@@ -1,0 +1,19 @@
+common: &common
+  port:  5000
+  debug: false
+  database_url: ST_DATABASE_URL
+
+test:
+  <<: *common
+  debug: true
+  database_url: ST_TEST_DATABASE_URL
+
+dev:
+  <<: *common
+  debug: true
+
+staging:
+  <<: *common
+
+prod:
+  <<: *common
