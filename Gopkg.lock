@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/gosimple/slug"
+  packages = ["."]
+  revision = "e9f42fa127660e552d0ad2b589868d403a9be7c6"
+  version = "v1.1.1"
+
+[[projects]]
   name = "github.com/jinzhu/gorm"
   packages = [
     ".",
@@ -26,9 +32,21 @@
   ]
   revision = "90697d60dd844d5ef6ff15135d0203f65d2f53b8"
 
+[[projects]]
+  branch = "master"
+  name = "github.com/rainycape/unidecode"
+  packages = ["."]
+  revision = "cb7f23ec59bec0d61b19c56cd88cee3d0cc1870c"
+
+[[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c441623732b7d5665ad6334e19538054a50261702e8a64f93cb8185e6044c6d1"
+  inputs-digest = "c33f0b7a1dbafcc6cfa591427b37a5574fc2c64de082e1aaa20dc8bdb1be5c70"
   solver-name = "gps-cdcl"
   solver-version = 1
