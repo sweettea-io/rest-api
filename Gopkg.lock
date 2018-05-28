@@ -23,6 +23,12 @@
   revision = "04140366298a54a039076d798123ffa108fff46c"
 
 [[projects]]
+  name = "github.com/kelseyhightower/envconfig"
+  packages = ["."]
+  revision = "f611eb38b3875cc3bd991ca91c51d06446afa14c"
+  version = "v1.3.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/lib/pq"
   packages = [
@@ -47,6 +53,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c33f0b7a1dbafcc6cfa591427b37a5574fc2c64de082e1aaa20dc8bdb1be5c70"
+  inputs-digest = "2c9f635e919d1e9fd5f90c8b0282e67c2f4470a88abc9ab98141af925092f81a"
   solver-name = "gps-cdcl"
   solver-version = 1

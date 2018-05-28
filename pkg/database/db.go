@@ -7,8 +7,8 @@ import (
   "github.com/sweettea/rest-api/pkg/models"
 )
 
-func Connection() *gorm.DB {
-  db, err := gorm.Open("postgres", "host=localhost port=5432 dbname=rest user=rest password=rest sslmode=disable")
+func Connection(url string) *gorm.DB {
+  db, err := gorm.Open("postgres", url)
 
   if err != nil {
     panic(fmt.Errorf("Error connecting to DB: %s", err))
@@ -17,8 +17,8 @@ func Connection() *gorm.DB {
   return db
 }
 
-func Migrate() {
-  db := Connection()
+func Migrate(url string) {
+  db := Connection(url)
 
   db.LogMode(true)
 

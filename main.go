@@ -1,3 +1,19 @@
 package main
 
-func main() {}
+import (
+  "github.com/sweettea/rest-api/app"
+  "github.com/sweettea/rest-api/pkg/utils"
+  "github.com/sweettea/rest-api/pkg/database"
+  "fmt"
+)
+
+func main() {
+  // Load app config
+  utils.Assert(app.LoadConfig(), "Failed to load app config")
+
+  // Establish connection to database
+  db := database.Connection(app.Config.DatabaseUrl)
+
+  // TODO: Routes setup and http server
+  fmt.Println(db)
+}
