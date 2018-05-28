@@ -3,8 +3,8 @@ package database
 import (
   "fmt"
   "github.com/jinzhu/gorm"
-  _ "github.com/jinzhu/gorm/dialects/postgres"
   "github.com/sweettea/rest-api/pkg/models"
+  _ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 func Connection(url string) *gorm.DB {

@@ -1,10 +1,10 @@
 package main
 
 import (
+  "fmt"
   "github.com/sweettea/rest-api/app"
   "github.com/sweettea/rest-api/pkg/utils"
   "github.com/sweettea/rest-api/pkg/database"
-  "fmt"
 )
 
 func main() {
