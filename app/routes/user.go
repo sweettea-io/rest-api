@@ -13,7 +13,7 @@ func InitUserRouter(baseRouter *mux.Router) {
   userRouter := baseRouter.PathPrefix(UserRoute).Subrouter()
 
   // Attach route handlers
-  userRouter.HandleFunc("/", GetUsersHandler)
+  userRouter.HandleFunc("", GetUsersHandler)
 }
 
 func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
