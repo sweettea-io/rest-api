@@ -9,6 +9,7 @@ type appConfig struct {
   Debug       bool   `default:"false"`
   Env         string `default:"dev"`
   Port        int    `default:"5000"`
+  ApiVersion  string `default:"v1"`
 }
 
 var Config appConfig
