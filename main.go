@@ -3,7 +3,6 @@ package main
 import (
   "fmt"
   "github.com/sweettea/rest-api/app"
-  "github.com/sweettea/rest-api/err"
   "github.com/sweettea/rest-api/pkg/utils"
   "github.com/sweettea/rest-api/pkg/database"
 )
@@ -15,11 +14,5 @@ func main() {
   // Establish connection to database
   db := database.Connection(app.Config.DatabaseUrl)
 
-  // TODO: Routes setup and http server
   fmt.Println(db)
-
-  status, jsonResp := err.Unauthorized()
-
-  fmt.Println(status)
-  fmt.Println(jsonResp)
 }
