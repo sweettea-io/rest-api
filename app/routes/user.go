@@ -19,6 +19,6 @@ func InitUserRouter(baseRouter *mux.Router) {
 
 func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
   w.WriteHeader(http.StatusOK)
-  w.Header().Set(headers.JsonHeader())
+  w.Header().Set(headers.JsonContentType())
   io.WriteString(w, `{"alive": true}`)
 }

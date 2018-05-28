@@ -1,5 +1,5 @@
 package headers
 
-func JsonHeader() (string, string) {
+func JsonContentType() (string, string) {
   return "Content-Type", "application/json"
 }
