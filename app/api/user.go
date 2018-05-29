@@ -3,7 +3,7 @@ package api
 import (
   "net/http"
   "github.com/gorilla/mux"
-  "github.com/sweettea/rest-api/pkg/utils"
+  "github.com/sweettea/rest-api/app/api/resp"
 )
 
 const UserRoute = "/users"
@@ -17,5 +17,5 @@ func InitUserRouter(baseRouter *mux.Router) {
 }
 
 func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
-  respOk(w, utils.JSON{})
+  respOk(w, resp.UserLoginSuccess)
 }
