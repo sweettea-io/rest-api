@@ -1,22 +1,21 @@
 package api
 
 import (
-  "io"
   "net/http"
   "github.com/gorilla/mux"
 )
 
-const UserRoute = "/users"
+const UserRoute = "/user"
 
 func InitUserRouter(baseRouter *mux.Router) {
   // Create user router
   userRouter := baseRouter.PathPrefix(UserRoute).Subrouter()
 
   // Attach route handlers
-  userRouter.HandleFunc("", GetUsersHandler)
+  userRouter.HandleFunc("/auth", UserAuthHandler)
 }
 
-func GetUsersHandler(w http.ResponseWriter, req *http.Request) {
-  w.WriteHeader(http.StatusOK)
-  io.WriteString(w, `{"alive": true}`)
+func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
+  user := CurrentUser(w, req)
+  logger.Info(user)
 }
