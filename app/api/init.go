@@ -1,4 +1,4 @@
-package routes
+package api
 
 import (
   "github.com/gorilla/mux"
@@ -12,14 +12,17 @@ var db *gorm.DB
 var logger *logrus.Logger
 
 func CreateRouter(baseRoute string, database *gorm.DB, logr *logrus.Logger) *mux.Router {
-  // Create base router from provided baseRoute.
-  baseRouter := mux.NewRouter().PathPrefix(baseRoute).Subrouter()
-
-  // Assign these to our global vars declared above.
+  // Assign values to our global vars declared above.
   db = database
   logger = logr
 
-  // Create route groups for each model needing a RESTful interface.
+  // Create base router from provided baseRoute.
+  baseRouter := mux.NewRouter().PathPrefix(baseRoute).Subrouter()
+
+  // Attach base middleware
+  baseRouter.Use(LogRequest)
+
+  // Create route groups for each model needing a REST-ful interface.
   InitUserRouter(baseRouter)
 
   return baseRouter

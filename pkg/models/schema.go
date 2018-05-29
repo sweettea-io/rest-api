@@ -88,16 +88,16 @@ type Team struct {
 
 type Cluster struct {
   gorm.Model
-  Uid          string `gorm:"type:varchar(240);default:null;unique;not null;index:cluster_uid"`
-  Name         string `gorm:"type:varchar(360);default:null;not null"`
-  NsAddresses  JSON   `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
-  Zones        JSON   `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
-  HostedZoneID string `gorm:"type:varchar(240);default:null"`
-  MasterType   string `gorm:"type:varchar(240);default:null"`
-  NodeType     string `gorm:"type:varchar(240);default:null"`
-  Image        string `gorm:"type:varchar(240);default:null"`
-  Validated    bool   `gorm:"default:false"`
-  IsDestroyed  bool   `gorm:"default:false"`
+  Uid          string     `gorm:"type:varchar(240);default:null;unique;not null;index:cluster_uid"`
+  Name         string     `gorm:"type:varchar(360);default:null;not null"`
+  NsAddresses  utils.JSON `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
+  Zones        utils.JSON `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
+  HostedZoneID string     `gorm:"type:varchar(240);default:null"`
+  MasterType   string     `gorm:"type:varchar(240);default:null"`
+  NodeType     string     `gorm:"type:varchar(240);default:null"`
+  Image        string     `gorm:"type:varchar(240);default:null"`
+  Validated    bool       `gorm:"default:false"`
+  IsDestroyed  bool       `gorm:"default:false"`
   WithUid
 }
 

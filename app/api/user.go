@@ -1,10 +1,9 @@
-package routes
+package api
 
 import (
   "io"
   "net/http"
   "github.com/gorilla/mux"
-  "github.com/sweettea/rest-api/pkg/utils/headers"
 )
 
 const UserRoute = "/users"
@@ -17,8 +16,7 @@ func InitUserRouter(baseRouter *mux.Router) {
   userRouter.HandleFunc("", GetUsersHandler)
 }
 
-func GetUsersHandler(writer http.ResponseWriter, req *http.Request) {
-  writer.WriteHeader(http.StatusOK)
-  writer.Header().Set(headers.JsonContentType())
-  io.WriteString(writer, `{"alive": true}`)
+func GetUsersHandler(w http.ResponseWriter, req *http.Request) {
+  w.WriteHeader(http.StatusOK)
+  io.WriteString(w, `{"alive": true}`)
 }

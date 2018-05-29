@@ -1,8 +1,6 @@
 package app
 
-import (
-  "github.com/kelseyhightower/envconfig"
-)
+import "github.com/kelseyhightower/envconfig"
 
 type appConfig struct {
   DatabaseUrl string `required:"true"`

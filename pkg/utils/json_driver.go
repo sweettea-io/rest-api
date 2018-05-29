@@ -1,4 +1,4 @@
-package models
+package utils
 
 import (
   "encoding/json"
@@ -33,4 +33,9 @@ func (p *JSON) Scan(src interface{}) error {
   }
 
   return nil
+}
+
+func (p *JSON) Stringify() string {
+  j, _ := json.Marshal(p)
+  return BytesToStr(j)
 }
