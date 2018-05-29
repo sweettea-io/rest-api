@@ -15,7 +15,11 @@ type appConfig struct {
 var Config appConfig
 
 func LoadConfig() error {
-  if err := envconfig.Process("st", &Config); err != nil {
+  // Look for env vars starting with "ST_".
+  envVarPrefix := "st"
+
+  // Unmarshal envs into Config struct.
+  if err := envconfig.Process(envVarPrefix, &Config); err != nil {
     return err
   }
 
