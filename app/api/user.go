@@ -12,10 +12,10 @@ import (
 const UserRoute = "/users"
 
 func InitUserRouter(baseRouter *mux.Router) {
-  // Create user router
+  // Create user router.
   userRouter := baseRouter.PathPrefix(UserRoute).Subrouter()
 
-  // Attach route handlers
+  // Attach route handlers.
   userRouter.HandleFunc("/auth", UserAuthHandler).Methods("GET")
 }
 
@@ -34,6 +34,7 @@ func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
   // TODO: Do this in a transaction.
   // Create a new session for the user.
   session := models.Session{User: user}
+  db.Create(&session)
 
   // Put newly minted session's token inside auth header.
   headers := map[string]string{
