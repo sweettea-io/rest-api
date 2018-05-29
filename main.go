@@ -3,11 +3,11 @@ package main
 import (
   "fmt"
   "net/http"
+  "github.com/Sirupsen/logrus"
   "github.com/sweettea/rest-api/app"
   "github.com/sweettea/rest-api/app/api"
   "github.com/sweettea/rest-api/pkg/database"
   "github.com/sweettea/rest-api/pkg/utils"
-  "github.com/Sirupsen/logrus"
 )
 
 func main() {

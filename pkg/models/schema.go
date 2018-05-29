@@ -69,7 +69,7 @@ type Session struct {
   gorm.Model
   User       User
   UserID     int    `gorm:"default:null;not null;index:session_user_id"`
-  Token      string `gorm:"type:varchar(240);not null;default:null;index:session_token"`
+  Token      string `gorm:"type:varchar(240);default:null;unique;not null;index:session_token"`
 }
 
 type Team struct {
