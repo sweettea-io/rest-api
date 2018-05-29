@@ -7,20 +7,20 @@ import (
   "github.com/sweettea/rest-api/app"
   "github.com/sweettea/rest-api/app/api"
   "github.com/sweettea/rest-api/pkg/database"
-  "github.com/sweettea/rest-api/pkg/utils"
 )
 
 func main() {
   // Load app config.
-  utils.Assert(app.LoadConfig(), "Failed to load app config")
+  app.LoadConfig()
 
   // Establish connection to database.
   db := database.Connection(app.Config.DatabaseUrl)
+  db.LogMode(app.Config.Debug)
 
-  // Create logger
+  // Create logger.
   logger := logrus.New()
 
-  // Construct the base route from the API version (i.e. "/v1").
+  // Construct base route from API version (i.e. "/v1").
   baseRoute := fmt.Sprintf("/%s", app.Config.ApiVersion)
 
   // Create API router.
@@ -31,6 +31,6 @@ func main() {
 
   logger.Infof("Listening on port %v...\n", app.Config.Port)
 
-  // Start the server.
+  // Start server.
   panic(http.ListenAndServe(addr, router))
 }

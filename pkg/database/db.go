@@ -11,7 +11,7 @@ func Connection(url string) *gorm.DB {
   db, err := gorm.Open("postgres", url)
 
   if err != nil {
-    panic(fmt.Errorf("Error connecting to DB: %s", err))
+    panic(fmt.Errorf("Error connecting to DB: %s", err.Error()))
   }
 
   return db

@@ -1,6 +1,9 @@
 package app
 
-import "github.com/kelseyhightower/envconfig"
+import (
+  "github.com/kelseyhightower/envconfig"
+  "fmt"
+)
 
 type appConfig struct {
   DatabaseUrl string `required:"true"`
@@ -12,14 +15,12 @@ type appConfig struct {
 
 var Config appConfig
 
-func LoadConfig() error {
+func LoadConfig() {
   // Look for env vars starting with "ST_".
-  envVarPrefix := "st"
+  prefix := "st"
 
   // Unmarshal envs into Config struct.
-  if err := envconfig.Process(envVarPrefix, &Config); err != nil {
-    return err
+  if err := envconfig.Process(prefix, &Config); err != nil {
+    panic(fmt.Errorf("Failed to load app config: %s", err.Error()))
   }
-
-  return nil
 }
