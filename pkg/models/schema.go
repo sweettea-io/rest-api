@@ -69,7 +69,7 @@ type Session struct {
   gorm.Model
   User       User
   UserID     int    `gorm:"default:null;not null;index:session_user_id"`
-  Token      string `gorm:"type:varchar(240);default:null"`
+  Token      string `gorm:"type:varchar(240);not null;default:null;index:session_token"`
 }
 
 type Team struct {
@@ -183,6 +183,11 @@ type Deployment struct {
 // Hook generating a uid for a model that needs one.
 func (w *WithUid) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("Uid", utils.NewUid())
+  return nil
+}
+
+func (session *Session) BeforeCreate(scope *gorm.Scope) error {
+  scope.SetColumn("Token", "")  // TODO: Mint a fresh token
   return nil
 }
 

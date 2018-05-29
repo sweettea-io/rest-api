@@ -3,15 +3,23 @@ package api
 import (
   "net/http"
   "github.com/sweettea/rest-api/defs"
-  "github.com/sweettea/rest-api/app/api/error"
+  "github.com/sweettea/rest-api/pkg/models"
+  "errors"
 )
 
-func CurrentUser(w http.ResponseWriter, req *http.Request) {
-  // Get session token from header.
-  if token := req.Header.Get(defs.AuthHeaderName); token == "" {
-    respError(w, error.Unauthorized())
+func LoadCurrentUser(w http.ResponseWriter, req *http.Request, user *models.User) error {
+  token := req.Header.Get(defs.AuthHeaderName)
+
+  if token == "" {
+    return errors.New(http.StatusText(http.StatusUnauthorized))
   }
 
-  // TODO: Find session by token and user through session
+  // Find session by token
+  var session models.Session
+  db.Where(&models.Session{Token: token}).First(&session)
 
+  // Load reference to user
+  user = &session.User
+
+  return nil
 }

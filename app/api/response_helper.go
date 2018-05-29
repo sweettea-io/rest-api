@@ -3,7 +3,7 @@ package api
 import (
   "io"
   "net/http"
-  "github.com/sweettea/rest-api/app/api/error"
+  "github.com/sweettea/rest-api/app/api/err"
   "github.com/sweettea/rest-api/pkg/utils"
 )
 
@@ -33,6 +33,12 @@ func respOkWithHeaders(w http.ResponseWriter, data utils.JSON, headers map[strin
   respOk(w, data)
 }
 
-func respError(w http.ResponseWriter, error *error.Error) {
-  respJson(w, error.Status, &error.Data)
+func respError(w http.ResponseWriter, e *err.Error) {
+  respJson(w, e.Status, &e.Data)
+
+  logger.Errorf("Request failed with status:%v code:%v message:%q \n",
+    e.Status,
+    e.Data["code"],
+    e.Data["error"],
+  )
 }

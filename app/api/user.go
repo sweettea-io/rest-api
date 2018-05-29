@@ -4,6 +4,9 @@ import (
   "net/http"
   "github.com/gorilla/mux"
   "github.com/sweettea/rest-api/app/api/resp"
+  "github.com/sweettea/rest-api/defs"
+  "github.com/sweettea/rest-api/pkg/models"
+  "github.com/sweettea/rest-api/app/api/err"
 )
 
 const UserRoute = "/users"
@@ -17,5 +20,36 @@ func InitUserRouter(baseRouter *mux.Router) {
 }
 
 func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
-  respOk(w, resp.UserLoginSuccess)
+  // Get user by email.
+  var user models.User
+  db.Where(&models.User{Email: "blah"}).First(&user)
+
+  // Ensure passwords match.
+  // TODO: Do this inside a password hash matching service.
+  if user.HashedPw != "<hashed_pw>" {
+    respError(w, err.Unauthorized())
+    return
+  }
+
+  // TODO: Do this in a transaction.
+  // Create a new session for the user.
+  session := models.Session{User: user}
+
+  // Put newly minted session's token inside auth header.
+  headers := map[string]string{
+    defs.AuthHeaderName: session.Token,
+  }
+
+  // Respond with success and new header token.
+  respOkWithHeaders(w, resp.UserLoginSuccess, headers)
+}
+
+func ExampleOfGettingCurrentUser(w http.ResponseWriter, req *http.Request) {
+  var user models.User
+
+  // Get current user from session.
+  if e := LoadCurrentUser(w, req, &user); e != nil {
+    respError(w, err.Unauthorized())
+    return
+  }
 }

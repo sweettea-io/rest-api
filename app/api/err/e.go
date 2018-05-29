@@ -1,4 +1,4 @@
-package error
+package err
 
 import (
   "net/http"
@@ -13,20 +13,18 @@ type Error struct {
 func ApiError(status int, code int, msg string) (*Error) {
   return &Error{
     Status: status,
-    Data: utils.JSON{
-      "ok": true,
-      "code": code,
-      "error": msg,
-    },
+    Data: utils.JSON{"ok": true, "code": code, "error": msg},
   }
 }
 
 func Forbidden() (*Error) {
-  return ApiError(http.StatusForbidden, http.StatusForbidden, "forbidden")
+  status := http.StatusForbidden
+  return ApiError(status, status, http.StatusText(status))
 }
 
 func Unauthorized() (*Error) {
-  return ApiError(http.StatusUnauthorized, http.StatusUnauthorized, "unauthorized")
+  status := http.StatusUnauthorized
+  return ApiError(status, status, http.StatusText(status))
 }
 
 func UnknownError() (*Error) {

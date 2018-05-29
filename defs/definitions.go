@@ -1,3 +1,3 @@
 package defs
 
-var AuthHeaderName = "Sweet-Tea-Api-Token"
+const AuthHeaderName = "Sweet-Tea-Api-Token"
