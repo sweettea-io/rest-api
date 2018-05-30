@@ -1,4 +1,4 @@
-package err
+package e
 
 import (
   "net/http"
@@ -16,6 +16,8 @@ func ApiError(status int, code int, msg string) (*Error) {
     Data: utils.JSON{"ok": true, "code": code, "error": msg},
   }
 }
+
+const JsonEncodingError = `{"ok": false, "code": 1000, "error": "Error encoding JSON response"}`
 
 func Forbidden() (*Error) {
   status := http.StatusForbidden

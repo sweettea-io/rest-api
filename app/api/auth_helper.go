@@ -15,6 +15,7 @@ func LoadCurrentUser(w http.ResponseWriter, req *http.Request, user *models.User
   }
 
   // Find session by token
+  // TODO: Eager-load user
   var session models.Session
   db.Where(&models.Session{Token: token}).First(&session)
 

@@ -6,14 +6,14 @@ import (
   "errors"
 )
 
-type JSON map[string]interface{}
+type JsonB map[string]interface{}
 
-func (p JSON) Value() (driver.Value, error) {
+func (p JsonB) Value() (driver.Value, error) {
   j, err := json.Marshal(p)
   return j, err
 }
 
-func (p *JSON) Scan(src interface{}) error {
+func (p *JsonB) Scan(src interface{}) error {
   source, ok := src.([]byte)
 
   if !ok {
@@ -33,9 +33,4 @@ func (p *JSON) Scan(src interface{}) error {
   }
 
   return nil
-}
-
-func (p *JSON) Stringify() string {
-  j, _ := json.Marshal(p)
-  return BytesToStr(j)
 }

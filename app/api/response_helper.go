@@ -1,16 +1,24 @@
 package api
 
 import (
-  "io"
   "net/http"
-  "github.com/sweettea/rest-api/app/api/err"
+  "github.com/sweettea/rest-api/app/api/e"
   "github.com/sweettea/rest-api/pkg/utils"
+  "encoding/json"
+  "io"
 )
 
 func respJson(w http.ResponseWriter, status int, data *utils.JSON) {
+  // Write status header.
   w.WriteHeader(status)
+
+  // All about that JSON
   w.Header().Set("Content-Type", "application/json")
-  io.WriteString(w, data.Stringify())
+
+  // Encode and send JSON string.
+  if err := json.NewEncoder(w).Encode(data); err != nil {
+    io.WriteString(w, e.JsonEncodingError)
+  }
 }
 
 func respCreated(w http.ResponseWriter, data utils.JSON) {
@@ -33,12 +41,12 @@ func respOkWithHeaders(w http.ResponseWriter, data utils.JSON, headers map[strin
   respOk(w, data)
 }
 
-func respError(w http.ResponseWriter, e *err.Error) {
-  respJson(w, e.Status, &e.Data)
+func respError(w http.ResponseWriter, err *e.Error) {
+  respJson(w, err.Status, &err.Data)
 
   logger.Errorf("Request failed with status:%v code:%v message:%q \n",
-    e.Status,
-    e.Data["code"],
-    e.Data["error"],
+    err.Status,
+    err.Data["code"],
+    err.Data["error"],
   )
 }
