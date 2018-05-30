@@ -17,6 +17,8 @@ func ApiError(status int, code int, msg string) (*Error) {
   }
 }
 
+// ------- Generic Errors --------
+
 const JsonEncodingError = `{"ok": false, "code": 1000, "error": "Error encoding JSON response"}`
 
 func Forbidden() (*Error) {
@@ -29,10 +31,17 @@ func Unauthorized() (*Error) {
   return ApiError(status, status, http.StatusText(status))
 }
 
-func UnknownError() (*Error) {
-  return ApiError(http.StatusInternalServerError, http.StatusInternalServerError, "unknown_error")
+func ISE() (*Error) {
+  status := http.StatusInternalServerError
+  return ApiError(status, status, http.StatusText(status))
 }
 
 func InvalidPayload() (*Error) {
   return ApiError(http.StatusBadRequest, http.StatusBadRequest, "invalid_input_payload")
+}
+
+// ------- User Errors --------
+
+func UserNotFound() (*Error) {
+  return ApiError(http.StatusNotFound, 1001, "user_not_found")
 }

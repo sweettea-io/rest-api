@@ -1,7 +1,6 @@
 package api
 
 import (
-  "encoding/json"
   "net/http"
   "github.com/gorilla/mux"
   "github.com/sweettea/rest-api/app/api/e"
@@ -9,11 +8,12 @@ import (
   "github.com/sweettea/rest-api/defs"
   "github.com/sweettea/rest-api/pkg/models"
   "github.com/sweettea/rest-api/pkg/utils"
+  "github.com/sweettea/rest-api/app/api/pl"
 )
 
 // ----------- ROUTER SETUP ------------
 
-const UserRoute = "/users"
+const UserRoute = "/users" // all routes in this file use this prefix
 
 func InitUserRouter(baseRouter *mux.Router) {
   // Create user router.
@@ -23,39 +23,50 @@ func InitUserRouter(baseRouter *mux.Router) {
   userRouter.HandleFunc("/auth", UserAuthHandler).Methods("POST")
 }
 
-// ----------- PAYLOADS -----------------
-
-type UserAuthPayload struct {
-  Email    string `json:"email"`
-  Password string `json:"password"`
-}
-
 // ----------- ROUTE HANDLERS -----------
 
-// POST /users/auth
-// Basic auth user login
-func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
-  var payload UserAuthPayload
+/*
+  User login with basic auth.
 
-  // Parse payload and fail if invalid.
-  if err := json.NewDecoder(req.Body).Decode(&payload); err != nil {
+  Method:  POST
+  Route:   /users/auth
+  Payload:
+    email    string (required)
+    password string (required)
+ */
+func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
+  // Parse & validate payload.
+  var payload pl.UserAuthPayload
+
+  if !payload.Validate(req) {
     respError(w, e.InvalidPayload())
+    return
   }
 
   // Get user by email.
   var user models.User
-  db.Where(&models.User{Email: payload.Email}).First(&user)
+  result := db.Where(&models.User{Email: payload.Email, IsDestroyed: false}).First(&user)
 
-  // Ensure passwords match and fail if not.
+  // Ensure user exists.
+  if result.RecordNotFound() {
+    respError(w, e.UserNotFound())
+    return
+  }
+
+  // Ensure passwords match.
   if !utils.VerifyPw(payload.Password, user.HashedPw) {
     respError(w, e.Unauthorized())
     return
   }
 
-  // TODO: Do this in a transaction.
-  // Create a new session for the user.
+  // Create new session for user.
   session := models.Session{User: user}
-  db.Create(&session)
+
+  if err := db.Create(&session).Error; err != nil {
+    respError(w, e.ISE())
+    logger.Errorf("Session creation failed for User(id=%v): %s\n", user.ID, err.Error())
+    return
+  }
 
   // Put newly minted session token inside auth header.
   headers := map[string]string{
