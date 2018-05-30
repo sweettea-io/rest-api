@@ -187,7 +187,7 @@ func (w *WithUid) BeforeCreate(scope *gorm.Scope) error {
 }
 
 func (session *Session) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Token", "")  // TODO: Mint a fresh token
+  scope.SetColumn("Token", utils.FreshSecret())
   return nil
 }
 

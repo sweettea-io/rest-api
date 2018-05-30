@@ -3,6 +3,7 @@ package utils
 import (
   "encoding/base64"
   "crypto/rand"
+  logging "github.com/Sirupsen/logrus"
 )
 
 // GenerateRandomBytes returns securely generated random bytes.
@@ -27,6 +28,14 @@ func GenerateRandomStringURLSafe(n int) (string, error) {
 }
 
 // Mint a new secret token.
-func FreshSecret() (string, error) {
-  return GenerateRandomStringURLSafe(32)
+func FreshSecret() string {
+  token, err := GenerateRandomStringURLSafe(32)
+
+  // If secret minting fails, default to uuid4 as backup.
+  if err != nil {
+    logging.Warn("GenerateRandomStringURLSafe util failing...defaulting to UUID4.")
+    token = NewUid()
+  }
+
+  return token
 }

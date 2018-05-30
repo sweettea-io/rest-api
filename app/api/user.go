@@ -7,6 +7,7 @@ import (
   "github.com/sweettea/rest-api/defs"
   "github.com/sweettea/rest-api/pkg/models"
   "github.com/sweettea/rest-api/app/api/err"
+  "github.com/sweettea/rest-api/pkg/utils"
 )
 
 const UserRoute = "/users"
@@ -25,8 +26,7 @@ func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
   db.Where(&models.User{Email: "blah"}).First(&user)
 
   // Ensure passwords match.
-  // TODO: Do this inside a password hash matching service.
-  if user.HashedPw != "<hashed_pw>" {
+  if !utils.VerifyPw("pw", user.HashedPw) {
     respError(w, err.Unauthorized())
     return
   }
