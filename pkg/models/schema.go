@@ -60,6 +60,7 @@ type User struct {
   Uid         string    `gorm:"type:varchar(240);default:null;unique;not null;index:user_uid"`
   Email       string    `gorm:"type:varchar(240);default:null;unique;not null;index:user_email"`
   HashedPw    string    `gorm:"type:varchar(240);default:null"`
+  Admin       bool      `gorm:"default:false"`
   Sessions    []Session
   IsDestroyed bool      `gorm:"default:false"`
   WithUid
