@@ -4,7 +4,7 @@ import "github.com/gomodule/redigo/redis"
 
 var redisPool *redis.Pool
 
-// Create app's redis pool configured with app.Config's values.
+// Create app's redis pool configured with app.Config's values
 func CreateRedisPool() {
   redisPool = &redis.Pool{
     // Max number of connections allocated by the pool at a given time (0 = unlimited)

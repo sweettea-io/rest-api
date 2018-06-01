@@ -14,6 +14,7 @@ type appConfig struct {
   ApiVersion         string `default:"v1"`
   Debug              bool   `default:"false"`
   Env                string `default:"dev"`
+  JobQueueNsp        string `default:"st_job_queue"`
   Port               int    `default:"5000"`
   RedisPoolMaxActive int    `default:"5"`
   RedisPoolMaxIdle   int    `default:"5"`

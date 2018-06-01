@@ -37,3 +37,7 @@
 [[constraint]]
   name = "github.com/gomodule/redigo"
   version = "2.0.0"
+
+[[constraint]]
+  name = "github.com/sweettea-io/work"
+  version = "0.5.1"

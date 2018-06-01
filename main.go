@@ -13,12 +13,15 @@ func main() {
   // Load app config.
   app.LoadConfig()
 
+  // Create redis pool
+  app.CreateRedisPool()
+
+  // Create job queue
+  app.CreateJobQueue()
+
   // Establish connection to database.
   db := database.Connection(app.Config.DatabaseUrl)
   db.LogMode(app.Config.Debug)
-
-  // Create redis pool
-  app.CreateRedisPool()
 
   // Create logger.
   logger := logrus.New()

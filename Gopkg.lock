@@ -50,12 +50,6 @@
   revision = "04140366298a54a039076d798123ffa108fff46c"
 
 [[projects]]
-  name = "github.com/kelseyhightower/envconfig"
-  packages = ["."]
-  revision = "f611eb38b3875cc3bd991ca91c51d06446afa14c"
-  version = "v1.3.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/lib/pq"
   packages = [
@@ -72,10 +66,22 @@
   revision = "cb7f23ec59bec0d61b19c56cd88cee3d0cc1870c"
 
 [[projects]]
+  name = "github.com/robfig/cron"
+  packages = ["."]
+  revision = "b41be1df696709bb6395fe435af20370037c0b4c"
+  version = "v1.1"
+
+[[projects]]
   name = "github.com/satori/go.uuid"
   packages = ["."]
   revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
   version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/sweettea-io/work"
+  packages = ["."]
+  revision = "1d4117a214abff263b472043871c8666aedb716b"
+  version = "v0.5.1"
 
 [[projects]]
   branch = "master"
@@ -85,7 +91,7 @@
     "blowfish",
     "ssh/terminal"
   ]
-  revision = "ab813273cd59e1333f7ae7bff5d027d4aadf528c"
+  revision = "5ba7f63082460102a45837dbd1827e10f9479ac0"
 
 [[projects]]
   branch = "master"
@@ -105,6 +111,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0a02e118d418abe587ccaa962c743e0a10b5954062bb6ac138e93a29d5682d23"
+  inputs-digest = "2a98df7b03de2693418046cb2cec919449faed254ae365dd7ecc95908de81918"
   solver-name = "gps-cdcl"
   solver-version = 1
