@@ -12,13 +12,11 @@ migrate: ## Run database migrations
 work: ## Start job worker
 	go run worker.go
 
-clean: Remove all built files
+clean: ## Remove all built files
 	rm server worker migrate
 
-build: clean ## Build main executables
-	build-server
-	build-worker
-	build-migrate
+build: ## Build main executables
+	go build ./...
 
 build-server: rm server ## Build server.go
 	go build -a -o server server.go
