@@ -26,9 +26,12 @@ func main() {
   // Create redis pool.
   app.CreateRedisPool()
 
+  // Create logger.
+  logger := logrus.New()
+
   // Create job context.
   context := Context{
-    logger: logrus.New(),
+    logger: logger,
   }
 
   // Create new worker pool with job context.
@@ -47,6 +50,8 @@ func main() {
 
   // Start processing jobs.
   workerPool.Start()
+
+  logger.Infof("Starting worker pool with %v workers...", app.Config.WorkerCount)
 
   // Wait for signal to quit.
   signalChan := make(chan os.Signal, 1)

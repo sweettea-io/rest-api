@@ -6,5 +6,5 @@ var JobQueue *work.Enqueuer
 
 // Create new job queue for passing jobs to our worker through redis
 func CreateJobQueue() {
-  JobQueue := work.NewEnqueuer(Config.JobQueueNsp, RedisPool)
+  JobQueue = work.NewEnqueuer(Config.JobQueueNsp, RedisPool)
 }
