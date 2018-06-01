@@ -13,10 +13,10 @@ func main() {
   // Load app config.
   app.LoadConfig()
 
-  // Create redis pool
+  // Create redis pool.
   app.CreateRedisPool()
 
-  // Create job queue
+  // Create job queue.
   app.CreateJobQueue()
 
   // Establish connection to database.

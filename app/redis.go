@@ -2,11 +2,11 @@ package app
 
 import "github.com/gomodule/redigo/redis"
 
-var redisPool *redis.Pool
+var RedisPool *redis.Pool
 
 // Create app's redis pool configured with app.Config's values
 func CreateRedisPool() {
-  redisPool = &redis.Pool{
+  RedisPool = &redis.Pool{
     // Max number of connections allocated by the pool at a given time (0 = unlimited)
     MaxActive: Config.RedisPoolMaxActive,
 

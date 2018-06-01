@@ -19,6 +19,7 @@ type appConfig struct {
   RedisPoolMaxActive int    `default:"5"`
   RedisPoolMaxIdle   int    `default:"5"`
   RedisPoolWait      bool   `default:"true"`
+  WorkerCount        uint   `default:"10"`
 }
 
 var Config appConfig

@@ -2,9 +2,9 @@ package app
 
 import "github.com/sweettea-io/work"
 
-var jobQueue *work.Enqueuer
+var JobQueue *work.Enqueuer
 
 // Create new job queue for passing jobs to our worker through redis
 func CreateJobQueue() {
-  jobQueue := work.NewEnqueuer(Config.JobQueueNsp, redisPool)
+  JobQueue := work.NewEnqueuer(Config.JobQueueNsp, RedisPool)
 }
