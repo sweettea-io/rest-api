@@ -6,11 +6,18 @@ import (
 )
 
 type appConfig struct {
-  DatabaseUrl string `required:"true"`
-  Debug       bool   `default:"false"`
-  Env         string `default:"dev"`
-  Port        int    `default:"5000"`
-  ApiVersion  string `default:"v1"`
+  // Required (check env vars)
+  DatabaseUrl        string `required:"true"`
+  RedisUrl           string `required:"true"`
+
+  // Optional with defaults
+  ApiVersion         string `default:"v1"`
+  Debug              bool   `default:"false"`
+  Env                string `default:"dev"`
+  Port               int    `default:"5000"`
+  RedisPoolMaxActive int    `default:"5"`
+  RedisPoolMaxIdle   int    `default:"5"`
+  RedisPoolWait      bool   `default:"true"`
 }
 
 var Config appConfig

@@ -17,6 +17,9 @@ func main() {
   db := database.Connection(app.Config.DatabaseUrl)
   db.LogMode(app.Config.Debug)
 
+  // Create redis pool
+  app.CreateRedisPool()
+
   // Create logger.
   logger := logrus.New()
 
