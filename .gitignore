@@ -17,6 +17,6 @@ vendor/
 
 t.go
 
-server
-worker
-migrate
+./server
+./worker
+./migrate
