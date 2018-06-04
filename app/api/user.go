@@ -13,7 +13,7 @@ import (
 
 // ----------- ROUTER SETUP ------------
 
-const UserRoute = "/users" // all routes in this file use this prefix
+const UserRoute = "/users" // prefix for all routes in this file
 
 func InitUserRouter(baseRouter *mux.Router) {
   // Create user router.
