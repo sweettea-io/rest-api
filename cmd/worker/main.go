@@ -1,7 +1,7 @@
 package main
 
 import (
-  "github.com/sweettea/rest-api/app"
+  "github.com/sweettea-io/rest-api/app"
   "github.com/Sirupsen/logrus"
   "github.com/sweettea-io/work"
   "os"

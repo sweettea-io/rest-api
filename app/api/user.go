@@ -3,12 +3,12 @@ package api
 import (
   "net/http"
   "github.com/gorilla/mux"
-  "github.com/sweettea/rest-api/app/api/e"
-  "github.com/sweettea/rest-api/app/api/resp"
-  "github.com/sweettea/rest-api/defs"
-  "github.com/sweettea/rest-api/pkg/models"
-  "github.com/sweettea/rest-api/pkg/utils"
-  "github.com/sweettea/rest-api/app/api/pl"
+  "github.com/sweettea-io/rest-api/app/api/e"
+  "github.com/sweettea-io/rest-api/app/api/resp"
+  "github.com/sweettea-io/rest-api/defs"
+  "github.com/sweettea-io/rest-api/pkg/models"
+  "github.com/sweettea-io/rest-api/pkg/utils"
+  "github.com/sweettea-io/rest-api/app/api/pl"
 )
 
 // ----------- ROUTER SETUP ------------

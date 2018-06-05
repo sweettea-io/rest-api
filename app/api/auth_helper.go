@@ -2,8 +2,8 @@ package api
 
 import (
   "net/http"
-  "github.com/sweettea/rest-api/defs"
-  "github.com/sweettea/rest-api/pkg/models"
+  "github.com/sweettea-io/rest-api/defs"
+  "github.com/sweettea-io/rest-api/pkg/models"
   "errors"
 )
 

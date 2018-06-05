@@ -50,7 +50,7 @@ package models
 import (
   "time"
   "github.com/jinzhu/gorm"
-  "github.com/sweettea/rest-api/pkg/utils"
+  "github.com/sweettea-io/rest-api/pkg/utils"
 )
 
 type WithUid struct {}

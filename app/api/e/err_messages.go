@@ -2,7 +2,7 @@ package e
 
 import (
   "net/http"
-  "github.com/sweettea/rest-api/pkg/utils"
+  "github.com/sweettea-io/rest-api/pkg/utils"
 )
 
 type Error struct {

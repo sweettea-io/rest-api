@@ -2,8 +2,8 @@ package api
 
 import (
   "net/http"
-  "github.com/sweettea/rest-api/app/api/e"
-  "github.com/sweettea/rest-api/pkg/utils"
+  "github.com/sweettea-io/rest-api/app/api/e"
+  "github.com/sweettea-io/rest-api/pkg/utils"
   "encoding/json"
   "io"
 )

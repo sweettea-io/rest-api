@@ -11,12 +11,6 @@
 *.test
 *.prof
 
-coverage.out
-coverage-all.out
 vendor/
-
-t.go
-
-./server
-./worker
-./migrate
+envs/
+bin/

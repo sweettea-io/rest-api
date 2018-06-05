@@ -4,9 +4,9 @@ import (
   "fmt"
   "net/http"
   "github.com/Sirupsen/logrus"
-  "github.com/sweettea/rest-api/app"
-  "github.com/sweettea/rest-api/app/api"
-  "github.com/sweettea/rest-api/pkg/database"
+  "github.com/sweettea-io/rest-api/app"
+  "github.com/sweettea-io/rest-api/app/api"
+  "github.com/sweettea-io/rest-api/pkg/database"
 )
 
 func main() {

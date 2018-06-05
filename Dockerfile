@@ -1,30 +1,42 @@
+# Use Go image for building of binary executable.
 FROM golang:1.10 AS builder
 
-# Install dep
+# Build arg used to specify which cmd inside cmd/ to build for/use as the entrypoint.
+ARG ROLE
+
+# Install dep so that dependencies can be installed.
 RUN apt-get update && apt-get install -y unzip --no-install-recommends && \
     apt-get autoremove -y && apt-get clean -y && \
-    wget -O dep.zip https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64.zip && \
-    echo '96c191251164b1404332793fb7d1e5d8de2641706b128bf8d65772363758f364 dep.zip' | sha256sum -c - && \
-    unzip -d /usr/bin dep.zip && rm dep.zip
+ 	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
-# Create classic GOPATH structure & set that as our working dir
-RUN mkdir -p /go/src/github.com/sweettea/rest-api
-WORKDIR /go/src/github.com/sweettea/rest-api
+# Create classic GOPATH structure inside the docker image.
+RUN mkdir -p /go/src/github.com/sweettea-io/rest-api
 
-# Copy our dep files, specifying our dependencies
+# Switch to project dir as new working dir.
+WORKDIR /go/src/github.com/sweettea-io/rest-api
+
+# Copy files needed by dep in order to install our dependencies.
 COPY Gopkg.toml Gopkg.lock ./
 
-# Install dependencies
+# Install dependencies.
 RUN dep ensure -vendor-only
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -installsuffix cgo -o sweettea/rest-api
 
+# Copy this project into working dir
+COPY . .
+
+# Build Go binary.
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -o main ./cmd/$ROLE/
+
+# Switch over to alpine base image (*much* lighter) for running of Go binary.
 FROM alpine:latest
+
 RUN apk --no-cache add ca-certificates
 
-# Switch to /root/
-WORKDIR /root/
+# Set working dir to /root inside alpine image.
+WORKDIR /root
 
-COPY --from=builder /go/src/github.com/sweettea/rest-api  .
+# Copy Go binary built in first image over to this image.
+COPY --from=builder /go/src/github.com/sweettea-io/rest-api/main ./main
 
-ENTRYPOINT ["./sweettea/rest-api"]
+# Execute Go binary
+ENTRYPOINT ["./main"]

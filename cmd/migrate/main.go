@@ -1,8 +1,8 @@
 package main
 
 import (
-  "github.com/sweettea/rest-api/app"
-  "github.com/sweettea/rest-api/pkg/database"
+  "github.com/sweettea-io/rest-api/app"
+  "github.com/sweettea-io/rest-api/pkg/database"
 )
 
 func main() {

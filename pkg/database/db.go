@@ -3,7 +3,7 @@ package database
 import (
   "fmt"
   "github.com/jinzhu/gorm"
-  "github.com/sweettea/rest-api/pkg/models"
+  "github.com/sweettea-io/rest-api/pkg/models"
   _ "github.com/jinzhu/gorm/dialects/postgres"
 )
 

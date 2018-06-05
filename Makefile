@@ -1,5 +1,10 @@
 default: run
 
+install: ## Setup project
+	mkdir bin
+	mkdir envs
+	update
+
 test: ## Run all tests
 	go test -p 1 ./...
 
@@ -13,19 +18,16 @@ work: ## Start job worker
 	go run worker.go
 
 clean: ## Remove all built files
-	rm server worker migrate
+	rm bin/*
 
-build: ## Build main executables
-	go build ./...
+build-server: ## Build server.go
+	go build -a -o ./bin/server ./cmd/server
 
-build-server: rm server ## Build server.go
-	go build -a -o server server.go
+build-worker: ## Build worker.go
+	go build -a -o ./bin/worker ./cmd/worker
 
-build-worker: rm worker ## Build worker.go
-	go build -a -o worker worker.go
-
-build-migrate: rm migrate ## Build migrate.go
-	go build -a -o migrate migrate.go
+build-migrate: ## Build migrate.go
+	go build -a -o ./bin/migrate ./cmd/migrate
 
 update: # Update dependencies
 	dep ensure
