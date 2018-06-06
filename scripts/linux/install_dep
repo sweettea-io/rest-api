@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# --- Install dep, the Go package management tool used with this project, if not already installed --- #
+
+# Check for dep existence
+if [[ "$( which dep )" ]]; then
+	echo "dep detected -- Skipping installation"
+else
+	echo "dep not detected -- Installing..."
+	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+fi

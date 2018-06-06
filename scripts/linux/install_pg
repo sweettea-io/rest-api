@@ -2,28 +2,17 @@
 
 # --- Install PostgreSQL if not already installed --- #
 
-# Get OS from arg or script
-if [[ "$1" ]]; then
-	OS="$1"
-else
-	OS="$( $THIS_DIR/curr_os )"
-fi
-
 if [[ "$( which postgres )" ]]; then
 	echo "Postgres detected -- Skipping installation"
 else
 	echo "Postgres not detected -- Installing..."
 
-	# Use brew to install if on mac, otherwise use the old-fashion way
-	if [[ "$OS" = "mac" ]]; then
-		brew install postgresql
-	elif [ "$OS" = "linux" -a "$( which apt-get )" ]; then
+	if [[ "$( which apt-get )" ]]; then
 		apt-get install postgresql postgresql-contrib
 	else
 		echo "Skipping postgres installation...Linux flavor not an APT system. Will need to be done manually."
 	fi
 
 	echo "Starting Postgres..."
-    THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-    $THIS_DIR/pg_start
+	pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start
 fi

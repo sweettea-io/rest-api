@@ -2,13 +2,6 @@
 
 # --- Install Redis if not already installed --- #
 
-# Get OS from arg or script
-if [[ "$1" ]]; then
-	OS="$1"
-else
-	OS="$( $THIS_DIR/curr_os )"
-fi
-
 if [[ "$( which redis-server )" ]]; then
 	echo "Redis detected -- Skipping installation"
 else
