@@ -1,3 +1,32 @@
 #!/bin/bash
 
 # --- Install Redis if not already installed --- #
+
+# Get OS from arg or script
+if [[ "$1" ]]; then
+	OS="$1"
+else
+	OS="$( $THIS_DIR/curr_os )"
+fi
+
+if [[ "$( which redis-server )" ]]; then
+	echo "Redis detected -- Skipping installation"
+else
+	echo "Redis not detected -- Installing..."
+
+	# Switch to /tmp dir for download/installation
+	OG_DIR="$( pwd )"
+	cd /tmp
+
+	# Download and unpack Redis v5.0
+	wget https://github.com/antirez/redis/archive/5.0-rc1.tar.gz
+	tar xzf 5.0-rc1.tar.gz
+
+	# Build and install redis binaries to /usr/local/bin
+	cd redis-5.0-rc1
+	make
+	make install
+
+	# Switch back to original dir
+	cd "$OG_DIR"
+fi

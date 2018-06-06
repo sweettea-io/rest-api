@@ -27,12 +27,12 @@ $THIS_DIR/install_dep "$OS"
 $THIS_DIR/install_pkgs
 
 # Install redis.
-$THIS_DIR/install_redis
+$THIS_DIR/install_redis "$OS"
 
 # Install PostgreSQL.
-$THIS_DIR/install_pg
+$THIS_DIR/install_pg "$OS"
 
 # Create local databases for dev and testing.
 $THIS_DIR/setup_dbs
 
-echo "Done."
+echo "Done!"

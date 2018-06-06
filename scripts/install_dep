@@ -11,9 +11,9 @@ fi
 
 # Check for dep existence
 if [[ "$( which dep )" ]]; then
-	echo "dep already detected -- Skipping installation"
+	echo "dep detected -- Skipping installation"
 else
-	echo "dep not installed -- Installing..."
+	echo "dep not detected -- Installing..."
 
 	# Use brew to install if on mac, otherwise use the old-fashion way
 	if [[ "$OS" = "mac" ]]; then
