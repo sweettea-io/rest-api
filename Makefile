@@ -1,12 +1,9 @@
 default: setup
 
-setup:
+setup: ## Unlock all scripts
 	chmod u+x scripts/*
 
-one: ## something
-	./scripts/one
-
-install: ## Setup project
+install: ## Install project dependencies
 	./scripts/install
 
 test: ## Run all tests
