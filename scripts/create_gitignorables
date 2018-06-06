@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# --- Create files/dirs that were gitignored and should now exist --- #
+
+# Upsert bin/ directory
+if [[ ! -d "bin" ]]; then
+	echo "Creating directory bin/"
+	mkdir bin/
+fi

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# --- Install everything required to get up and running with Sweet Tea --- #
+
+# Directory of this script.
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Current OS -- will exit if not mac or linux.
+OS="$( $THIS_DIR/curr_os )"
+
+if [[ "$OS" = "mac" ]]; then
+	# Install homebrew if on mac
+	$THIS_DIR/install_homebrew
+elif [[ "$OS" = "unknown" ]]; then
+	# Exit early if not on mac or linux
+	echo "Only Linux and Mac operating systems supported. Exiting..."
+	exit
+fi
+
+# Create files/dirs that were gitignored and should now exist.
+$THIS_DIR/create_gitignorables
+
+# Install 'dep' -- Go package management tool used with this project.
+$THIS_DIR/install_dep "$OS"
+
+# Install third-party Go packages listed in Gopkg.toml.
+$THIS_DIR/install_pkgs
+
+# Install redis.
+$THIS_DIR/install_redis
+
+# Install PostgreSQL.
+$THIS_DIR/install_pg
+
+# Create local databases for dev and testing.
+$THIS_DIR/setup_dbs
+
+echo "Done."

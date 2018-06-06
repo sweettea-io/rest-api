@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# --- Install dep, the Go package management tool used with this project, if not already installed --- #
+
+# Get OS from arg or script
+if [[ "$1" ]]; then
+	OS="$1"
+else
+	OS="$( $THIS_DIR/curr_os )"
+fi
+
+# Check for dep existence
+if [[ "$( which dep )" ]]; then
+	echo "dep already detected -- Skipping installation"
+else
+	echo "dep not installed -- Installing..."
+
+	# Use brew to install if on mac, otherwise use the old-fashion way
+	if [[ "$OS" = "mac" ]]; then
+		brew install dep
+	else
+		curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+	fi
+fi

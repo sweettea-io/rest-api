@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# --- Install third-party Go packages listed in Gopkg.toml, using dep --- #
+
+echo "Installing dependencies specified in Gopkg.toml..."
+dep ensure -vendor-only

@@ -1,9 +1,13 @@
-default: run
+default: setup
+
+setup:
+	chmod u+x scripts/*
+
+one: ## something
+	./scripts/one
 
 install: ## Setup project
-	mkdir bin
-	mkdir envs
-	update
+	./scripts/install
 
 test: ## Run all tests
 	go test -p 1 ./...
@@ -29,5 +33,5 @@ build-worker: ## Build worker.go
 build-migrate: ## Build migrate.go
 	go build -a -o ./bin/migrate ./cmd/migrate
 
-update: # Update dependencies
-	dep ensure
+ensure: # Update dependencies
+	dep ensure -vendor-only
