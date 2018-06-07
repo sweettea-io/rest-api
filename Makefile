@@ -1,13 +1,34 @@
-default: setup
+default: unlock
 
-setup: ## Unlock all scripts
-	chmod u+x scripts/*
+unlock: ## Unlock all scripts
+	chmod -R u+x scripts/*
 
-install: ## Install project dependencies
+install: ## Setup & install project dependencies
 	./scripts/install
 
-test: ## Run all tests
-	go test -p 1 ./...
+build-server: ## Build the server application as a Docker image
+	./scripts/build server
+
+build-migrate: ## Build the migrate application as a Docker image
+	./scripts/build migrate
+
+build-worker: ## Build the worker application as a Docker image
+	./scripts/build worker
+
+build: ## Build all applications as Docker images
+	./scripts/build all
+
+build-server-raw: ## Build the server application as a Go binary
+	./scripts/build server -raw
+
+build-migrate-raw: ## Build the migrate application as a Go binary
+	./scripts/build migrate -raw
+
+build-worker-raw: ## Build the worker application as a Go binary
+	./scripts/build worker -raw
+
+build-raw: ## Build all applications as Go binaries
+	./scripts/build all -raw
 
 run: ## Start the HTTP server
 	go run server.go
@@ -21,14 +42,9 @@ work: ## Start job worker
 clean: ## Remove all built files
 	rm bin/*
 
-build-server: ## Build server.go
-	go build -a -o ./bin/server ./cmd/server
-
-build-worker: ## Build worker.go
-	go build -a -o ./bin/worker ./cmd/worker
-
-build-migrate: ## Build migrate.go
-	go build -a -o ./bin/migrate ./cmd/migrate
-
-ensure: # Update dependencies
+ensure: ## Update dependencies
 	dep ensure -vendor-only
+
+test: ## Run all tests
+	go test -p 1 ./...
+

@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# --- Build one or all Sweet Tea applications as either Go binaries or Docker images --- #
+
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP="$1"
+APP_VAL_SUPPORTED="" # false
+BUILD_FOR_DOCKER="" # false
+GO_BUILD_OUTPUT_DIR="./bin"
+declare -a SUPPORTED_APP_VALUES=("server" "migrate" "worker" "all")
+declare -a APPS=("server" "migrate" "worker")
+
+if [[ "$2" != "-raw" ]]; then
+	BUILD_FOR_DOCKER="true"
+fi
+
+# Ensure provided app arg is supported.
+for supported_app_val in "${SUPPORTED_APP_VALUES[@]}"; do
+	# Set APP_VAL_SUPPORTED to "true" if app arg is one of the supported values.
+	if [[ "$APP" = "$supported_app_val" ]]; then
+		APP_VAL_SUPPORTED="true"
+	fi
+done
+
+# Exit early if app value not supported.
+if [[ ! "$APP_VAL_SUPPORTED" ]]; then
+	echo "App value \"$APP\" not supported. Not building."
+	exit
+fi
+
+# Create array of apps to build.
+if [[ "$APP" = "all" ]]; then
+	APPS_TO_BUILD="$APPS"
+else
+	declare -a APPS_TO_BUILD=("$APP")
+fi
+
+# Build each app requested to be built.
+if [[ "$BUILD_FOR_DOCKER" ]]; then
+	# Build each app for Docker.
+	for app in "${APPS_TO_BUILD[@]}"; do
+		tag_name=$( $THIS_DIR/docker_images "$app" )
+
+		echo "Building \"$app\" into Docker image \"$tag_name\"..."
+		docker build --build-arg ROLE="$app" -t "$tag_name" .
+	done
+else
+	# Build each app as a Go binary.
+	for app in "${APPS_TO_BUILD[@]}"; do
+		echo "Building \"$app\" into Go binary at $GO_BUILD_OUTPUT_DIR/$app..."
+		go build -a -o "$GO_BUILD_OUTPUT_DIR/$app" "./cmd/$app"
+	done
+fi
+
+echo "Done!"

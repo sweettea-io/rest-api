@@ -22,7 +22,7 @@ for dir in "${dirs[@]}"; do
 		mkdir "$dir"
 	fi
 done
-
+e
 # Copy example.env into local/.env
 if [[ ! -f "$ENV_DIR/local/.env" ]]; then
 	cp "$EXAMPLES_DIR/example.env" "$ENV_DIR/local/.env"
@@ -39,7 +39,7 @@ declare -a env_example_dest=(
 
 declare -a apps=("migrate" "server" "worker")
 
-for dest_dir in "${env_example_dest[@]}"; do
+e
 	for app in "${apps[@]}"; do
 		if [[ ! -f "$dest_dir/$app.env" ]]; then
 			cp "$EXAMPLES_DIR/$app.example.env" "$dest_dir/$app.env"
