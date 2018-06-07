@@ -1,0 +1,3 @@
+#!/bin/bash
+
+# --- Deploy supported application to Kubernetes cluster of specified env tier --- #

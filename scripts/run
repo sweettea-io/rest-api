@@ -12,7 +12,6 @@ RUN_TYPE="$2"
 APP_VAL_SUPPORTED="" # false
 RUN_TYPE_SUPPORTED="" # false
 declare -a SUPPORTED_APP_VALUES=("server" "migrate" "worker")
-declare -a SUPPORTED_RUN_TYPES=("raw" "docker")
 
 # Ensure provided app arg is supported.
 for supported_app_val in "${SUPPORTED_APP_VALUES[@]}"; do
@@ -25,20 +24,6 @@ done
 # Exit early if app value not supported.
 if [[ ! "$APP_VAL_SUPPORTED" ]]; then
 	echo "App value \"$APP\" not supported. Not running."
-	exit
-fi
-
-# Ensure provided run-type arg is supported.
-for supported_run_type in "${SUPPORTED_RUN_TYPES[@]}"; do
-	# Set APP_VAL_SUPPORTED to "true" if app arg is one of the supported values.
-	if [[ "$RUN_TYPE" = "-$supported_run_type" ]]; then
-		RUN_TYPE_SUPPORTED="true"
-	fi
-done
-
-# Exit early if run type not supported.
-if [[ ! "$RUN_TYPE_SUPPORTED" ]]; then
-	echo "Run type value \"$RUN_TYPE\" not supported. Not running."
 	exit
 fi
 
@@ -69,7 +54,10 @@ elif [[ "$RUN_TYPE" = "-docker" ]]; then
 
 	# Run that bish
 	$CMD
-else
+elif [[ "$RUN_TYPE" = "" ]]; then
 	# Run the Go file for this app.
-	go $APPS_DIR/$APP/main.go
+	CMD="go run $APPS_DIR/$APP/main.go"
+	$CMD
+else
+	echo "Run type value \"$RUN_TYPE\" not supported. Not running."
 fi

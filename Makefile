@@ -30,41 +30,77 @@ build-worker-raw: ## Build the worker application as a Go binary
 build-raw: ## Build all applications as Go binaries
 	./scripts/build all -raw
 
-serve-go: ## Run the server application main file
+run-server-go: ## Run the server application main file
 	./scripts/run server
 
-migrate-go: ## Run the migrate application main file
+run-migrate-go: ## Run the migrate application main file
 	./scripts/run migrate
 
-work-go: ## Run the work application main file
+run-worker-go: ## Run the work application main file
 	./scripts/run worker
 
-serve-raw: ## Run the server application Go binary
+run-server-raw: ## Run the server application Go binary
 	./scripts/run server -raw
 
-migrate-raw: ## Run the migrate application Go binary
+run-migrate-raw: ## Run the migrate application Go binary
 	./scripts/run migrate -raw
 
-work-raw: ## Run the worker application Go binary
+run-worker-raw: ## Run the worker application Go binary
 	./scripts/run worker -raw
 
-serve: ## Run the latest Docker image for the server application
+run-server: ## Run the latest Docker image for the server application
 	./scripts/run server -docker
 
-migrate: ## Run the latest Docker image for the migrate application
+run-migrate: ## Run the latest Docker image for the migrate application
 	./scripts/run migrate -docker
 
-work: ## Run the latest Docker image for the worker application
-	./scripts/run work -docker
+run-worker: ## Run the latest Docker image for the worker application
+	./scripts/run worker -docker
 
-dserve: ## Run the latest Docker image for the server application as a daemon
+run-dserver: ## Run the latest Docker image for the server application as a daemon
 	./scripts/run server -docker -daemon
 
-dmigrate: ## Run the latest Docker image for the migrate application as a daemon
+run-dmigrate: ## Run the latest Docker image for the migrate application as a daemon
 	./scripts/run migrate -docker -daemon
 
-dwork: ## Run the latest Docker image for the worker application as a daemon
+run-dworker: ## Run the latest Docker image for the worker application as a daemon
 	./scripts/run work -docker -daemon
+
+deploy-server-local: ## Deploy the latest Docker image for the server application to the local K8S core cluster
+	./scripts/deploy server local
+
+deploy-server-dev: ## Deploy the latest Docker image for the server application to the dev K8S core cluster
+	./scripts/deploy server dev
+
+deploy-server-staging: ## Deploy the latest Docker image for the server application to the staging K8S core cluster
+	./scripts/deploy server staging
+
+deploy-server-prod: ## Deploy the latest Docker image for the server application to the prod K8S core cluster
+	./scripts/deploy server prod
+
+deploy-migrate-local: ## Deploy the latest Docker image for the migrate application to the local K8S core cluster
+	./scripts/deploy migrate local
+
+deploy-migrate-dev: ## Deploy the latest Docker image for the migrate application to the dev K8S core cluster
+	./scripts/deploy migrate dev
+
+deploy-migrate-staging: ## Deploy the latest Docker image for the migrate application to the staging K8S core cluster
+	./scripts/deploy migrate staging
+
+deploy-migrate-prod: ## Deploy the latest Docker image for the migrate application to the prod K8S core cluster
+	./scripts/deploy migrate prod
+
+deploy-worker-local: ## Deploy the latest Docker image for the worker application to the local K8S core cluster
+	./scripts/deploy worker local
+
+deploy-worker-dev: ## Deploy the latest Docker image for the worker application to the dev K8S core cluster
+	./scripts/deploy worker dev
+
+deploy-worker-staging: ## Deploy the latest Docker image for the worker application to the staging K8S core cluster
+	./scripts/deploy worker staging
+
+deploy-worker-prod: ## Deploy the latest Docker image for the worker application to the prod K8S core cluster
+	./scripts/deploy worker prod
 
 clean: ## Remove all Go-built binaries
 	rm ./bin/*
