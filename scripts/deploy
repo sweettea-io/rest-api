@@ -1,3 +1,48 @@
 #!/bin/bash
 
 # --- Deploy supported application to Kubernetes cluster of specified env tier --- #
+
+APP="$1"
+DEPLOY_ENV="$2"
+ENVS_DIR="./envs"
+APP_VAL_SUPPORTED="" # false
+DEPLOY_ENV_VAL_SUPPORTED="" # false
+declare -a SUPPORTED_APPS=("server" "migrate" "worker")
+declare -a SUPPORTED_DEPLOY_ENVS=("local" "dev" "staging", "prod")
+
+# Ensure provided app arg is supported.
+for supported_app_val in "${SUPPORTED_APPS[@]}"; do
+	# Set APP_VAL_SUPPORTED to "true" if app arg is one of the supported values.
+	if [[ "$APP" = "$supported_app_val" ]]; then
+		APP_VAL_SUPPORTED="true"
+	fi
+done
+
+# Exit early if app value not supported.
+if [[ ! "$APP_VAL_SUPPORTED" ]]; then
+	echo "App value \"$APP\" not supported. Not deploying."
+	exit
+fi
+
+# Ensure provided deploy_env arg is supported.
+for supported_deploy_env in "${SUPPORTED_DEPLOY_ENVS[@]}"; do
+	# Set DEPLOY_ENV_VAL_SUPPORTED to "true" if deploy_env arg is one of the supported values.
+	if [[ "$DEPLOY_ENV" = "$supported_deploy_env" ]]; then
+		DEPLOY_ENV_VAL_SUPPORTED="true"
+	fi
+done
+
+# Exit early if deploy_env value not supported.
+if [[ ! "$DEPLOY_ENV_VAL_SUPPORTED" ]]; then
+	echo "Deploy environment \"$DEPLOY_ENV\" not supported. Not deploying."
+	exit
+fi
+
+# TODO: Will need to check if deployment or job
+# TODO: If deployment:
+#			If already exists:
+#				Just update
+#				Diff envs and check if you need to update those too
+#			If new:
+#				Perform deploy
+# 				Read envs from env file and use all of those
