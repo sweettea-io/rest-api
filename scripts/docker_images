@@ -6,7 +6,7 @@ case "$1" in
     server*)  TAG="rest-api";;
     migrate*) TAG="rest-api-migration";;
     worker*)  TAG="rest-api-worker";;
-    *)		  TAG=""
+    *)        TAG=""
 esac
 
 echo "$TAG"
