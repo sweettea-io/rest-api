@@ -12,5 +12,9 @@
 *.prof
 
 vendor/
-envs/
 bin/
+envs/test
+envs/local
+envs/dev
+envs/staging
+envs/prod

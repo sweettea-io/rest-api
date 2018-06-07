@@ -2,8 +2,52 @@
 
 # --- Create files/dirs that were gitignored and should now exist --- #
 
-# Upsert bin/ directory
-if [[ ! -d "bin" ]]; then
-	echo "Creating directory bin/"
-	mkdir bin/
+ENV_DIR="envs"
+EXAMPLES_DIR="$ENV_DIR/examples"
+
+declare -a dirs=(
+	"bin/"
+	"$ENV_DIR"
+	"$ENV_DIR/test/"
+	"$ENV_DIR/local/"
+	"$ENV_DIR/dev/"
+	"$ENV_DIR/staging/"
+	"$ENV_DIR/prod/"
+)
+
+# Upsert dirs
+for dir in "${dirs[@]}"; do
+	if [[ ! -d "$dir" ]]; then
+		echo "Creating directory $dir"
+		mkdir "$dir"
+	fi
+done
+
+# Copy example.env into local/.env
+if [[ ! -f "$ENV_DIR/local/.env" ]]; then
+	cp "$EXAMPLES_DIR/example.env" "$ENV_DIR/local/.env"
 fi
+
+# Copy app-specific docker env files from examples
+declare -a env_example_dest=(
+	"$ENV_DIR/test"
+	"$ENV_DIR/local"
+	"$ENV_DIR/dev"
+	"$ENV_DIR/staging"
+	"$ENV_DIR/prod"
+)
+
+declare -a example_env_files=(
+	"migrate.example.env"
+	"server.example.env"
+	"worker.example.env"
+)
+
+
+for dest_dir in "${env_example_dest[@]}"; do
+	for filename in "${example_env_files[@]}"; do
+		if [[ ! -f "$dest_dir/$filename" ]]; then
+			cp "$EXAMPLES_DIR/$filename" "$dest_dir/$filename"
+		fi
+	done
+done
