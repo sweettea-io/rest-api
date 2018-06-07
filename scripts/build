@@ -2,6 +2,7 @@
 
 # --- Build one or all Sweet Tea applications as either Go binaries or Docker images --- #
 
+# Parse script args into vars
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 APP="$1"
 APP_VAL_SUPPORTED="" # false

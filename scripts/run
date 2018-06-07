@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# --- Run supported application as either a Go binary or Docker image (and potentially as a daemon if Docker image) --- #
+
+# Parse script args into vars
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+GO_BUILD_OUTPUT_DIR="./bin"
+APPS_DIR="./cmd"
+ENV_DIR="./envs/local"
+APP="$1"
+RUN_TYPE="$2"
+APP_VAL_SUPPORTED="" # false
+RUN_TYPE_SUPPORTED="" # false
+declare -a SUPPORTED_APP_VALUES=("server" "migrate" "worker")
+declare -a SUPPORTED_RUN_TYPES=("raw" "docker")
+
+# Ensure provided app arg is supported.
+for supported_app_val in "${SUPPORTED_APP_VALUES[@]}"; do
+	# Set APP_VAL_SUPPORTED to "true" if app arg is one of the supported values.
+	if [[ "$APP" = "$supported_app_val" ]]; then
+		APP_VAL_SUPPORTED="true"
+	fi
+done
+
+# Exit early if app value not supported.
+if [[ ! "$APP_VAL_SUPPORTED" ]]; then
+	echo "App value \"$APP\" not supported. Not running."
+	exit
+fi
+
+# Ensure provided run-type arg is supported.
+for supported_run_type in "${SUPPORTED_RUN_TYPES[@]}"; do
+	# Set APP_VAL_SUPPORTED to "true" if app arg is one of the supported values.
+	if [[ "$RUN_TYPE" = "-$supported_run_type" ]]; then
+		RUN_TYPE_SUPPORTED="true"
+	fi
+done
+
+# Exit early if run type not supported.
+if [[ ! "$RUN_TYPE_SUPPORTED" ]]; then
+	echo "Run type value \"$RUN_TYPE\" not supported. Not running."
+	exit
+fi
+
+if [[ "$RUN_TYPE" = "-raw" ]]; then
+	# Run the Go binary for this app.
+	$GO_BUILD_OUTPUT_DIR/$APP
+elif [[ "$RUN_TYPE" = "-docker" ]]; then
+	# Run the Docker image for this app.
+	ENV_FILE="$ENV_DIR/$APP.env"
+	TAG_NAME=$( $THIS_DIR/docker_images "$APP" )
+	CMD="docker run"
+
+	# Add port binding for server app
+	if [[ "$APP" = "server" ]]; then
+		CMD="$CMD -p 5000:5000"
+	fi
+
+	# Run Docker image as daemon if desired
+	if [[ "$3" = "-daemon" ]]; then
+		CMD="$CMD -d"
+	fi
+
+	# Use proper environment variables based on which app to run
+	CMD="$CMD --env-file $ENV_FILE"
+
+	# Specify which image tag to run
+	CMD="$CMD $TAG_NAME"
+
+	# Run that bish
+	$CMD
+else
+	# Run the Go file for this app.
+	go $APPS_DIR/$APP/main.go
+fi
