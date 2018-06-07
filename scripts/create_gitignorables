@@ -37,17 +37,12 @@ declare -a env_example_dest=(
 	"$ENV_DIR/prod"
 )
 
-declare -a example_env_files=(
-	"migrate.example.env"
-	"server.example.env"
-	"worker.example.env"
-)
-
+declare -a apps=("migrate" "server" "worker")
 
 for dest_dir in "${env_example_dest[@]}"; do
-	for filename in "${example_env_files[@]}"; do
-		if [[ ! -f "$dest_dir/$filename" ]]; then
-			cp "$EXAMPLES_DIR/$filename" "$dest_dir/$filename"
+	for app in "${apps[@]}"; do
+		if [[ ! -f "$dest_dir/$app.env" ]]; then
+			cp "$EXAMPLES_DIR/$app.example.env" "$dest_dir/$app.env"
 		fi
 	done
 done
