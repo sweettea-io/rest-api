@@ -7,7 +7,7 @@ var RedisPool *redis.Pool
 // Create app's redis pool configured with app.Config's values
 func CreateRedisPool() {
   RedisPool = &redis.Pool{
-    // Max number of connections allocated by the pool at a given time (0 = unlimited)
+    // Max number of connections allocated by the pool at any given time (0 = unlimited)
     MaxActive: Config.RedisPoolMaxActive,
 
     // Max number of idle connections in the pool.
