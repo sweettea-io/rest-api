@@ -5,7 +5,6 @@
 
 .idea/
 *.pem
-*.env
 
 *.exef
 *.test
