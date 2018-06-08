@@ -2,6 +2,7 @@
 
 # --- Deploy supported application to Kubernetes cluster of specified env tier --- #
 
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 APP="$1"
 DEPLOY_ENV="$2"
 ENVS_DIR="./envs"
@@ -38,11 +39,37 @@ if [[ ! "$DEPLOY_ENV_VAL_SUPPORTED" ]]; then
 	exit
 fi
 
-# TODO: Will need to check if deployment or job
-# TODO: If deployment:
-#			If already exists:
-#				Just update
-#				Diff envs and check if you need to update those too
-#			If new:
-#				Perform deploy
-# 				Read envs from env file and use all of those
+# Get image name from script
+IMAGE_NAME=$( $THIS_DIR/docker_images "$APP" )
+
+# Get app-agnostic env vars from proper file
+docker_image_owner=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "DOCKER_IMAGE_OWNER" )
+
+# TODO: Group logic by kubectl run vs. kubectl update
+
+
+
+# Deployment (server, worker)
+if [ "$APP" -eq "server" ] || [ "$APP" -eq "worker" ]; then
+	server_port=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "PORT" )
+
+	if [[ "$server_port" ]]; then
+		server_port="--port=$server_port"
+	fi
+
+	server_replicas_count=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "SERVER_REPLICAS_COUNT" )
+	server_restart_policy=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "SERVER_RESTART_POLICY" )
+
+	# Get all envs for this deployment in kubectl-arg format
+	deploy_envs=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "all" "true" )
+
+	kubectl run "$IMAGE_NAME" \
+		--image="$docker_image_owner/$IMAGE_NAME" $server_port \
+		--replicas="$server_replicas_count" \
+		--restart="$server_restart_policy" \
+		$deploy_envs
+
+# Job (migrate)
+else
+	echo ""
+fi
