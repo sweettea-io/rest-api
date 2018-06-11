@@ -35,11 +35,17 @@ server_example_content=$( cat "$EXAMPLES_DIR/server.example.env" )
 migrate_example_content=$( cat "$EXAMPLES_DIR/migrate.example.env" )
 worker_example_content=$( cat "$EXAMPLES_DIR/worker.example.env" )
 
-
-
 # For each env tier...
 for env_tier in "${env_tiers[@]}"; do
-	# TODO: Skip if dir is NOT empty
+	# Skip this tier if the dir already has content
+	env_tier_dir="$ENV_DIR/$env_tier"
+	num_files=$( ls -l "$env_tier_dir" | wc -l )
+	num_files=$((num_files-1))
+
+	if [[ "$num_files" != "0" ]]; then
+		echo "Directory \"$env_tier_dir\" not empty. Skipping env file creation..."
+		continue
+	fi
 
 	# Empty example_envs
 	IFS=$'\n' read -rd '' -a example_envs <<<""
@@ -67,6 +73,10 @@ for env_tier in "${env_tiers[@]}"; do
 			app_envs="$app_envs$env_name=$env_val\n"
 		done
 
-		printf "$app_envs" > "$ENV_DIR/$env_tier/$app.env"
+		app_env_file="$env_tier_dir/$app.env"
+
+		echo "Creating env file \"$app_env_file\"."
+
+		printf "$app_envs" > "$app_env_file"
 	done
 done
