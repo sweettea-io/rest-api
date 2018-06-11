@@ -45,7 +45,7 @@ fi
 image_name=$( $THIS_DIR/docker_images "$APP" )
 image_owner=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "IMAGE_OWNER" )
 image_repo="$image_owner/$image_name"
-image_version="TODO"
+image_version=$( git log -n 1 | grep "commit " )
 
 # Tag docker image with version of latest commit sha
 docker tag "$image_name" "$image_repo:$image_version"
