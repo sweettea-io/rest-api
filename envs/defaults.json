@@ -1,16 +1,20 @@
 {
   "server": {
     "test": {
+      "DATABASE_URL": "postgres://rest-api-test:rest-api-test@localhost:5432/rest-api-test?sslmode=disable",
       "DEBUG": "true",
-      "ENV": "test"
+      "ENV": "test",
+      "IMAGE_NAME": "rest-api"
     },
     "local": {
       "BUILD_CLUSTER_NAME": "build-local",
       "CLOUD_PROVIDER": "aws",
       "CORE_CLUSTER_NAME": "core-local",
+      "DATABASE_URL": "postgres://rest-api:rest-api@localhost:5432/rest-api?sslmode=disable",
       "DEBUG": "true",
       "DOMAIN": "localhost",
       "ENV": "local",
+      "IMAGE_NAME": "rest-api",
       "K8S_VERSION": "1.7.10",
       "REDIS_URL": "localhost:6379",
       "REPLICAS_COUNT": "1",
@@ -57,14 +61,18 @@
   },
   "migrate": {
     "test": {
+      "DATABASE_URL": "postgres://rest-api-test:rest-api-test@localhost:5432/rest-api-test?sslmode=disable",
       "DEBUG": "true",
-      "ENV": "test"
+      "ENV": "test",
+      "IMAGE_NAME": "rest-api-migrate"
     },
     "local": {
       "CORE_CLUSTER_NAME": "core-local",
+      "DATABASE_URL": "postgres://rest-api:rest-api@localhost:5432/rest-api?sslmode=disable",
       "DEBUG": "true",
       "DOMAIN": "localhost",
       "ENV": "local",
+      "IMAGE_NAME": "rest-api-migrate",
       "RESTART_POLICY": "Never"
     },
     "dev": {
@@ -88,16 +96,20 @@
   },
   "worker": {
     "test": {
+      "DATABASE_URL": "postgres://rest-api-test:rest-api-test@localhost:5432/rest-api-test?sslmode=disable",
       "DEBUG": "true",
-      "ENV": "test"
+      "ENV": "test",
+      "IMAGE_NAME": "rest-api-worker"
     },
     "local": {
       "BUILD_CLUSTER_NAME": "build-local",
       "CLOUD_PROVIDER": "aws",
       "CORE_CLUSTER_NAME": "core-local",
+      "DATABASE_URL": "postgres://rest-api:rest-api@localhost:5432/rest-api?sslmode=disable",
       "DEBUG": "true",
       "DOMAIN": "localhost",
       "ENV": "local",
+      "IMAGE_NAME": "rest-api-worker",
       "K8S_VERSION": "1.7.10",
       "REDIS_URL": "localhost:6379",
       "REPLICAS_COUNT": "1",
