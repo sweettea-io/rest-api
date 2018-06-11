@@ -65,7 +65,7 @@ for env_tier in "${env_tiers[@]}"; do
 		app_envs=""
 		for env_name in "${example_envs[@]}"; do
 			# Attempt to find env default value from defaults.json, using 'jq'
-			env_val=$( cat "$ENV_DEFAULTS_PATH" | jq ".$app.$env_tier.$env_name" )
+			env_val=$( cat "$ENV_DEFAULTS_PATH" | jq -r ".$app.$env_tier.$env_name" )
 
 			if [[ "$env_val" = "null" ]]; then
 				env_val=""
