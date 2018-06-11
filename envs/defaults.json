@@ -1,0 +1,141 @@
+{
+  "server": {
+    "test": {
+      "DEBUG": "true",
+      "ENV": "test"
+    },
+    "local": {
+      "BUILD_CLUSTER_NAME": "build-local",
+      "CLOUD_PROVIDER": "aws",
+      "CORE_CLUSTER_NAME": "core-local",
+      "DEBUG": "true",
+      "DOMAIN": "localhost",
+      "ENV": "local",
+      "K8S_VERSION": "1.7.10",
+      "REDIS_URL": "localhost:6379",
+      "REPLICAS_COUNT": "1",
+      "RESTART_POLICY": "Always",
+      "SERVER_PORT": "80",
+      "TRAIN_CLUSTER_NAME": "train-local"
+    },
+    "dev": {
+      "BUILD_CLUSTER_NAME": "build-dev",
+      "CLOUD_PROVIDER": "aws",
+      "CORE_CLUSTER_NAME": "core-dev",
+      "DEBUG": "true",
+      "ENV": "dev",
+      "K8S_VERSION": "1.7.10",
+      "REPLICAS_COUNT": "3",
+      "RESTART_POLICY": "Always",
+      "SERVER_PORT": "80",
+      "TRAIN_CLUSTER_NAME": "train-dev"
+    },
+    "staging": {
+      "BUILD_CLUSTER_NAME": "build-staging",
+      "CLOUD_PROVIDER": "aws",
+      "CORE_CLUSTER_NAME": "core-staging",
+      "DEBUG": "false",
+      "ENV": "staging",
+      "K8S_VERSION": "1.7.10",
+      "REPLICAS_COUNT": "3",
+      "RESTART_POLICY": "Always",
+      "SERVER_PORT": "80",
+      "TRAIN_CLUSTER_NAME": "train-staging"
+    },
+    "prod": {
+      "BUILD_CLUSTER_NAME": "build",
+      "CLOUD_PROVIDER": "aws",
+      "CORE_CLUSTER_NAME": "core",
+      "DEBUG": "true",
+      "ENV": "prod",
+      "K8S_VERSION": "1.7.10",
+      "REPLICAS_COUNT": "3",
+      "RESTART_POLICY": "Always",
+      "SERVER_PORT": "80",
+      "TRAIN_CLUSTER_NAME": "train"
+    }
+  },
+  "migrate": {
+    "test": {
+      "DEBUG": "true",
+      "ENV": "test"
+    },
+    "local": {
+      "CORE_CLUSTER_NAME": "core-local",
+      "DEBUG": "true",
+      "DOMAIN": "localhost",
+      "ENV": "local",
+      "RESTART_POLICY": "Never"
+    },
+    "dev": {
+      "CORE_CLUSTER_NAME": "core-dev",
+      "DEBUG": "true",
+      "ENV": "dev",
+      "RESTART_POLICY": "Never"
+    },
+    "staging": {
+      "CORE_CLUSTER_NAME": "core-staging",
+      "DEBUG": "false",
+      "ENV": "staging",
+      "RESTART_POLICY": "Never"
+    },
+    "prod": {
+      "CORE_CLUSTER_NAME": "core",
+      "DEBUG": "false",
+      "ENV": "prod",
+      "RESTART_POLICY": "Never"
+    }
+  },
+  "worker": {
+    "test": {
+      "DEBUG": "true",
+      "ENV": "test"
+    },
+    "local": {
+      "BUILD_CLUSTER_NAME": "build-local",
+      "CLOUD_PROVIDER": "aws",
+      "CORE_CLUSTER_NAME": "core-local",
+      "DEBUG": "true",
+      "DOMAIN": "localhost",
+      "ENV": "local",
+      "K8S_VERSION": "1.7.10",
+      "REDIS_URL": "localhost:6379",
+      "REPLICAS_COUNT": "1",
+      "RESTART_POLICY": "Always",
+      "TRAIN_CLUSTER_NAME": "train-local"
+    },
+    "dev": {
+      "BUILD_CLUSTER_NAME": "build-dev",
+      "CLOUD_PROVIDER": "aws",
+      "CORE_CLUSTER_NAME": "core-dev",
+      "DEBUG": "true",
+      "ENV": "dev",
+      "K8S_VERSION": "1.7.10",
+      "REPLICAS_COUNT": "1",
+      "RESTART_POLICY": "Always",
+      "TRAIN_CLUSTER_NAME": "train-dev"
+    },
+    "staging": {
+      "BUILD_CLUSTER_NAME": "build-staging",
+      "CLOUD_PROVIDER": "aws",
+      "CORE_CLUSTER_NAME": "core-staging",
+      "DEBUG": "false",
+      "ENV": "staging",
+      "K8S_VERSION": "1.7.10",
+      "REPLICAS_COUNT": "1",
+      "RESTART_POLICY": "Always",
+      "TRAIN_CLUSTER_NAME": "train-staging"
+    },
+    "prod": {
+      "BUILD_CLUSTER_NAME": "build",
+      "CLOUD_PROVIDER": "aws",
+      "CORE_CLUSTER_NAME": "core",
+      "DEBUG": "false",
+      "ENV": "prod",
+      "K8S_VERSION": "1.7.10",
+      "REPLICAS_COUNT": "1",
+      "RESTART_POLICY": "Always",
+      "TRAIN_CLUSTER_NAME": "train"
+    }
+  }
+}

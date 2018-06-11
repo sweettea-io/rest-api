@@ -2,11 +2,15 @@
 
 # --- Create files/dirs that were gitignored and should now exist --- #
 
-ENV_DIR="envs"
+ENV_DIR="./envs"
 EXAMPLES_DIR="$ENV_DIR/examples"
+ENV_DEFAULTS_PATH="$ENV_DIR/defaults.json"
+declare -a apps=("migrate" "server" "worker")
+declare -a env_tiers=("test" "local" "dev" "staging" "prod")
 
+# Directories to upsert
 declare -a dirs=(
-	"bin/"
+	"./bin/"
 	"$ENV_DIR"
 	"$ENV_DIR/test/"
 	"$ENV_DIR/local/"
@@ -15,34 +19,50 @@ declare -a dirs=(
 	"$ENV_DIR/prod/"
 )
 
-# Upsert dirs
+# For each dir listed above...
 for dir in "${dirs[@]}"; do
+	# If dir doesn't exist already...
 	if [[ ! -d "$dir" ]]; then
 		echo "Creating directory $dir"
+
+		# Create the dir.
 		mkdir "$dir"
 	fi
 done
-e
-# Copy example.env into local/.env
-if [[ ! -f "$ENV_DIR/local/.env" ]]; then
-	cp "$EXAMPLES_DIR/example.env" "$ENV_DIR/local/.env"
-fi
 
-# Copy app-specific docker env files from examples
-declare -a env_example_dest=(
-	"$ENV_DIR/test"
-	"$ENV_DIR/local"
-	"$ENV_DIR/dev"
-	"$ENV_DIR/staging"
-	"$ENV_DIR/prod"
-)
+# Get all envs for each application from its respective <app>.example.env file.
+server_example_content=$( cat "$EXAMPLES_DIR/server.example.env" )
+IFS=$'\n' read -rd '' -a server_example_envs <<<"$server_example_content"
 
-declare -a apps=("migrate" "server" "worker")
+migrate_example_content=$( cat "$EXAMPLES_DIR/migrate.example.env" )
+IFS=$'\n' read -rd '' -a migrate_example_envs <<<"$migrate_example_content"
 
-e
+worker_example_content=$( cat "$EXAMPLES_DIR/worker.example.env" )
+IFS=$'\n' read -rd '' -a worker_example_envs <<<"$worker_example_content"
+
+# For each env tier...
+for env_tier in "${env_tiers[@]}"; do
+	# For each app...
 	for app in "${apps[@]}"; do
-		if [[ ! -f "$dest_dir/$app.env" ]]; then
-			cp "$EXAMPLES_DIR/$app.example.env" "$dest_dir/$app.env"
-		fi
+		# Get the example envs for this app
+		case "$app" in
+			server*)  example_envs="$server_example_envs";;
+			migrate*) example_envs="$migrate_example_envs";;
+			worker*)  example_envs="$worker_example_envs";;
+			*)        example_envs=""
+		esac
+
+		# Build up a string of env vars to write to an env config file.
+		app_envs=""
+		for env_name in "${example_envs[@]}"; do
+			env_val=""
+
+			# TODO: Attempt to find env default value from defaults.json
+
+			# Append the new env var
+			app_envs="$app_envs$env_name=$env_val\n"
+		done
+
+		printf "$app_envs" > "$ENV_DIR/$env_tier/$app.env"
 	done
 done
