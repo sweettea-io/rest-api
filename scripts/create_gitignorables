@@ -40,9 +40,8 @@ for env_tier in "${env_tiers[@]}"; do
 	# Skip this tier if the dir already has content
 	env_tier_dir="$ENV_DIR/$env_tier"
 	num_files=$( ls -l "$env_tier_dir" | wc -l )
-	num_files=$((num_files-1))
 
-	if [[ "$num_files" != "0" ]]; then
+	if [ "$num_files" -gt "0" ]; then
 		echo "Directory \"$env_tier_dir\" not empty. Skipping env file creation..."
 		continue
 	fi
@@ -65,9 +64,12 @@ for env_tier in "${env_tiers[@]}"; do
 		# Build up a string of env vars to write to an env config file.
 		app_envs=""
 		for env_name in "${example_envs[@]}"; do
-			env_val=""
+			# Attempt to find env default value from defaults.json, using 'jq'
+			env_val=$( cat "$ENV_DEFAULTS_PATH" | jq ".$app.$env_tier.$env_name" )
 
-			# TODO: Attempt to find env default value from defaults.json
+			if [[ "$env_val" = "null" ]]; then
+				env_val=""
+			fi
 
 			# Append the new env var
 			app_envs="$app_envs$env_name=$env_val\n"
