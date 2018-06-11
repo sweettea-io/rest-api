@@ -42,8 +42,8 @@ fi
 
 # ======== TAG/PUSH IMAGE TO REPOSITORY ======== #
 
-image_name=$( $THIS_DIR/docker_images "$APP" )
 image_owner=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "IMAGE_OWNER" )
+image_name=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "IMAGE_NAME" )
 image_repo="$image_owner/$image_name"
 image_version=$( $THIS_DIR/latest_sha )
 
@@ -74,18 +74,19 @@ resource_name="$image_name"	# unique suffix will be added for job deploys
 if [[ "$APP" = "migrate" ]]; then
 	NEW_DEPLOY="true"
 
-	# For a job, the resource name needs to differ with each deploy, so generate a uid for suffix.
-	job_uid="TODO"
+	# For a job, the resource name needs to differ with each deploy, so generate a uuid for suffix.
+	uuid=$( uuidgen )
+	job_uid="${uuid:0:8}"
 	image_name="$image_name-$job_uid"
 else
-	# For 'deployments', check to see if they already exist first.
+	# TODO: For 'deployments', check to see if they already exist first.
 	# This will determine whether we should 'kubectl run' or simply 'kubectl update'.
 	echo "TODO"
 fi
 
 # ======== FORMAT DEPLOY ARGS ======== #
 
-port=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "PORT" "port" )
+port=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "SERVER_PORT" "port" )
 replicas=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "REPLICAS_COUNT" "replicas" )
 restart=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "RESTART_POLICY" "restart" )
 deploy_envs=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "all" "true" )
@@ -96,5 +97,5 @@ if [[ "$NEW_DEPLOY" ]]; then
 	kubectl run "$resource_name" "--image=$image_repo" "$port" "$replicas" "$restart" "$deploy_envs"
 else
 	container_name="$image_name"
-	kubectl set image "deployment/$resource_name" "$container_name=$image_repo:latest"
+	kubectl set image "deployment/$resource_name" "$container_name=$image_repo:$image_version"
 fi
