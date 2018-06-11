@@ -40,6 +40,7 @@ fi
 if [[ "$BUILD_FOR_DOCKER" ]]; then
 	# Build each app for Docker.
 	for app in "${APPS_TO_BUILD[@]}"; do
+		# TODO: Fix this to pull from env file once you add env tier as an arg to this script
 		tag_name=$( $THIS_DIR/docker_images "$app" )
 
 		echo "Building \"$app\" into Docker image \"$tag_name\"..."

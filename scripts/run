@@ -6,7 +6,6 @@
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 GO_BUILD_OUTPUT_DIR="./bin"
 APPS_DIR="./cmd"
-ENV_DIR="./envs/local"
 APP="$1"
 RUN_TYPE="$2"
 APP_VAL_SUPPORTED="" # false
@@ -31,28 +30,30 @@ if [[ "$RUN_TYPE" = "-raw" ]]; then
 	# Run the Go binary for this app.
 	$GO_BUILD_OUTPUT_DIR/$APP
 elif [[ "$RUN_TYPE" = "-docker" ]]; then
-	# Run the Docker image for this app.
-	ENV_FILE="$ENV_DIR/$APP.env"
-	TAG_NAME=$( $THIS_DIR/docker_images "$APP" )
+	# Get the docker image name for the 'local' env tier.
+	image_name=$( $THIS_DIR/env_reader "$APP" "local" "IMAGE_NAME" )
+
+	# Construct the docker command to execute.
 	CMD="docker run"
 
-	# Add port binding for server app
+	# Add port binding for server app.
 	if [[ "$APP" = "server" ]]; then
-		CMD="$CMD -p 5000:5000"
+		server_port=$( $THIS_DIR/env_reader "$APP" "local" "SERVER_PORT" )
+		CMD="$CMD -p $server_port:$server_port"
 	fi
 
-	# Run Docker image as daemon if desired
+	# Run Docker image as daemon if desired.
 	if [[ "$3" = "-daemon" ]]; then
 		CMD="$CMD -d"
 	fi
 
-	# Use proper environment variables based on which app to run
-	CMD="$CMD --env-file $ENV_FILE"
+	# Use proper environment variables based on which app to run.
+	CMD="$CMD --env-file ./envs/local/$APP.env"
 
-	# Specify which image tag to run
-	CMD="$CMD $TAG_NAME"
+	# Specify which image to run.
+	CMD="$CMD $image_name"
 
-	# Run that bish
+	# Run that bish.
 	$CMD
 elif [[ "$RUN_TYPE" = "" ]]; then
 	# Run the Go file for this app.
