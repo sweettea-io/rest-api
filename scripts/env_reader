@@ -5,42 +5,33 @@
 APP="$1"
 ENV_TIER="$2"
 ENV_NAME="$3"
+ARG_NAME="$4"
 ENVS_DIR="./envs"
 ENV_FILE_PATH="$ENVS_DIR/$ENV_TIER/$APP.env"
-K8S_FORMAT="" # false
-
-if [[ "$4" = "true" ]]; then
-	K8S_FORMAT="true"
-fi
 
 # Get all env vars if "all" is specified.
 if [[ "$ENV_NAME" = "all" ]]; then
 	# Get all env vars (ignore comments)
 	all_envs=$( cat "$ENV_FILE_PATH" | grep "^[^#]" )
 
-	# Format envs as kubectl args if desired.
-	if [[ "$K8S_FORMAT" ]]; then
-		# Convert all_envs into array
-		IFS=$'\n' read -rd '' -a all_envs_arr <<<"$all_envs"
+	# Convert all_envs into array
+	IFS=$'\n' read -rd '' -a all_envs_arr <<<"$all_envs"
 
-		# Format env pairs into args formatted with '--env="<env_pair>"'
-		env_args=""
-		for env_pair in "${all_envs_arr[@]}"; do
-			env_args="$env_args--env=\"$env_pair\" "
-		done
+	# Format env pairs into args formatted with '--env="<env_pair>"'
+	env_args=""
+	for env_pair in "${all_envs_arr[@]}"; do
+		env_args="$env_args--env=\"$env_pair\" "
+	done
 
-		echo "$env_args"
-	else
-		echo "$all_envs"
-	fi
-
+	echo "$env_args"
 elif [[ "$ENV_NAME" ]]; then
 	# If one env name is specified, return the value of that env var.
 	env_var=$( cat "$ENV_FILE_PATH" | grep "$ENV_NAME=" )
 
+	# If env var exists, format it as an arg (--argname=value)
 	if [[ "$env_var" ]]; then
 		[[ $env_var =~ ($ENV_NAME=(.*)) ]]
-		echo "${BASH_REMATCH[2]}"
+		echo "--$ARG_NAME${BASH_REMATCH[2]}"
 	else
 		echo ""
 	fi

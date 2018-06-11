@@ -11,6 +11,8 @@ DEPLOY_ENV_VAL_SUPPORTED="" # false
 declare -a SUPPORTED_APPS=("server" "migrate" "worker")
 declare -a SUPPORTED_DEPLOY_ENVS=("local" "dev" "staging", "prod")
 
+# ======== VALIDATE ARGS ======== #
+
 # Ensure provided app arg is supported.
 for supported_app_val in "${SUPPORTED_APPS[@]}"; do
 	# Set APP_VAL_SUPPORTED to "true" if app arg is one of the supported values.
@@ -39,6 +41,10 @@ if [[ ! "$DEPLOY_ENV_VAL_SUPPORTED" ]]; then
 	exit
 fi
 
+# ======== VALIDATE CLUSTER ======== #
+
+cluster_name=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "CLUSTER_NAME" )
+
 # Get image name from script
 IMAGE_NAME=$( $THIS_DIR/docker_images "$APP" )
 
@@ -47,29 +53,13 @@ docker_image_owner=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "DOCKER_IMAGE_OW
 
 # TODO: Group logic by kubectl run vs. kubectl update
 
+# ======== FORMAT DEPLOY ARGS ======== #
 
+port=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "PORT" "port" )
+replicas=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "REPLICAS_COUNT" "replicas" )
+restart=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "RESTART_POLICY" "restart" )
+deploy_envs=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "all" "true" )
 
-# Deployment (server, worker)
-if [ "$APP" -eq "server" ] || [ "$APP" -eq "worker" ]; then
-	server_port=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "PORT" )
+# ======== DEPLOY ======== #
 
-	if [[ "$server_port" ]]; then
-		server_port="--port=$server_port"
-	fi
-
-	server_replicas_count=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "SERVER_REPLICAS_COUNT" )
-	server_restart_policy=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "SERVER_RESTART_POLICY" )
-
-	# Get all envs for this deployment in kubectl-arg format
-	deploy_envs=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "all" "true" )
-
-	kubectl run "$IMAGE_NAME" \
-		--image="$docker_image_owner/$IMAGE_NAME" $server_port \
-		--replicas="$server_replicas_count" \
-		--restart="$server_restart_policy" \
-		$deploy_envs
-
-# Job (migrate)
-else
-	echo ""
-fi
+kubectl run "$IMAGE_NAME" --image="$docker_image_owner/$IMAGE_NAME" $port $replicas $restart $deploy_envs
