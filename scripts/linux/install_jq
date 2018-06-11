@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# --- Install jq if not already installed --- #
+
+if [[ "$( which jq )" ]]; then
+	echo "jq detected -- Skipping installation"
+else
+	echo "jq not detected -- Installing..."
+
+	if [[ "$( which apt-get )" ]]; then
+		apt-get install jq
+		chmod u+x $( which jq )
+	else
+		echo "Skipping jq installation...Linux flavor not an APT system. Will need to be done manually."
+	fi
+fi

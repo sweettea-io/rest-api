@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# --- Install jq if not already installed --- #
+
+# Check for jq existence
+if [[ "$( which jq )" ]]; then
+	echo "jq detected -- Skipping installation"
+else
+	echo "jq not detected -- Installing..."
+	brew install jq
+	chmod u+x $( which jq )
+fi
