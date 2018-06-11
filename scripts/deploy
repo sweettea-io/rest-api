@@ -5,7 +5,6 @@
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 APP="$1"
 DEPLOY_ENV="$2"
-ENVS_DIR="./envs"
 APP_VAL_SUPPORTED="" # false
 DEPLOY_ENV_VAL_SUPPORTED="" # false
 declare -a SUPPORTED_APPS=("server" "migrate" "worker")
@@ -41,6 +40,19 @@ if [[ ! "$DEPLOY_ENV_VAL_SUPPORTED" ]]; then
 	exit
 fi
 
+# ======== TAG/PUSH IMAGE TO REPOSITORY ======== #
+
+image_name=$( $THIS_DIR/docker_images "$APP" )
+image_owner=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "IMAGE_OWNER" )
+image_repo="$image_owner/$image_name"
+image_version="TODO"
+
+# Tag docker image with version of latest commit sha
+docker tag "$image_name" "$image_repo:$image_version"
+
+# Push docker image to external repository
+docker push "$image_repo:$image_version"
+
 # ======== SPECIFY/VALIDATE CLUSTER ======== #
 
 # Get cluster name from envs.
@@ -56,9 +68,6 @@ fi
 
 # ======== DETERMINE DEPLOYMENT EXISTENCE ======== #
 
-image_name=$( $THIS_DIR/docker_images "$APP" )
-image_owner=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "IMAGE_OWNER" )
-image_repo="$image_owner/$image_name"
 resource_name="$image_name"	# unique suffix will be added for job deploys
 
 # Always make a new deploy for deploys that are actually 'jobs'
