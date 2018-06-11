@@ -17,6 +17,9 @@ elif [[ "$OS" = "unknown" ]]; then
 	exit
 fi
 
+# Install jq to help with bash json parsing.
+$THIS_DIR/$OS/install_jq
+
 # Create files/dirs that were gitignored and should now exist.
 $THIS_DIR/create_gitignorables
 
