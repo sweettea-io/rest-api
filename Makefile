@@ -6,29 +6,11 @@ unlock: ## Unlock all scripts
 install: ## Setup & install project dependencies
 	./scripts/install
 
-build-server: ## Build the server application as a Docker image
-	./scripts/build server
-
-build-migrate: ## Build the migrate application as a Docker image
-	./scripts/build migrate
-
-build-worker: ## Build the worker application as a Docker image
-	./scripts/build worker
-
-build: ## Build all applications as Docker images
-	./scripts/build all
-
-build-server-raw: ## Build the server application as a Go binary
-	./scripts/build server -raw
-
-build-migrate-raw: ## Build the migrate application as a Go binary
-	./scripts/build migrate -raw
-
-build-worker-raw: ## Build the worker application as a Go binary
-	./scripts/build worker -raw
-
-build-raw: ## Build all applications as Go binaries
-	./scripts/build all -raw
+export target
+export env=local
+export as=image
+build: ## Build an application for a specific env tier as either a Docker image or a Go binary
+	./scripts/build $(target) $(env) $(as)
 
 run-server-go: ## Run the server application main file
 	./scripts/run server

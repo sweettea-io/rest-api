@@ -1,0 +1,17 @@
+#!/bin/bash
+
+arg_name="$1"
+IFS=$'|' read -rd '' -a vals <<<"$2"
+valid="" # false
+
+for val in ${vals[@]}; do
+	if [[ "$arg_name" = "$val" ]]; then
+		valid="true"
+		break
+	fi
+done
+
+if [[ ! "$valid" ]]; then
+	echo "Invalid $3 arg. Exiting."
+	exit
+fi
