@@ -32,25 +32,29 @@ done
 
 # Get all envs for each application from its respective <app>.example.env file.
 server_example_content=$( cat "$EXAMPLES_DIR/server.example.env" )
-IFS=$'\n' read -rd '' -a server_example_envs <<<"$server_example_content"
-
 migrate_example_content=$( cat "$EXAMPLES_DIR/migrate.example.env" )
-IFS=$'\n' read -rd '' -a migrate_example_envs <<<"$migrate_example_content"
-
 worker_example_content=$( cat "$EXAMPLES_DIR/worker.example.env" )
-IFS=$'\n' read -rd '' -a worker_example_envs <<<"$worker_example_content"
+
+
 
 # For each env tier...
 for env_tier in "${env_tiers[@]}"; do
+	# TODO: Skip if dir is NOT empty
+
+	# Empty example_envs
+	IFS=$'\n' read -rd '' -a example_envs <<<""
+
 	# For each app...
 	for app in "${apps[@]}"; do
 		# Get the example envs for this app
 		case "$app" in
-			server*)  example_envs="$server_example_envs";;
-			migrate*) example_envs="$migrate_example_envs";;
-			worker*)  example_envs="$worker_example_envs";;
-			*)        example_envs=""
+			server*)  example_content="$server_example_content";;
+			migrate*) example_content="$migrate_example_content";;
+			worker*)  example_content="$worker_example_content";;
 		esac
+
+		# Read envs into an array
+		IFS=$'\n' read -rd '' -a example_envs <<<"$example_content"
 
 		# Build up a string of env vars to write to an env config file.
 		app_envs=""
