@@ -38,5 +38,8 @@ WORKDIR /root
 # Copy Go binary built in first image over to this image.
 COPY --from=builder /go/src/github.com/sweettea-io/rest-api/main ./main
 
+# If you decide to copy .kubeconfig, uncomment this and then add KUBECONFIG=/root/.kubeconfig to env file
+#COPY --from=builder /go/src/github.com/sweettea-io/rest-api/.kubeconfig ./kubeconfig
+
 # Execute Go binary
 ENTRYPOINT ["./main"]
