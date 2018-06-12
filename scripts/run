@@ -2,63 +2,54 @@
 
 # --- Run supported application as either a Go binary or Docker image (and potentially as a daemon if Docker image) --- #
 
-# Parse script args into vars
+# ======== PARSE ARGS ======== #
+
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 GO_BUILD_OUTPUT_DIR="./bin"
 APPS_DIR="./cmd"
+ENVS_DIR="./envs"
+RUN_ENV="local"
 APP="$1"
 RUN_TYPE="$2"
-APP_VAL_SUPPORTED="" # false
-RUN_TYPE_SUPPORTED="" # false
-declare -a SUPPORTED_APP_VALUES=("server" "migrate" "worker")
+RUN_AS_DAEMON="$3"
 
-# Ensure provided app arg is supported.
-for supported_app_val in "${SUPPORTED_APP_VALUES[@]}"; do
-	# Set APP_VAL_SUPPORTED to "true" if app arg is one of the supported values.
-	if [[ "$APP" = "$supported_app_val" ]]; then
-		APP_VAL_SUPPORTED="true"
-	fi
-done
+# ======== VALIDATE ARGS ======== #
 
-# Exit early if app value not supported.
-if [[ ! "$APP_VAL_SUPPORTED" ]]; then
-	echo "App value \"$APP\" not supported. Not running."
-	exit
-fi
+$THIS_DIR/validate_arg "$APP" "server|migrate|worker" "target"
+$THIS_DIR/validate_arg "$RUN_TYPE" "image|binary|file" "run format"
 
-if [[ "$RUN_TYPE" = "-raw" ]]; then
-	# Run the Go binary for this app.
-	$GO_BUILD_OUTPUT_DIR/$APP
-elif [[ "$RUN_TYPE" = "-docker" ]]; then
-	# Get the docker image name for the 'local' env tier.
-	image_name=$( $THIS_DIR/env_reader "$APP" "local" "IMAGE_NAME" )
+# ======== RUN LOCAL APP ======== #
+
+if [[ "$RUN_TYPE" = "image" ]]; then
+	# Get the Docker image name for the 'local' env tier.
+	image_name=$( $THIS_DIR/env_reader "$APP" "$RUN_ENV" "IMAGE_NAME" )
 
 	# Construct the docker command to execute.
 	CMD="docker run"
 
-	# Add port binding for server app.
+	# Add port binding for the server app.
 	if [[ "$APP" = "server" ]]; then
-		server_port=$( $THIS_DIR/env_reader "$APP" "local" "SERVER_PORT" )
+		server_port=$( $THIS_DIR/env_reader "$APP" "$RUN_ENV" "SERVER_PORT" )
 		CMD="$CMD -p $server_port:$server_port"
 	fi
 
 	# Run Docker image as daemon if desired.
-	if [[ "$3" = "-daemon" ]]; then
+	if [[ "$RUN_AS_DAEMON" = "true" ]]; then
 		CMD="$CMD -d"
 	fi
 
 	# Use proper environment variables based on which app to run.
-	CMD="$CMD --env-file ./envs/local/$APP.env"
+	CMD="$CMD --env-file $ENVS_DIR/$RUN_ENV/$APP.env"
 
 	# Specify which image to run.
 	CMD="$CMD $image_name"
 
-	# Run that bish.
+	# Run the docker image.
 	$CMD
-elif [[ "$RUN_TYPE" = "" ]]; then
-	# Run the Go file for this app.
-	CMD="go run $APPS_DIR/$APP/main.go"
-	$CMD
+elif [[ "$RUN_TYPE" = "binary" ]]; then
+	# Run the Go binary for this app.
+	$GO_BUILD_OUTPUT_DIR/$APP
 else
-	echo "Run type value \"$RUN_TYPE\" not supported. Not running."
+	# Run the Go file for this app.
+	go run "$APPS_DIR/$APP/main.go"
 fi

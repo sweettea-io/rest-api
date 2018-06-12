@@ -2,43 +2,16 @@
 
 # --- Deploy supported application to Kubernetes cluster of specified env tier --- #
 
+# ======== PARSE ARGS ======== #
+
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 APP="$1"
 DEPLOY_ENV="$2"
-APP_VAL_SUPPORTED="" # false
-DEPLOY_ENV_VAL_SUPPORTED="" # false
-declare -a SUPPORTED_APPS=("server" "migrate" "worker")
-declare -a SUPPORTED_DEPLOY_ENVS=("local" "dev" "staging", "prod")
 
 # ======== VALIDATE ARGS ======== #
 
-# Ensure provided app arg is supported.
-for supported_app_val in "${SUPPORTED_APPS[@]}"; do
-	# Set APP_VAL_SUPPORTED to "true" if app arg is one of the supported values.
-	if [[ "$APP" = "$supported_app_val" ]]; then
-		APP_VAL_SUPPORTED="true"
-	fi
-done
-
-# Exit early if app value not supported.
-if [[ ! "$APP_VAL_SUPPORTED" ]]; then
-	echo "App value \"$APP\" not supported. Not deploying."
-	exit
-fi
-
-# Ensure provided deploy_env arg is supported.
-for supported_deploy_env in "${SUPPORTED_DEPLOY_ENVS[@]}"; do
-	# Set DEPLOY_ENV_VAL_SUPPORTED to "true" if deploy_env arg is one of the supported values.
-	if [[ "$DEPLOY_ENV" = "$supported_deploy_env" ]]; then
-		DEPLOY_ENV_VAL_SUPPORTED="true"
-	fi
-done
-
-# Exit early if deploy_env value not supported.
-if [[ ! "$DEPLOY_ENV_VAL_SUPPORTED" ]]; then
-	echo "Deploy environment \"$DEPLOY_ENV\" not supported. Not deploying."
-	exit
-fi
+$THIS_DIR/validate_arg "$APP" "server|migrate|worker" "target"
+$THIS_DIR/validate_arg "$DEPLOY_ENV" "local|dev|staging|prod" "env"
 
 # ======== TAG/PUSH IMAGE TO REPOSITORY ======== #
 
@@ -47,10 +20,10 @@ image_name=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "IMAGE_NAME" )
 image_repo="$image_owner/$image_name"
 image_version=$( $THIS_DIR/latest_sha )
 
-# Tag docker image with version of latest commit sha
+# Tag Docker image with version of latest commit sha.
 docker tag "$image_name" "$image_repo:$image_version"
 
-# Push docker image to external repository
+# Push Docker image to external repository.
 docker push "$image_repo:$image_version"
 
 # ======== SPECIFY/VALIDATE CLUSTER ======== #
@@ -59,7 +32,7 @@ docker push "$image_repo:$image_version"
 cluster_name=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "CLUSTER_NAME" )
 
 # Switch to cluster context.
-kubectl config use "$cluster_name"
+kubectl config use-context "$cluster_name"
 
 if ! kubectl get nodes; then
 	echo "Error fetching cluster nodes. Not deploying."
@@ -70,7 +43,7 @@ fi
 
 resource_name="$image_name"	# unique suffix will be added for job deploys
 
-# Always make a new deploy for deploys that are actually 'jobs'
+# Always make a new deploy for deploys that are actually 'jobs' (i.e. migrate jobs)
 if [[ "$APP" = "migrate" ]]; then
 	NEW_DEPLOY="true"
 
@@ -80,7 +53,7 @@ if [[ "$APP" = "migrate" ]]; then
 	image_name="$image_name-$job_uid"
 else
 	# TODO: For 'deployments', check to see if they already exist first.
-	# This will determine whether we should 'kubectl run' or simply 'kubectl update'.
+	# This will determine whether we should 'kubectl run' or simply 'kubectl set image'.
 	echo "TODO"
 fi
 
@@ -96,6 +69,7 @@ deploy_envs=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "all" "true" )
 if [[ "$NEW_DEPLOY" ]]; then
 	kubectl run "$resource_name" "--image=$image_repo" "$port" "$replicas" "$restart" "$deploy_envs"
 else
-	container_name="$image_name"
-	kubectl set image "deployment/$resource_name" "$container_name=$image_repo:$image_version"
+	kubectl set image "deployment/$resource_name" "$image_name=$image_repo:$image_version"
 fi
+
+echo "Done!"

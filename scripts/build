@@ -2,7 +2,8 @@
 
 # --- Build one or all Sweet Tea applications as either Go binaries or Docker images --- #
 
-# Parse args
+# ======== PARSE ARGS ======== #
+
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 APP="$1"
 BUILD_ENV="$2"
@@ -10,10 +11,13 @@ BUILD_FORMAT="$3"
 GO_BUILD_OUTPUT_DIR="./bin"
 declare -a APPS=("server" "migrate" "worker")
 
-# Validate args
+# ======== VALIDATE ARGS ======== #
+
 $THIS_DIR/validate_arg "$APP" "server|migrate|worker|all" "target"
 $THIS_DIR/validate_arg "$BUILD_ENV" "test|local|dev|staging|prod" "env"
 $THIS_DIR/validate_arg "$BUILD_FORMAT" "image|binary" "build format"
+
+# ======== BUILD APPS ======== #
 
 # Create array of apps to build.
 if [[ "$APP" = "all" ]]; then
@@ -22,12 +26,15 @@ else
 	declare -a APPS_TO_BUILD=("$APP")
 fi
 
-# Build each app requested to be built.
 if [[ "$BUILD_FORMAT" = "image" ]]; then
-	# Build each app for Docker.
+	# Build each app as a Docker image.
 	for app in "${APPS_TO_BUILD[@]}"; do
+		# Get the docker image name for the specified env.
 		image_name=$( $THIS_DIR/env_reader "$app" "$BUILD_ENV" "IMAGE_NAME" )
+
 		echo "Building \"$app\" for \"$BUILD_ENV\" environment into Docker image \"$image_name\"..."
+
+		# Build the app image.
 		docker build --build-arg ROLE="$app" -t "$image_name" .
 	done
 else

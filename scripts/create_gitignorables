@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- Create files/dirs that were gitignored and should now exist --- #
+# --- Create files/dirs that were git-ignored and should now exist --- #
 
 ENV_DIR="./envs"
 EXAMPLES_DIR="$ENV_DIR/examples"

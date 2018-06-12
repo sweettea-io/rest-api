@@ -9,80 +9,19 @@ install: ## Setup & install project dependencies
 export target
 export env=local
 export as=image
-build: ## Build an application for a specific env tier as either a Docker image or a Go binary
+build: ## Build an application for a specific environment tier as either a Docker image or a Go binary.
 	./scripts/build $(target) $(env) $(as)
 
-run-server-go: ## Run the server application main file
-	./scripts/run server
+export target
+export as=image
+export daemon
+run: ## Run an application as either a Docker image, a Go binary, or a Go file.
+	./scripts/run $(target) $(as) $(daemon)
 
-run-migrate-go: ## Run the migrate application main file
-	./scripts/run migrate
-
-run-worker-go: ## Run the work application main file
-	./scripts/run worker
-
-run-server-raw: ## Run the server application Go binary
-	./scripts/run server -raw
-
-run-migrate-raw: ## Run the migrate application Go binary
-	./scripts/run migrate -raw
-
-run-worker-raw: ## Run the worker application Go binary
-	./scripts/run worker -raw
-
-run-server: ## Run the latest Docker image for the server application
-	./scripts/run server -docker
-
-run-migrate: ## Run the latest Docker image for the migrate application
-	./scripts/run migrate -docker
-
-run-worker: ## Run the latest Docker image for the worker application
-	./scripts/run worker -docker
-
-run-dserver: ## Run the latest Docker image for the server application as a daemon
-	./scripts/run server -docker -daemon
-
-run-dmigrate: ## Run the latest Docker image for the migrate application as a daemon
-	./scripts/run migrate -docker -daemon
-
-run-dworker: ## Run the latest Docker image for the worker application as a daemon
-	./scripts/run work -docker -daemon
-
-deploy-server-local: ## Deploy the latest Docker image for the server application to the local K8S core cluster
-	./scripts/deploy server local
-
-deploy-server-dev: ## Deploy the latest Docker image for the server application to the dev K8S core cluster
-	./scripts/deploy server dev
-
-deploy-server-staging: ## Deploy the latest Docker image for the server application to the staging K8S core cluster
-	./scripts/deploy server staging
-
-deploy-server-prod: ## Deploy the latest Docker image for the server application to the prod K8S core cluster
-	./scripts/deploy server prod
-
-deploy-migrate-local: ## Deploy the latest Docker image for the migrate application to the local K8S core cluster
-	./scripts/deploy migrate local
-
-deploy-migrate-dev: ## Deploy the latest Docker image for the migrate application to the dev K8S core cluster
-	./scripts/deploy migrate dev
-
-deploy-migrate-staging: ## Deploy the latest Docker image for the migrate application to the staging K8S core cluster
-	./scripts/deploy migrate staging
-
-deploy-migrate-prod: ## Deploy the latest Docker image for the migrate application to the prod K8S core cluster
-	./scripts/deploy migrate prod
-
-deploy-worker-local: ## Deploy the latest Docker image for the worker application to the local K8S core cluster
-	./scripts/deploy worker local
-
-deploy-worker-dev: ## Deploy the latest Docker image for the worker application to the dev K8S core cluster
-	./scripts/deploy worker dev
-
-deploy-worker-staging: ## Deploy the latest Docker image for the worker application to the staging K8S core cluster
-	./scripts/deploy worker staging
-
-deploy-worker-prod: ## Deploy the latest Docker image for the worker application to the prod K8S core cluster
-	./scripts/deploy worker prod
+export target
+export env=local
+deploy: ## Deploy the latest Docker image of an application to a specific environment.
+	./scripts/deploy $(target) $(env)
 
 clean: ## Remove all Go-built binaries
 	rm ./bin/*
