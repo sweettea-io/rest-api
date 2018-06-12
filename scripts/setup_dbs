@@ -3,18 +3,18 @@
 # --- Setup users and databases for dev and test environments --- #
 
 # Directory of this script
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Name of both user and database for the dev environment tier
-DEV_NAME="rest-api"
+dev_name="rest-api"
 
 # Name of both user and database for the testing environment tier
-TEST_NAME="rest-api-test"
+test_name="rest-api-test"
 
 # Upsert users
-$THIS_DIR/upsert_db_role "$DEV_NAME"
-$THIS_DIR/upsert_db_role "$TEST_NAME"
+$this_dir/upsert_db_role "$dev_name"
+$this_dir/upsert_db_role "$test_name"
 
 # Upsert databases
-$THIS_DIR/upsert_db "$DEV_NAME" "$DEV_NAME"
-$THIS_DIR/upsert_db "$TEST_NAME" "$TEST_NAME"
+$this_dir/upsert_db "$dev_name" "$dev_name"
+$this_dir/upsert_db "$test_name" "$test_name"

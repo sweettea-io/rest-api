@@ -2,11 +2,11 @@
 
 # --- Upsert Postgres role by name --- #
 
-ROLE_NAME="$1"
+role_name="$1"
 
-if psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$ROLE_NAME'" | grep -q 1; then
-	echo "User \"$ROLE_NAME\" already exists. Not creating."
+if psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$role_name'" | grep -q 1; then
+	echo "User \"$role_name\" already exists. Not creating."
 else
-	echo "Creating user \"$ROLE_NAME\"."
-	createuser -s "$ROLE_NAME"
+	echo "Creating user \"$role_name\"."
+	createuser -s "$role_name"
 fi

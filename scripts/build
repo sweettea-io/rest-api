@@ -4,44 +4,43 @@
 
 # ======== PARSE ARGS ======== #
 
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-APP="$1"
-BUILD_ENV="$2"
-BUILD_FORMAT="$3"
-GO_BUILD_OUTPUT_DIR="./bin"
-declare -a APPS=("server" "migrate" "worker")
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+app="$1"
+build_env="$2"
+build_format="$3"
+go_build_output_dir="./bin"
 
 # ======== VALIDATE ARGS ======== #
 
-$THIS_DIR/validate_arg "$APP" "server|migrate|worker|all" "target"
-$THIS_DIR/validate_arg "$BUILD_ENV" "test|local|dev|staging|prod" "env"
-$THIS_DIR/validate_arg "$BUILD_FORMAT" "image|binary" "build format"
+$this_dir/validate_arg "$app" "server|migrate|worker|all" "target"
+$this_dir/validate_arg "$build_env" "test|local|dev|staging|prod" "env"
+$this_dir/validate_arg "$build_format" "image|binary" "build format"
 
 # ======== BUILD APPS ======== #
 
 # Create array of apps to build.
-if [[ "$APP" = "all" ]]; then
-	APPS_TO_BUILD="$APPS"
+if [[ "$app" = "all" ]]; then
+	declare -a apps_to_build=("server" "migrate" "worker")
 else
-	declare -a APPS_TO_BUILD=("$APP")
+	declare -a apps_to_build=("$app")
 fi
 
-if [[ "$BUILD_FORMAT" = "image" ]]; then
+if [[ "$build_format" = "image" ]]; then
 	# Build each app as a Docker image.
-	for app in "${APPS_TO_BUILD[@]}"; do
+	for app_to_build in "${apps_to_build[@]}"; do
 		# Get the docker image name for the specified env.
-		image_name=$( $THIS_DIR/env_reader "$app" "$BUILD_ENV" "IMAGE_NAME" )
+		image_name=$( $this_dir/env_reader "$app_to_build" "$build_env" "IMAGE_NAME" )
 
-		echo "Building \"$app\" for \"$BUILD_ENV\" environment into Docker image \"$image_name\"..."
+		echo "Building \"$app_to_build\" for \"$build_env\" environment into Docker image \"$image_name\"..."
 
 		# Build the app image.
-		docker build --build-arg ROLE="$app" -t "$image_name" .
+		docker build --build-arg ROLE="$app_to_build" -t "$image_name" .
 	done
 else
 	# Build each app as a Go binary.
-	for app in "${APPS_TO_BUILD[@]}"; do
-		echo "Building \"$app\" into Go binary at $GO_BUILD_OUTPUT_DIR/$app..."
-		go build -a -o "$GO_BUILD_OUTPUT_DIR/$app" "./cmd/$app"
+	for app_to_build in "${apps_to_build[@]}"; do
+		echo "Building \"$app_to_build\" into Go binary at $go_build_output_dir/$app_to_build..."
+		go build -a -o "$go_build_output_dir/$app_to_build" "./cmd/$app_to_build"
 	done
 fi
 

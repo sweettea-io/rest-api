@@ -1,18 +1,17 @@
 #!/bin/bash
 
 # --- Retrieve the value of an env variable given app name and env tier --- #
-
-APP="$1"
-ENV_TIER="$2"
-ENV_NAME="$3"
-ARG_NAME="$4"
-ENVS_DIR="./envs"
-ENV_FILE_PATH="$ENVS_DIR/$ENV_TIER/$APP.env"
+app_arg="$1"
+env_tier="$2"
+env_name="$3"
+arg_name="$4"
+envs_dir="./envs"
+env_file_path="$envs_dir/$env_tier/$app_arg.env"
 
 # Get all env vars if "all" is specified.
-if [[ "$ENV_NAME" = "all" ]]; then
+if [[ "$env_name" = "all" ]]; then
 	# Get all env vars (ignore comments)
-	all_envs=$( cat "$ENV_FILE_PATH" | grep "^[^#]" )
+	all_envs=$( cat "$env_file_path" | grep "^[^#]" )
 
 	# Convert all_envs into array
 	IFS=$'\n' read -rd '' -a all_envs_arr <<<"$all_envs"
@@ -24,18 +23,18 @@ if [[ "$ENV_NAME" = "all" ]]; then
 	done
 
 	echo "$env_args"
-elif [[ "$ENV_NAME" ]]; then
+elif [[ "$env_name" ]]; then
 	# If one env name is specified, return the value of that env var.
-	env_var=$( cat "$ENV_FILE_PATH" | grep "$ENV_NAME=" )
+	env_var=$( cat "$env_file_path" | grep "$env_name=" )
 
 	# If env var exists...
 	if [[ "$env_var" ]]; then
 		# Just get the value
-		[[ $env_var =~ ($ENV_NAME=(.*)) ]]
+		[[ $env_var =~ ($env_name=(.*)) ]]
 
 		# Format as an arg if desired
-		if [[ "$ARG_NAME" ]]; then
-			echo "--$ARG_NAME${BASH_REMATCH[2]}"
+		if [[ "$arg_name" ]]; then
+			echo "--$arg_name${BASH_REMATCH[2]}"
 		else
 			echo "${BASH_REMATCH[2]}"
 		fi

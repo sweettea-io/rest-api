@@ -3,39 +3,39 @@
 # --- Install everything required to get up and running with Sweet Tea --- #
 
 # Directory of this script.
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Current OS -- will exit if not mac or linux.
-OS="$( $THIS_DIR/curr_os )"
+# Current os -- will exit if not mac or linux.
+os="$( $this_dir/curr_os )"
 
-if [[ "$OS" = "mac" ]]; then
+if [[ "$os" = "mac" ]]; then
 	# Install homebrew if on mac
-	$THIS_DIR/mac/install_homebrew
-elif [[ "$OS" = "unknown" ]]; then
+	$this_dir/mac/install_homebrew
+elif [[ "$os" = "unknown" ]]; then
 	# Exit early if not on mac or linux
 	echo "Only Linux and Mac operating systems supported. Exiting..."
 	exit
 fi
 
 # Install jq to help with bash json parsing.
-$THIS_DIR/$OS/install_jq
+$this_dir/$os/install_jq
 
 # Create files/dirs that were gitignored and should now exist.
-$THIS_DIR/create_gitignorables
+$this_dir/create_gitignorables
 
 # Install 'dep' -- Go package management tool used with this project.
-$THIS_DIR/$OS/install_dep
+$this_dir/$os/install_dep
 
 # Install third-party Go packages listed in Gopkg.toml.
-$THIS_DIR/install_pkgs
+$this_dir/install_pkgs
 
 # Install redis.
-$THIS_DIR/install_redis
+$this_dir/install_redis
 
 # Install PostgreSQL.
-$THIS_DIR/$OS/install_pg
+$this_dir/$os/install_pg
 
 # Create local databases for dev and testing.
-$THIS_DIR/setup_dbs
+$this_dir/setup_dbs
 
 echo "Done!"

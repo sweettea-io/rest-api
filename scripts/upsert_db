@@ -2,12 +2,12 @@
 
 # --- Upsert database by name and owner role (assumes owner role exists) --- #
 
-OWNER="$1"
-DB_NAME="$2"
+owner="$1"
+db_name="$2"
 
-if psql postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'" | grep -q 1; then
-	echo "Database \"$DB_NAME\" already exists. Not creating."
+if psql postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$db_name'" | grep -q 1; then
+	echo "Database \"$db_name\" already exists. Not creating."
 else
-	echo "Creating database \"$DB_NAME\"."
-	createdb -O "$OWNER" "$DB_NAME"
+	echo "Creating database \"$db_name\"."
+	createdb -O "$owner" "$db_name"
 fi

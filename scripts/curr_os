@@ -5,9 +5,9 @@
 unameOut="$( uname -s )"
 
 case "${unameOut}" in
-    Linux*)  OS="linux";;
-    Darwin*) OS="mac";;
-    *)       OS="unknown"
+    Linux*)  os="linux";;
+    Darwin*) os="mac";;
+    *)       os="unknown"
 esac
 
-echo "$OS"
+echo "$os"

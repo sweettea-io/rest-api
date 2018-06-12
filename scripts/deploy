@@ -4,21 +4,21 @@
 
 # ======== PARSE ARGS ======== #
 
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-APP="$1"
-DEPLOY_ENV="$2"
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+app="$1"
+deploy_env="$2"
 
 # ======== VALIDATE ARGS ======== #
 
-$THIS_DIR/validate_arg "$APP" "server|migrate|worker" "target"
-$THIS_DIR/validate_arg "$DEPLOY_ENV" "local|dev|staging|prod" "env"
+$this_dir/validate_arg "$app" "server|migrate|worker" "target"
+$this_dir/validate_arg "$deploy_env" "local|dev|staging|prod" "env"
 
 # ======== TAG/PUSH IMAGE TO REPOSITORY ======== #
 
-image_owner=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "IMAGE_OWNER" )
-image_name=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "IMAGE_NAME" )
+image_owner=$( $this_dir/env_reader "$app" "$deploy_env" "IMAGE_OWNER" )
+image_name=$( $this_dir/env_reader "$app" "$deploy_env" "IMAGE_NAME" )
 image_repo="$image_owner/$image_name"
-image_version=$( $THIS_DIR/latest_sha )
+image_version=$( $this_dir/latest_sha )
 
 # Tag Docker image with version of latest commit sha.
 docker tag "$image_name" "$image_repo:$image_version"
@@ -29,7 +29,7 @@ docker push "$image_repo:$image_version"
 # ======== SPECIFY/VALIDATE CLUSTER ======== #
 
 # Get cluster name from envs.
-cluster_name=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "CLUSTER_NAME" )
+cluster_name=$( $this_dir/env_reader "$app" "$deploy_env" "CLUSTER_NAME" )
 
 # Switch to cluster context.
 kubectl config use-context "$cluster_name"
@@ -44,8 +44,8 @@ fi
 resource_name="$image_name"	# unique suffix will be added for job deploys
 
 # Always make a new deploy for deploys that are actually 'jobs' (i.e. migrate jobs)
-if [[ "$APP" = "migrate" ]]; then
-	NEW_DEPLOY="true"
+if [[ "$app" = "migrate" ]]; then
+	new_deploy="true"
 
 	# For a job, the resource name needs to differ with each deploy, so generate a uuid for suffix.
 	uuid=$( uuidgen )
@@ -59,14 +59,14 @@ fi
 
 # ======== FORMAT DEPLOY ARGS ======== #
 
-port=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "SERVER_PORT" "port" )
-replicas=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "REPLICAS_COUNT" "replicas" )
-restart=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "RESTART_POLICY" "restart" )
-deploy_envs=$( $THIS_DIR/env_reader "$APP" "$DEPLOY_ENV" "all" "true" )
+port=$( $this_dir/env_reader "$app" "$deploy_env" "SERVER_PORT" "port" )
+replicas=$( $this_dir/env_reader "$app" "$deploy_env" "REPLICAS_COUNT" "replicas" )
+restart=$( $this_dir/env_reader "$app" "$deploy_env" "RESTART_POLICY" "restart" )
+deploy_envs=$( $this_dir/env_reader "$app" "$deploy_env" "all" "true" )
 
 # ======== DEPLOY ======== #
 
-if [[ "$NEW_DEPLOY" ]]; then
+if [[ "$new_deploy" ]]; then
 	kubectl run "$resource_name" "--image=$image_repo" "$port" "$replicas" "$restart" "$deploy_envs"
 else
 	kubectl set image "deployment/$resource_name" "$image_name=$image_repo:$image_version"

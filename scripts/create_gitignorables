@@ -2,21 +2,21 @@
 
 # --- Create files/dirs that were git-ignored and should now exist --- #
 
-ENV_DIR="./envs"
-EXAMPLES_DIR="$ENV_DIR/examples"
-ENV_DEFAULTS_PATH="$ENV_DIR/defaults.json"
+env_dir="./envs"
+examples_dir="$env_dir/examples"
+env_defaults_path="$env_dir/defaults.json"
 declare -a apps=("migrate" "server" "worker")
 declare -a env_tiers=("test" "local" "dev" "staging" "prod")
 
 # Directories to upsert
 declare -a dirs=(
 	"./bin/"
-	"$ENV_DIR"
-	"$ENV_DIR/test/"
-	"$ENV_DIR/local/"
-	"$ENV_DIR/dev/"
-	"$ENV_DIR/staging/"
-	"$ENV_DIR/prod/"
+	"$env_dir"
+	"$env_dir/test/"
+	"$env_dir/local/"
+	"$env_dir/dev/"
+	"$env_dir/staging/"
+	"$env_dir/prod/"
 )
 
 # For each dir listed above...
@@ -31,14 +31,14 @@ for dir in "${dirs[@]}"; do
 done
 
 # Get all envs for each application from its respective <app>.example.env file.
-server_example_content=$( cat "$EXAMPLES_DIR/server.example.env" )
-migrate_example_content=$( cat "$EXAMPLES_DIR/migrate.example.env" )
-worker_example_content=$( cat "$EXAMPLES_DIR/worker.example.env" )
+server_example_content=$( cat "$examples_dir/server.example.env" )
+migrate_example_content=$( cat "$examples_dir/migrate.example.env" )
+worker_example_content=$( cat "$examples_dir/worker.example.env" )
 
 # For each env tier...
 for env_tier in "${env_tiers[@]}"; do
 	# Skip this tier if the dir already has content
-	env_tier_dir="$ENV_DIR/$env_tier"
+	env_tier_dir="$env_dir/$env_tier"
 	num_files=$( ls -l "$env_tier_dir" | wc -l )
 
 	if [ "$num_files" -gt "0" ]; then
@@ -65,7 +65,7 @@ for env_tier in "${env_tiers[@]}"; do
 		app_envs=""
 		for env_name in "${example_envs[@]}"; do
 			# Attempt to find env default value from defaults.json, using 'jq'
-			env_val=$( cat "$ENV_DEFAULTS_PATH" | jq -r ".$app.$env_tier.$env_name" )
+			env_val=$( cat "$env_defaults_path" | jq -r ".$app.$env_tier.$env_name" )
 
 			if [[ "$env_val" = "null" ]]; then
 				env_val=""
