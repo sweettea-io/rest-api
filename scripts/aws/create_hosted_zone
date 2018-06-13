@@ -1,0 +1,31 @@
+#!/bin/bash
+
+call_ref=$(uuidgen)
+subdomain="$1"
+domain="$2"
+hosted_zone_name="$subdomain.$domain"
+
+# Create hosted zone.
+echo "Creating hosted zone \"$hosted_zone_name\"..."
+hosted_zone=$( aws route53 create-hosted-zone --name "$hosted_zone_name" --caller-reference "$call_ref")
+
+# Parse id & name servers from response.
+hz_id=$( echo "$hosted_zone" | jq ".Id" )
+hz_name_servers=$( echo "$hosted_zone" | jq ".DelegationSet.NameServers" )
+
+echo "Hosted zone created with ID \"$hz_id\"."
+
+# Create payload for NS record changes.
+changes="{
+	\"Action\": \"UPSERT\",
+	\"ResourceRecordSet\": {
+	  \"Name\": \"$domain\",
+	  \"Type\": type,
+	  \"TTL\": 60,
+	  \"ResourceRecords\": $hz_name_servers
+	}
+}"
+
+# Register name servers as NS records.
+echo "Registering hosted zone name servers as NS records for domain \"$domain\"..."
+aws route53 change-resource-record-sets --hosted-zone-id "$hz_id" --cli-input-json "$changes"

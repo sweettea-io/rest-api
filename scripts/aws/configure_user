@@ -1,0 +1,14 @@
+#!/bin/bash
+
+user_name="$1"
+
+echo "Creating new aws key pair..."
+aws iam create-access-key --user-name "$user_name"
+
+echo "Configuring aws to use \"$user_name\" user..."
+echo "Enter the keys for the key pair just created..."
+aws configure
+
+echo "Exporting Access Key and Secret Access Key..."
+export AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id)
+export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)

@@ -23,6 +23,19 @@ export env=local
 deploy: ## Deploy the latest Docker image of an application to a specific environment.
 	./scripts/deploy $(target) $(env)
 
+export provider=aws
+export type
+export env
+export zones
+export master_size
+export node_size
+export node_count
+export state
+export image
+export k8s_version
+create-cluster: ## Create the core, train, or build cluster for a specific environment.
+	./scripts/create-cluster $(provider) $(type) $(env) $(zones) $(master_size) $(node_size) $(node_count) $(state) $(image) $(k8s_version)
+
 clean: ## Remove all Go-built binaries
 	rm ./bin/*
 

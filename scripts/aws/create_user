@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Keep these the same
+group_name="$1"
+user_name="$group_name"
+
+echo "Creating aws user \"$user_name\" and attaching to group \"$group_name\"..."
+aws iam create-user --user-name "$user_name"
+aws iam add-user-to-group --user-name "$user_name" --group-name "$group_name"
