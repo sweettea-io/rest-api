@@ -49,8 +49,8 @@ if [[ "$app" = "migrate" ]]; then
 
 	# For a job, the resource name needs to differ with each deploy, so generate a uuid for suffix.
 	uuid=$( uuidgen )
-	job_uid="${uuid:0:8}"
-	image_name="$image_name-$job_uid"
+	job_uuid="${uuid:0:8}"
+	image_name="$image_name-$job_uuid"
 else
 	# TODO: For 'deployments', check to see if they already exist first.
 	# This will determine whether we should 'kubectl run' or simply 'kubectl set image'.

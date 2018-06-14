@@ -5,15 +5,8 @@
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 provider="$1"
 type="$2"
-upper_type="${type^^}"
 env="$3"
-zones="$4"
-master_size="$5"
-node_size="$6"
-node_count="$7"
-state="$8"
-image="$9"
-k8s_version="$9"
+upper_type="${type^^}"
 
 # ======== VALIDATE ARGS ======== #
 
@@ -21,31 +14,33 @@ $this_dir/validate_arg "$provider" "aws" "provider"
 $this_dir/validate_arg "$type" "core|build|train" "type"
 $this_dir/validate_arg "$env" "local|dev|staging|prod" "env"
 
-# ======== SETUP FALLBACK ARG VALUES ======== #
+# ======== GET ENV VALS ======== #
 
 # Read envs from server.env for the provided $env
 app_for_env_reading="server"
 
-# Get env vals
+# Required to have env values already
 cluster_name=$( $this_dir/env_reader "$app_for_env_reading" "$env" "${upper_type}_CLUSTER_NAME" )
-zones_env_val=$( $this_dir/env_reader "$app_for_env_reading" "$env" "AWS_REGION_NAME" )
-master_size_env_val=$( $this_dir/env_reader "$app_for_env_reading" "$env" "MASTER_SIZE" )
-node_size_env_val=$( $this_dir/env_reader "$app_for_env_reading" "$env" "NODE_SIZE" )
-node_count_env_val=$( $this_dir/env_reader "$app_for_env_reading" "$env" "NODE_COUNT" )
-state_env_val=$( $this_dir/env_reader "$app_for_env_reading" "$env" "${upper_type}_CLUSTER_STATE" )
-image_env_val=$( $this_dir/env_reader "$app_for_env_reading" "$env" "CLUSTER_IMAGE" )
-k8s_version_env_val=$( $this_dir/env_reader "$app_for_env_reading" "$env" "K8S_VERSION" )
+domain=$( $this_dir/env_reader "$app_for_env_reading" "$env" "DOMAIN" )
 
-# Fallback vals -- Assign env vals
-zones="${zones:-$zones_env_val}"
-master_size="${master_size:-$master_size_env_val}"
-node_size="${node_size:-$node_size_env_val}"
-node_count="${node_count:-$node_count_env_val}"
-state="${state:-$state_env_val}"
-image="${image:-$image_env_val}"
-k8s_version="${k8s_version:-$k8s_version_env_val}"
+if [[ ! "$cluster_name" ]]; then
+	echo "${upper_type}_CLUSTER_NAME env var must have a value already set. Exiting."
+fi
 
-# Fallback vals #2
+if [[ ! "$domain" ]]; then
+	echo "DOMAIN env var must have a value already set. Exiting."
+fi
+
+# Envs that can (but don't have to) be set yet.
+zones=$( $this_dir/env_reader "$app_for_env_reading" "$env" "AWS_REGION_NAME" )
+master_size=$( $this_dir/env_reader "$app_for_env_reading" "$env" "MASTER_SIZE" )
+node_size=$( $this_dir/env_reader "$app_for_env_reading" "$env" "NODE_SIZE" )
+node_count=$( $this_dir/env_reader "$app_for_env_reading" "$env" "NODE_COUNT" )
+state=$( $this_dir/env_reader "$app_for_env_reading" "$env" "${upper_type}_CLUSTER_STATE" )
+image=$( $this_dir/env_reader "$app_for_env_reading" "$env" "CLUSTER_IMAGE" )
+k8s_version=$( $this_dir/env_reader "$app_for_env_reading" "$env" "K8S_VERSION" )
+
+# Assign fallback defaults
 zones="${zones:-us-west-1a}"
 master_size="${master_size:-t2.micro}"
 node_size="${node_size:-t2.micro}"
@@ -53,10 +48,4 @@ node_count="${node_count:-2}"
 image="${image:-099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1}"
 k8s_version="${k8s_version:-1.7.10}"
 
-#TODO: Add args to these calls
-$this_dir/$provider/create_group
-$this_dir/$provider/create_user
-$this_dir/$provider/configure_user
-$this_dir/$provider/create_bucket
-$this_dir/$provider/create_hosted_zone
-$this_dir/$provider/create_cluster
+$this_dir/$provider/create_cluster "$cluster_name" "$domain" "$state" "$zones" "$master_size" "$node_size" "$node_count" "$image" "$k8s_version"
