@@ -49,3 +49,5 @@ image="${image:-099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-ser
 k8s_version="${k8s_version:-1.7.10}"
 
 $this_dir/$provider/create_cluster "$cluster_name" "$domain" "$state" "$zones" "$master_size" "$node_size" "$node_count" "$image" "$k8s_version"
+
+echo "Done!"
