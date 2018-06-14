@@ -5,6 +5,23 @@
 user_name="$1"
 group_name="$2"
 
-echo "Creating aws user \"$user_name\" and attaching to group \"$group_name\"..."
-aws iam create-user --user-name "$user_name"
-aws iam add-user-to-group --user-name "$user_name" --group-name "$group_name"
+# Get all existing IAM users.
+users_output=$( aws iam list-users )
+
+# Exit early if failed to list iam users.
+if [[ ! "$users_output" ]]; then
+	echo "Failed to list IAM users. Exiting."
+	exit
+fi
+
+existing_users=$( echo "$users_output" | jq "[.Users[] | .UserName]" )
+user_exists=$( echo "$existing_users" | grep "\"$user_name\"" )
+
+# Upsert IAM user.
+if [[ "$user_exists" ]]; then
+	echo "IAM user \"$user_name\" already exists. Skipping creation."
+else
+	echo "Creating IAM user \"$user_name\" and attaching to group \"$group_name\"..."
+	aws iam create-user --user-name "$user_name"
+	aws iam add-user-to-group --user-name "$user_name" --group-name "$group_name"
+fi

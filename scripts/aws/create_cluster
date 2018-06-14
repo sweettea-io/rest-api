@@ -19,10 +19,10 @@ group_name="kops"
 
 # ======== CREATE RESOURCES REQUIRED TO SUPPORT CLUSTER ======== #
 
-# Create aws group.
+# Create AWS group.
 $this_dir/create_group "$group_name"
 
-# Create aws user and attach to group.
+# Create AWS user and attach to group.
 $this_dir/create_user "$user_name" "$group_name"
 
 # Configure new IAM role/keypair for user.

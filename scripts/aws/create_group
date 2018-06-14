@@ -4,10 +4,27 @@
 
 group_name="$1"
 
-echo "Creating aws group \"$group_name\"..."
-aws iam create-group --group-name "$group_name"
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess --group-name "$group_name"
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonRoute53FullAccess --group-name "$group_name"
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess --group-name "$group_name"
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/IAMFullAccess --group-name "$group_name"
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonVPCFullAccess --group-name "$group_name"
+# Get all existing iam groups.
+groups_output=$( aws iam list-groups )
+
+# Exit early if failed to list iam groups.
+if [[ ! "$groups_output" ]]; then
+	echo "Failed to list IAM groups. Exiting."
+	exit
+fi
+
+existing_groups=$( echo "$groups_output" | jq "[.Groups[] | .GroupName]" )
+group_exists=$( echo "$existing_groups" | grep "\"$group_name\"" )
+
+# Upsert IAM group.
+if [[ "$group_exists" ]]; then
+	echo "IAM group \"$group_name\" already exists. Skipping creation."
+else
+	echo "Creating IAM group \"$group_name\"..."
+	aws iam create-group --group-name "$group_name"
+	aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess --group-name "$group_name"
+	aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonRoute53FullAccess --group-name "$group_name"
+	aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess --group-name "$group_name"
+	aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/IAMFullAccess --group-name "$group_name"
+	aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonVPCFullAccess --group-name "$group_name"
+fi
