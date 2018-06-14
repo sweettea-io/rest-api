@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# --- Install kops if not already installed --- #
+
+# Check for kops existence
+if [[ "$( which kops )" ]]; then
+	echo "kops detected -- Skipping installation"
+else
+	echo "kops not detected -- Installing..."
+	brew install kops
+fi

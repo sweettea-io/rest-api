@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# --- Install kubectl if not already installed --- #
+
+# Check for kubectl existence
+if [[ "$( which kubectl )" ]]; then
+	echo "kubectl detected -- Skipping installation"
+else
+	echo "kubectl not detected -- Installing..."
+	brew install kubernetes-cli
+fi
