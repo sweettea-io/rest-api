@@ -20,6 +20,12 @@ fi
 # Install jq to help with bash json parsing.
 $this_dir/$os/install_jq
 
+# Install kops.
+$this_dir/$os/install_kops
+
+# Install kubectl.
+$this_dir/$os/install_kubectl
+
 # Create files/dirs that were gitignored and should now exist.
 $this_dir/create_gitignorables
 
