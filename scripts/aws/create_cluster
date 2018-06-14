@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# --- Create Kubernetes cluster on AWS --- #
+
+# ======== PARSE ARGS ======== #
+
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cluster_name="$1"
 domain="$2"
@@ -13,13 +17,15 @@ k8s_version="$9"
 user_name="kops"
 group_name="kops"
 
+# ======== CREATE RESOURCES REQUIRED TO SUPPORT CLUSTER ======== #
+
 # Create aws group.
 $this_dir/create_group "$group_name"
 
 # Create aws user and attach to group.
 $this_dir/create_user "$user_name" "$group_name"
 
-# Configure new key pair for user.
+# Configure new IAM role/keypair for user.
 $this_dir/configure_user "$user_name"
 
 # If state doesn't exist yet for cluster, create S3 bucket to serve that purpose.
@@ -39,7 +45,8 @@ fi
 # Create hosted zone.
 $this_dir/create_hosted_zone "$cluster_name" "$domain"
 
-# Create kubernetes cluster.
+# ======== CREATE CLUSTER ======== #
+
 kops create cluster \
 	--name "$cluster_name.$domain" \
 	--zones "$zones" \

@@ -1,9 +1,15 @@
 #!/bin/bash
 
+# --- Create AWS Route53 Hosted Zone for provided domain/subdomain --- #
+
+# ======== PARSE ARGS ======== #
+
 call_ref=$(uuidgen)
 subdomain="$1"
 domain="$2"
 hosted_zone_name="$subdomain.$domain"
+
+# ======== CREATE HOSTED ZONE ======== #
 
 # Create hosted zone.
 echo "Creating hosted zone \"$hosted_zone_name\"..."
@@ -14,6 +20,8 @@ hz_id=$( echo "$hosted_zone" | jq ".Id" )
 hz_name_servers=$( echo "$hosted_zone" | jq ".DelegationSet.NameServers" )
 
 echo "Hosted zone created with ID \"$hz_id\"."
+
+# ======== REGISTER NS DNS RECORDS ======== #
 
 # Create payload for NS record changes.
 changes="{
