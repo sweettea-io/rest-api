@@ -2,11 +2,13 @@
 
 # --- Install PostgreSQL if not already installed --- #
 
+# Check for postgres existence.
 if [[ "$( which postgres )" ]]; then
 	echo "Postgres detected -- Skipping installation"
 else
 	echo "Postgres not detected -- Installing..."
 
+	# Make sure supported Linux flavor is running.
 	if [[ "$( which apt-get )" ]]; then
 		apt-get install postgresql postgresql-contrib
 	else

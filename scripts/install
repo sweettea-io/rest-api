@@ -9,10 +9,11 @@ this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 os="$( $this_dir/curr_os )"
 
 if [[ "$os" = "mac" ]]; then
-	# Install homebrew if on mac
+	# Install homebrew if on mac.
 	$this_dir/mac/install_homebrew
+
 elif [[ "$os" = "unknown" ]]; then
-	# Exit early if not on mac or linux
+	# Exit early if not on mac or linux.
 	echo "Only Linux and Mac operating systems supported. Exiting..."
 	exit
 fi
@@ -35,7 +36,7 @@ $this_dir/$os/install_dep
 # Install third-party Go packages listed in Gopkg.toml.
 $this_dir/install_pkgs
 
-# Install redis.
+# Install Redis.
 $this_dir/install_redis
 
 # Install PostgreSQL.

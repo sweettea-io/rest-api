@@ -1,12 +1,17 @@
 #!/bin/bash
 
-# Parse args
+# --- Exit if the value for a provided argument is not supported --- #
+
+# ======== PARSE ARGS ======== #
+
 arg_name="$1"
 provided_val="$2"
 supported_vals="$3" # '|' delimited string of supported arg values
 
 # Split supported values into an array.
 IFS=$'|' read -rd '' -a supported_vals_arr <<<"$supported_vals"
+
+# ======== CHECK ARG VALIDITY ======== #
 
 # Set $valid to "true" if provided value matches any of the supported values.
 valid="" # false
@@ -16,6 +21,8 @@ for val in ${supported_vals_arr[@]}; do
 		break
 	fi
 done
+
+# ======== LOG ERROR & EXIT IF INVALID ======== #
 
 # Log an error message and exit if provided arg value is not supported.
 if [[ ! "$valid" ]]; then

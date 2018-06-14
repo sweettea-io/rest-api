@@ -2,13 +2,15 @@
 
 # --- Create files/dirs that were git-ignored and should now exist --- #
 
+# ======== VAR DECLARATION ======== #
+
 env_dir="./envs"
 examples_dir="$env_dir/examples"
 env_defaults_path="$env_dir/defaults.json"
 declare -a apps=("migrate" "server" "worker")
 declare -a env_tiers=("test" "local" "dev" "staging" "prod")
 
-# Directories to upsert
+# Directories to upsert.
 declare -a dirs=(
 	"./bin/"
 	"$env_dir"
@@ -19,13 +21,13 @@ declare -a dirs=(
 	"$env_dir/prod/"
 )
 
+# ======== FILE/DIR UPSERTION ======== #
+
 # For each dir listed above...
 for dir in "${dirs[@]}"; do
-	# If dir doesn't exist already...
+	# If dir doesn't exist already, create it.
 	if [[ ! -d "$dir" ]]; then
 		echo "Creating directory $dir"
-
-		# Create the dir.
 		mkdir "$dir"
 	fi
 done
@@ -37,7 +39,7 @@ worker_example_content=$( cat "$examples_dir/worker.example.env" )
 
 # For each env tier...
 for env_tier in "${env_tiers[@]}"; do
-	# Skip this tier if the dir already has content
+	# Skip this tier if the dir already has content.
 	env_tier_dir="$env_dir/$env_tier"
 	num_files=$( ls -l "$env_tier_dir" | wc -l )
 
@@ -46,32 +48,32 @@ for env_tier in "${env_tiers[@]}"; do
 		continue
 	fi
 
-	# Empty example_envs
+	# Empty example_envs.
 	IFS=$'\n' read -rd '' -a example_envs <<<""
 
 	# For each app...
 	for app in "${apps[@]}"; do
-		# Get the example envs for this app
+		# Get the example envs for this app.
 		case "$app" in
 			server*)  example_content="$server_example_content";;
 			migrate*) example_content="$migrate_example_content";;
 			worker*)  example_content="$worker_example_content";;
 		esac
 
-		# Read envs into an array
+		# Read envs into an array.
 		IFS=$'\n' read -rd '' -a example_envs <<<"$example_content"
 
 		# Build up a string of env vars to write to an env config file.
 		app_envs=""
 		for env_name in "${example_envs[@]}"; do
-			# Attempt to find env default value from defaults.json, using 'jq'
+			# Attempt to find env default value from defaults.json, using 'jq'.
 			env_val=$( cat "$env_defaults_path" | jq -r ".$app.$env_tier.$env_name" )
 
 			if [[ "$env_val" = "null" ]]; then
 				env_val=""
 			fi
 
-			# Append the new env var
+			# Append the new env var.
 			app_envs="$app_envs$env_name=$env_val\n"
 		done
 
@@ -79,6 +81,7 @@ for env_tier in "${env_tiers[@]}"; do
 
 		echo "Creating env file \"$app_env_file\"."
 
+		# Write env vars to file.
 		printf "$app_envs" > "$app_env_file"
 	done
 done

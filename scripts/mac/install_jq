@@ -2,7 +2,7 @@
 
 # --- Install jq if not already installed --- #
 
-# Check for jq existence
+# Check for jq existence.
 if [[ "$( which jq )" ]]; then
 	echo "jq detected -- Skipping installation"
 else

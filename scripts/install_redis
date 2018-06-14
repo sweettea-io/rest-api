@@ -2,12 +2,13 @@
 
 # --- Install Redis if not already installed --- #
 
+# Check for redis existence.
 if [[ "$( which redis-server )" ]]; then
 	echo "Redis detected -- Skipping installation"
 else
 	echo "Redis not detected -- Installing..."
 
-	# Switch to /tmp dir for download/installation
+	# Switch to /tmp dir for download/installation.
 	og_dir="$( pwd )"
 	cd /tmp
 
@@ -20,6 +21,6 @@ else
 	make
 	make install
 
-	# Switch back to original dir
+	# Switch back to original dir.
 	cd "$og_dir"
 fi

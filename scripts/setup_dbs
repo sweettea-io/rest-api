@@ -1,20 +1,20 @@
 #!/bin/bash
 
-# --- Setup users and databases for dev and test environments --- #
+# --- Setup databases and database roles for dev and test environments --- #
 
 # Directory of this script
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Name of both user and database for the dev environment tier
+# Database name and role name for the dev environment tier
 dev_name="rest-api"
 
-# Name of both user and database for the testing environment tier
+# Database name and role name for the testing environment tier
 test_name="rest-api-test"
 
-# Upsert users
+# Upsert roles.
 $this_dir/upsert_db_role "$dev_name"
 $this_dir/upsert_db_role "$test_name"
 
-# Upsert databases
+# Upsert databases.
 $this_dir/upsert_db "$dev_name" "$dev_name"
 $this_dir/upsert_db "$test_name" "$test_name"

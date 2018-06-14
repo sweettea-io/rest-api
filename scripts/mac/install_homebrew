@@ -2,6 +2,7 @@
 
 # --- Install homebrew if not already installed --- #
 
+# Check for homebrew existence.
 if [[ "$( which brew )" ]]; then
 	echo "homebrew detected -- Skipping installation"
 else

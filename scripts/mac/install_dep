@@ -2,7 +2,7 @@
 
 # --- Install dep, the Go package management tool used with this project, if not already installed --- #
 
-# Check for dep existence
+# Check for dep existence.
 if [[ "$( which dep )" ]]; then
 	echo "dep detected -- Skipping installation"
 else

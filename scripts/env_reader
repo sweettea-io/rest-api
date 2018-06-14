@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # --- Retrieve the value of an env variable given app name and env tier --- #
+
+# ======== PARSE ARGS ======== #
+
 app_arg="$1"
 env_tier="$2"
 env_name="$3"
@@ -8,35 +11,39 @@ arg_name="$4"
 envs_dir="./envs"
 env_file_path="$envs_dir/$env_tier/$app_arg.env"
 
+# ======== RETRIEVE ENV VAL(s) ======== #
+
 # Get all env vars if "all" is specified.
 if [[ "$env_name" = "all" ]]; then
-	# Get all env vars (ignore comments)
+	# Get all lines that are NOT comments.
 	all_envs=$( cat "$env_file_path" | grep "^[^#]" )
 
-	# Convert all_envs into array
+	# Convert all lines into an array.
 	IFS=$'\n' read -rd '' -a all_envs_arr <<<"$all_envs"
 
-	# Format env pairs into args formatted with '--env="<env_pair>"'
+	# Format env pairs (1 per line) into args formatted with '--env="<env_pair>"'
 	env_args=""
 	for env_pair in "${all_envs_arr[@]}"; do
 		env_args="$env_args--env=\"$env_pair\" "
 	done
 
 	echo "$env_args"
+
 elif [[ "$env_name" ]]; then
-	# If one env name is specified, return the value of that env var.
+	# Get value for specific env name.
 	env_var=$( cat "$env_file_path" | grep "$env_name=" )
 
 	# If env var exists...
 	if [[ "$env_var" ]]; then
-		# Just get the value
+		# Parse only the env value.
 		[[ $env_var =~ ($env_name=(.*)) ]]
+		env_val="${BASH_REMATCH[2]}"
 
-		# Format as an arg if desired
+		# Format as an arg if desired.
 		if [[ "$arg_name" ]]; then
-			echo "--$arg_name${BASH_REMATCH[2]}"
+			echo "--$arg_name=$env_val"
 		else
-			echo "${BASH_REMATCH[2]}"
+			echo "$env_val"
 		fi
 	else
 		echo ""

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# --- Ingest args and prep them for provider-specific cluster-creation script --- #
+
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -40,13 +42,16 @@ state=$( $this_dir/env_reader "$app_for_env_reading" "$env" "${upper_type}_CLUST
 image=$( $this_dir/env_reader "$app_for_env_reading" "$env" "CLUSTER_IMAGE" )
 k8s_version=$( $this_dir/env_reader "$app_for_env_reading" "$env" "K8S_VERSION" )
 
-# Assign fallback defaults
+# ======== USE FALLBACK DEFAULTS (if necessary) ======== #
+
 zones="${zones:-us-west-1a}"
 master_size="${master_size:-t2.micro}"
 node_size="${node_size:-t2.micro}"
 node_count="${node_count:-2}"
 image="${image:-099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1}"
 k8s_version="${k8s_version:-1.7.10}"
+
+# ======== CREATE CLUSTER ======== #
 
 $this_dir/$provider/create_cluster "$cluster_name" "$domain" "$state" "$zones" "$master_size" "$node_size" "$node_count" "$image" "$k8s_version"
 

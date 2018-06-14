@@ -2,6 +2,7 @@
 
 # --- Install PostgreSQL if not already installed --- #
 
+# Check for postgres existence.
 if [[ "$( which postgres )" ]]; then
 	echo "Postgres detected -- Skipping installation"
 else

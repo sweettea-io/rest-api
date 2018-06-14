@@ -5,13 +5,13 @@
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+app="$1"
+run_type="$2"
+run_as_daemon="$3"
 go_build_output_dir="./bin"
 apps_dir="./cmd"
 envs_dir="./envs"
 run_env="local"
-app="$1"
-run_type="$2"
-run_as_daemon="$3"
 
 # ======== VALIDATE ARGS ======== #
 
@@ -20,14 +20,15 @@ $this_dir/validate_arg "format" "$run_type" "image|binary|file"
 
 # ======== RUN LOCAL APP ======== #
 
+# Run app as a Docker image.
 if [[ "$run_type" = "image" ]]; then
-	# Get the Docker image name for the 'local' env tier.
+	# Get Docker image name for 'local' env tier.
 	image_name=$( $this_dir/env_reader "$app" "$run_env" "IMAGE_NAME" )
 
 	# Build up args for 'docker run' command.
 	cmd_args="--env-file $envs_dir/$run_env/$app.env"
 
-	# Add port binding for the server app.
+	# Add port binding for 'server' app.
 	if [[ "$app" = "server" ]]; then
 		server_port=$( $this_dir/env_reader "$app" "$run_env" "SERVER_PORT" )
 		cmd_args="$cmd_args -p $server_port:$server_port"
@@ -38,12 +39,13 @@ if [[ "$run_type" = "image" ]]; then
 		cmd_args="$cmd_args -d"
 	fi
 
-	# Run the Docker image.
+	# Run Docker image.
 	docker run "$image_name" "$cmd_args"
+
 elif [[ "$run_type" = "binary" ]]; then
-	# Run the Go binary for this app.
+	# Run app as Go binary.
 	$go_build_output_dir/$app
 else
-	# Run the Go file for this app.
+	# Run app as Go file.
 	go run "$apps_dir/$app/main.go"
 fi

@@ -2,6 +2,7 @@
 
 # --- Install kubectl if not already installed --- #
 
+# Check for kubectl existence.
 if [[ "$( which kubectl )" ]]; then
 	echo "kubectl detected -- Skipping installation"
 else
