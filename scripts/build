@@ -12,9 +12,9 @@ go_build_output_dir="./bin"
 
 # ======== VALIDATE ARGS ======== #
 
-$this_dir/validate_arg "$app" "server|migrate|worker|all" "target"
-$this_dir/validate_arg "$build_env" "test|local|dev|staging|prod" "env"
-$this_dir/validate_arg "$build_format" "image|binary" "build format"
+$this_dir/validate_arg "target" "$app" "server|migrate|worker|all"
+$this_dir/validate_arg "env" "$build_env" "test|local|dev|staging|prod"
+$this_dir/validate_arg "format" "$build_format" "image|binary"
 
 # ======== BUILD APPS ======== #
 

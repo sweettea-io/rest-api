@@ -10,8 +10,8 @@ deploy_env="$2"
 
 # ======== VALIDATE ARGS ======== #
 
-$this_dir/validate_arg "$app" "server|migrate|worker" "target"
-$this_dir/validate_arg "$deploy_env" "local|dev|staging|prod" "env"
+$this_dir/validate_arg "target" "$app" "server|migrate|worker"
+$this_dir/validate_arg "env" "$deploy_env" "local|dev|staging|prod"
 
 # ======== TAG/PUSH IMAGE TO REPOSITORY ======== #
 

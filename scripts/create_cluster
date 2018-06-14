@@ -10,9 +10,9 @@ upper_type="${type^^}"
 
 # ======== VALIDATE ARGS ======== #
 
-$this_dir/validate_arg "$provider" "aws" "provider"
-$this_dir/validate_arg "$type" "core|build|train" "type"
-$this_dir/validate_arg "$env" "local|dev|staging|prod" "env"
+$this_dir/validate_arg "provider" "$provider" "aws"
+$this_dir/validate_arg "type" "$type" "core|build|train"
+$this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
 
 # ======== GET ENV VALS ======== #
 

@@ -15,8 +15,8 @@ run_as_daemon="$3"
 
 # ======== VALIDATE ARGS ======== #
 
-$this_dir/validate_arg "$app" "server|migrate|worker" "target"
-$this_dir/validate_arg "$run_type" "image|binary|file" "run format"
+$this_dir/validate_arg "target" "$app" "server|migrate|worker"
+$this_dir/validate_arg "format" "$run_type" "image|binary|file"
 
 # ======== RUN LOCAL APP ======== #
 

@@ -8,15 +8,15 @@ install: ## Setup & install project dependencies
 
 export target
 export env=local
-export as=image
+export format=image
 build: ## Build an application for a specific environment tier as either a Docker image or a Go binary.
-	./scripts/build $(target) $(env) $(as)
+	./scripts/build $(target) $(env) $(format)
 
 export target
-export as=image
+export format=image
 export daemon
 run: ## Run an application as either a Docker image, a Go binary, or a Go file.
-	./scripts/run $(target) $(as) $(daemon)
+	./scripts/run $(target) $(format) $(daemon)
 
 export target
 export env=local

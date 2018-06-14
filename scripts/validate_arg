@@ -1,17 +1,26 @@
 #!/bin/bash
 
+# Parse args
 arg_name="$1"
-IFS=$'|' read -rd '' -a vals <<<"$2"
-valid="" # false
+provided_val="$2"
+supported_vals="$3" # '|' delimited string of supported arg values
 
-for val in ${vals[@]}; do
-	if [[ "$arg_name" = "$val" ]]; then
+# Split supported values into an array.
+IFS=$'|' read -rd '' -a supported_vals_arr <<<"$supported_vals"
+
+# Set $valid to "true" if provided value matches any of the supported values.
+valid="" # false
+for val in ${supported_vals_arr[@]}; do
+	if [[ "$provided_val" = "$val" ]]; then
 		valid="true"
 		break
 	fi
 done
 
+# Log an error message and exit if provided arg value is not supported.
 if [[ ! "$valid" ]]; then
-	echo "Invalid $3 arg. Exiting."
+	space_del="${supported_vals_arr[@]}"
+	comma_del="${space_del// /, }"
+	echo "Invalid value \"$provided_val\" provided for argument \"$arg_name\. Supported values: $comma_del."
 	exit
 fi
