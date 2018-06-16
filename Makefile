@@ -6,6 +6,12 @@ unlock: ## Unlock all scripts
 install: ## Setup & install project dependencies
 	./scripts/install
 
+export provider=aws
+export type
+export env
+create-cluster: ## Create the core, train, or build cluster for a specific environment.
+	./scripts/create-cluster $(provider) $(type) $(env)
+
 export target
 export env=local
 export format=image
@@ -23,13 +29,7 @@ export env=local
 deploy: ## Deploy the latest Docker image of an application to a specific environment.
 	./scripts/deploy $(target) $(env)
 
-export provider=aws
-export type
-export env
-create-cluster: ## Create the core, train, or build cluster for a specific environment.
-	./scripts/create-cluster $(provider) $(type) $(env)
-
-clean: ## Remove all Go-built binaries
+clean: ## Remove all built Go binaries
 	rm ./bin/*
 
 ensure: ## Update dependencies
