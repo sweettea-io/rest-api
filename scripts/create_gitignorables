@@ -32,6 +32,8 @@ for dir in "${dirs[@]}"; do
 	fi
 done
 
+# ======== ENV UPSERTION ======== #
+
 # Get all envs for each application from its respective <app>.example.env file.
 server_example_content=$( cat "$examples_dir/server.example.env" )
 migrate_example_content=$( cat "$examples_dir/migrate.example.env" )
