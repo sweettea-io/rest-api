@@ -8,7 +8,7 @@ this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 provider="$1"
 type="$2"
 env="$3"
-upper_type=$( echo "$type" | tr "[a-z]" "[A-Z]" )
+upper_type=$( echo "$type" | tr "[:lower:]" "[:upper:]" )
 
 # ======== VALIDATE ARGS ======== #
 
@@ -24,13 +24,21 @@ app_for_env_reading="server"
 # Required to have env values already
 cluster_name=$( $this_dir/env_reader "$app_for_env_reading" "$env" "${upper_type}_CLUSTER_NAME" )
 domain=$( $this_dir/env_reader "$app_for_env_reading" "$env" "DOMAIN" )
+hosted_zone_id=$( $this_dir/env_reader "$app_for_env_reading" "$env" "HOSTED_ZONE_ID" )
 
 if [[ ! "$cluster_name" ]]; then
 	echo "${upper_type}_CLUSTER_NAME env var must have a value already set. Exiting."
+	exit
 fi
 
 if [[ ! "$domain" ]]; then
 	echo "DOMAIN env var must have a value already set. Exiting."
+	exit
+fi
+
+if [[ ! "$hosted_zone_id" ]]; then
+	echo "HOSTED_ZONE_ID env var must have a value already set. Exiting."
+	exit
 fi
 
 # Envs that can (but don't have to) be set yet.
@@ -53,6 +61,6 @@ k8s_version="${k8s_version:-1.7.10}"
 
 # ======== CREATE CLUSTER ======== #
 
-$this_dir/$provider/create_cluster "$cluster_name" "$domain" "$state" "$zones" "$master_size" "$node_size" "$node_count" "$image" "$k8s_version"
+$this_dir/$provider/create_cluster "$cluster_name" "$domain" "$hosted_zone_id" "$state" "$zones" "$master_size" "$node_size" "$node_count" "$image" "$k8s_version"
 
 echo "Done!"

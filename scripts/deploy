@@ -48,7 +48,7 @@ if [[ "$app" = "migrate" ]]; then
 	new_deploy="true"
 
 	# For a job, the resource name needs to differ with each deploy, so generate a uuid for suffix.
-	uuid=$( uuidgen )
+	uuid=$( uuidgen | tr "[:upper:]" "[:lower:]" )
 	job_uuid="${uuid:0:8}"
 	image_name="$image_name-$job_uuid"
 else

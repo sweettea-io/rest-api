@@ -3,8 +3,9 @@
 # --- Create new AWS IAM key pair for provided AWS user name --- #
 
 user_name="$1"
+keypair_exists=$( aws iam list-access-keys --user-name "$user_name" | jq ".AccessKeyMetadata" )
 
-if aws iam list-access-keys --user-name "$user_name" | jq ".AccessKeyMetadata"; then
+if [[ "$keypair_exists" ]]; then
 	echo "Access keypair for IAM user \"$user_name\" already exists."
 else
 	echo "Creating new access keypair for IAM user \"$user_name\"."
