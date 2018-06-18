@@ -6,7 +6,9 @@
 
 env_dir="./envs"
 examples_dir="$env_dir/examples"
-env_defaults_path="$env_dir/defaults.json"
+docker_env_defaults_path="$env_dir/docker-defaults.json"
+non_docker_env_defaults_path="$env_dir/non-docker-local-defaults.json"
+local_env_filepath="./.env"
 declare -a apps=("migrate" "server" "worker")
 declare -a env_tiers=("test" "local" "dev" "staging" "prod")
 
@@ -39,7 +41,7 @@ server_example_content=$( cat "$examples_dir/server.example.env" )
 migrate_example_content=$( cat "$examples_dir/migrate.example.env" )
 worker_example_content=$( cat "$examples_dir/worker.example.env" )
 
-# For each env tier...
+# Upsert docker env files for each app for each env tier.
 for env_tier in "${env_tiers[@]}"; do
 	# Skip this tier if the dir already has content.
 	env_tier_dir="$env_dir/$env_tier"
@@ -68,9 +70,10 @@ for env_tier in "${env_tiers[@]}"; do
 		# Build up a string of env vars to write to an env config file.
 		app_envs=""
 		for env_name in "${example_envs[@]}"; do
-			# Attempt to find env default value from defaults.json, using 'jq'.
-			env_val=$( cat "$env_defaults_path" | jq -r ".$app.$env_tier.$env_name" )
+			# Attempt to find env default value from docker-defaults.json, using 'jq'.
+			env_val=$( cat "$docker_env_defaults_path" | jq -r ".$app.$env_tier.$env_name" )
 
+			# Use empty string instead of null.
 			if [[ "$env_val" = "null" ]]; then
 				env_val=""
 			fi
@@ -87,3 +90,27 @@ for env_tier in "${env_tiers[@]}"; do
 		printf "$app_envs" > "$app_env_file"
 	done
 done
+
+# Upsert non-docker .env file used for local dev
+if [[ ! -e "$local_env_filepath" ]]; then
+	IFS=$'\n' read -rd '' -a server_example_envs <<<"$server_example_content"
+	local_envs=""
+
+	for env_name in "${server_example_envs[@]}"; do
+		# Attempt to find env default value from non-docker-local-defaults.json, using 'jq'.
+		env_val=$( cat "$non_docker_env_defaults_path" | jq -r ".$env_name" )
+
+		# Use empty string instead of null.
+		if [[ "$env_val" = "null" ]]; then
+			env_val=""
+		fi
+
+		# Append the new env var.
+		local_envs="${local_envs}export $env_name=\"$env_val\"\n"
+	done
+
+	echo "Creating env file \"$local_env_filepath\"."
+
+	# Write env vars to file.
+	printf "$local_envs" > "$local_env_filepath"
+fi
