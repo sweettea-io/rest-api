@@ -8,7 +8,7 @@ this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 provider="$1"
 type="$2"
 env="$3"
-upper_type="${type^^}"
+upper_type=$( echo "$type" | tr "[a-z]" "[A-Z]" )
 
 # ======== VALIDATE ARGS ======== #
 

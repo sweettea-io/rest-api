@@ -10,7 +10,7 @@ export provider=aws
 export type
 export env
 create-cluster: ## Create the core, train, or build cluster for a specific environment.
-	./scripts/create-cluster $(provider) $(type) $(env)
+	./scripts/create_cluster $(provider) $(type) $(env)
 
 export target
 export env=local
