@@ -9,7 +9,7 @@ install: ## Setup & install project dependencies
 export provider=aws
 export type
 export env
-create-cluster: ## Create the core, train, or build cluster for a specific environment.
+cluster: ## Create the core, train, or build cluster for a specific environment.
 	./scripts/create_cluster $(provider) $(type) $(env)
 
 export target
