@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- Create Kubernetes cluster on AWS --- #
+# --- Upsert Kubernetes cluster on AWS --- #
 
 # ======== PARSE ARGS ======== #
 
@@ -20,14 +20,20 @@ group_name="kops"
 
 # ======== CREATE RESOURCES REQUIRED TO SUPPORT CLUSTER ======== #
 
-# Create AWS group.
-$this_dir/create_group "$group_name"
+# Ensure AWS environment variables are currently set.
+if [ ! "$AWS_ACCESS_KEY_ID" ] || [ ! "$AWS_SECRET_ACCESS_KEY" ]; then
+	echo "AWS environment variables not currently set.\nSet \"AWS_ACCESS_KEY_ID\" and \"AWS_SECRET_ACCESS_KEY\" and then try again."
+	exit
+fi
 
-# Create AWS user and attach to group.
-$this_dir/create_user "$user_name" "$group_name"
+# Upsert AWS group.
+$this_dir/upsert_group "$group_name"
 
-# Configure new IAM role/keypair for user.
-$this_dir/configure_user "$user_name"
+# Upsert AWS user and attach to group.
+$this_dir/upsert_user "$user_name" "$group_name"
+
+# Upsert AWS access keypair for user.
+$this_dir/upsert_access_key "$user_name"
 
 # If state doesn't exist yet for cluster, create S3 bucket to serve that purpose.
 if [[ ! "$state" ]]; then
@@ -43,12 +49,13 @@ if [[ ! "$state" ]]; then
 	state="s3://$bucket_name"
 fi
 
-# Create hosted zone.
-$this_dir/create_hosted_zone "$cluster_name" "$domain" "$hosted_zone_id"
+# Upsert hosted zone.
+$this_dir/upsert_hosted_zone "$cluster_name" "$domain" "$hosted_zone_id"
 
-# ======== CREATE CLUSTER ======== #
+# ======== CREATE K8S CLUSTER ======== #
 
 kops create cluster \
+	--cloud "aws" \
 	--name "$cluster_name.$domain" \
 	--zones "$zones" \
 	--master-size "$master_size" \

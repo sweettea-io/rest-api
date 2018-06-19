@@ -1,14 +1,15 @@
 #!/bin/bash
 
-# --- Create new AWS IAM key pair for provided AWS user name --- #
+# --- Upsert access keypair for an IAM user --- #
 
 user_name="$1"
+
 keypair_exists=$( aws iam list-access-keys --user-name "$user_name" | jq ".AccessKeyMetadata" )
 
 if [[ "$keypair_exists" ]]; then
-	echo "Access keypair for IAM user \"$user_name\" already exists."
+	echo "IAM user \"$user_name\" already has an access key. Skipping creation."
 else
-	echo "Creating new access keypair for IAM user \"$user_name\"."
+	echo "Creating new access keypair for IAM user \"$user_name\"..."
 	aws iam create-access-key --user-name "$user_name"
 
 	echo "Configuring aws to use \"$user_name\" user..."

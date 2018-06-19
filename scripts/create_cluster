@@ -61,6 +61,6 @@ k8s_version="${k8s_version:-1.7.10}"
 
 # ======== CREATE CLUSTER ======== #
 
-$this_dir/$provider/create_cluster "$cluster_name" "$domain" "$hosted_zone_id" "$state" "$zones" "$master_size" "$node_size" "$node_count" "$image" "$k8s_version"
+$this_dir/$provider/upsert_cluster "$cluster_name" "$domain" "$hosted_zone_id" "$state" "$zones" "$master_size" "$node_size" "$node_count" "$image" "$k8s_version"
 
 echo "Done!"

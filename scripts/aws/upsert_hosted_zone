@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# --- Upsert AWS Route53 Hosted Zone for provided domain/subdomain --- #
+
+# ======== PARSE ARGS ======== #
+
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+subdomain="$1"
+domain="$2"
+naked_hosted_zone_id="$3"
+new_hosted_zone_name="$subdomain.$domain"
+
+hosted_zone_exists=$( aws route53 list-hosted-zones | jq "[.HostedZones[] | .Name]" | grep "\"$new_hosted_zone_name.\"" )
+
+# ======== CREATE HOSTED ZONE ======== #
+
+if [[ "$hosted_zone_exists" ]]; then
+	echo "Hosted zone \"$new_hosted_zone_name\" already exists. Skipping creation."
+else
+	echo "Creating hosted zone \"$new_hosted_zone_name\"..."
+
+	hz_creation_call_ref=$( uuidgen )
+	hosted_zone=$( aws route53 create-hosted-zone --name "$new_hosted_zone_name" --caller-reference "$hz_creation_call_ref" )
+
+	echo "Hosted zone created."
+
+	# Parse name servers from response.
+	hz_name_servers=$( echo "$hosted_zone" | jq ".DelegationSet.NameServers" | jq -c -r ".[]" )
+
+	# Register name servers as NS records on the naked domain's hosted zone.
+	$this_dir/upsert_ns_records "$naked_hosted_zone_id" "$new_hosted_zone_name" "$hz_name_servers"
+fi

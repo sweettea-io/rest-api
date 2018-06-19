@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# --- Create AWS group (and policy) with provided name --- #
+# --- Upsert AWS group (and policy) with provided name --- #
 
 group_name="$1"
+
 group_exists=$( aws iam list-groups | jq "[.Groups[] | .GroupName]" | grep "\"$group_name\"" )
 
 if [[ "$group_exists" ]]; then

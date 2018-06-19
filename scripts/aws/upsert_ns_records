@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# --- Upsert NS Records For a Route53 Hosted Zone --- #
+
+# ======== PARSE ARGS ======== #
+
+hosted_zone_id="$1"
+record_set_name="$2"
+records="$3"
+
+# ======== PREP PAYLOAD ======== #
+
+# Split provided records into a bash array (by new line)
+IFS=$'\n' read -rd '' -a ns_records <<<"$records"
+
+# Format ns_records into a JSON string formatted properly for a call to 'change-resource-record-sets'.
+ns_count="${#ns_records[@]}"
+resource_records="["
+i="1"
+for ns in "${ns_records[@]}"; do
+	resource_records="${resource_records}{\"Value\":\"$ns\"}"
+
+	if [[ "$i" -lt "$ns_count" ]]; then
+		resource_records+=","
+	fi
+
+	i=$((i+1))
+done
+resource_records+="]"
+
+# ======== REGISTER NS DNS RECORDS ======== #
+
+# Create payload for NS record changes.
+changes="{
+	\"Comment\": \"Upserting NS Records\",
+	\"Changes\": [{
+		\"Action\": \"UPSERT\",
+		\"ResourceRecordSet\": {
+		  \"Name\": \"$record_set_name\",
+		  \"Type\": \"NS\",
+		  \"TTL\": 60,
+		  \"ResourceRecords\": $resource_records
+		}
+	}]
+}"
+
+# Register NS records.
+echo "Registering NS records on hosted zone ID \"$hosted_zone_id\" for resource name \"$record_set_name\"..."
+aws route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "$changes"
