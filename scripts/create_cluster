@@ -42,7 +42,6 @@ if [[ ! "$hosted_zone_id" ]]; then
 fi
 
 # Envs that can (but don't have to) be set yet.
-region=$( $this_dir/env_reader "$app_for_env_reading" "$env" "AWS_REGION_NAME" )
 zones=$( $this_dir/env_reader "$app_for_env_reading" "$env" "${upper_type}_CLUSTER_ZONES" )
 master_size=$( $this_dir/env_reader "$app_for_env_reading" "$env" "MASTER_SIZE" )
 node_size=$( $this_dir/env_reader "$app_for_env_reading" "$env" "NODE_SIZE" )
@@ -53,7 +52,6 @@ k8s_version=$( $this_dir/env_reader "$app_for_env_reading" "$env" "K8S_VERSION" 
 
 # ======== USE FALLBACK DEFAULTS (if necessary) ======== #
 
-region="${region:-us-west-1}"
 zones="${zones:-us-west-1a}"
 master_size="${master_size:-t2.micro}"
 node_size="${node_size:-t2.micro}"
@@ -63,6 +61,6 @@ k8s_version="${k8s_version:-1.7.10}"
 
 # ======== CREATE CLUSTER ======== #
 
-$this_dir/$provider/upsert_cluster "$cluster_name" "$domain" "$hosted_zone_id" "$state" "$region" "$zones" "$master_size" "$node_size" "$node_count" "$image" "$k8s_version"
+$this_dir/$provider/upsert_cluster "$cluster_name" "$domain" "$hosted_zone_id" "$state" "$zones" "$master_size" "$node_size" "$node_count" "$image" "$k8s_version"
 
 echo "Done!"
