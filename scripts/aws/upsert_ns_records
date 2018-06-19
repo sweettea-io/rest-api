@@ -4,6 +4,7 @@
 
 # ======== PARSE ARGS ======== #
 
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 hosted_zone_id="$1"
 record_set_name="$2"
 records="$3"
@@ -46,4 +47,10 @@ changes="{
 
 # Register NS records.
 echo "Registering NS records on hosted zone ID \"$hosted_zone_id\" for resource name \"$record_set_name\"..."
-aws route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "$changes"
+change_result=$( aws route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "$changes" )
+
+# Parse change id.
+change_id=$( echo "$change_result" | jq -r ".ChangeInfo.Id" )
+
+# Wait for record change to go into effect.
+$this_dir/verify_route53_change "$change_id" "INSYNC"
