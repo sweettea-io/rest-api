@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- Create files/dirs that were git-ignored and should now exist --- #
+# --- Upsert files/dirs that were git-ignored and should now exist --- #
 
 # ======== VAR DECLARATION ======== #
 

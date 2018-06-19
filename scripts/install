@@ -27,8 +27,8 @@ $this_dir/$os/install_kops
 # Install kubectl.
 $this_dir/$os/install_kubectl
 
-# Create files/dirs that were gitignored and should now exist.
-$this_dir/create_gitignorables
+# Upsert files/dirs that were gitignored and should now exist.
+$this_dir/upsert_gitignorables
 
 # Install 'dep' -- Go package management tool used with this project.
 $this_dir/$os/install_dep
@@ -42,7 +42,7 @@ $this_dir/install_redis
 # Install PostgreSQL.
 $this_dir/$os/install_pg
 
-# Create local databases for dev and testing.
+# Upsert local databases for dev and testing.
 $this_dir/setup_dbs
 
 echo "Done!"
