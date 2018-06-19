@@ -12,6 +12,13 @@ export env
 cluster: ## Create the core, train, or build cluster for a specific environment.
 	./scripts/create_cluster $(provider) $(type) $(env)
 
+export provider=aws
+export env
+clusters: ## Make all clusters for a specific environment.
+	./scripts/create_cluster $(provider) core $(env)
+	./scripts/create_cluster $(provider) build $(env)
+	./scripts/create_cluster $(provider) train $(env)
+
 export target
 export env=local
 export format=image
