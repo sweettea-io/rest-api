@@ -7,11 +7,13 @@
       "IMAGE_NAME": "rest-api"
     },
     "local": {
-      "AWS_REGION_NAME": "us-west-1a",
+      "AWS_REGION_NAME": "us-west-1",
       "BUILD_CLUSTER_NAME": "build-local",
+      "BUILD_CLUSTER_ZONES": "us-west-1a",
       "CLOUD_PROVIDER": "aws",
       "CLUSTER_IMAGE": "099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1",
       "CORE_CLUSTER_NAME": "core-local",
+      "CORE_CLUSTER_ZONES": "us-west-1a",
       "DATABASE_URL": "postgres://rest-api:rest-api@localhost:5432/rest-api?sslmode=disable",
       "DEBUG": "true",
       "DOMAIN": "localhost",
@@ -26,14 +28,17 @@
       "REPLICAS_COUNT": "1",
       "RESTART_POLICY": "Always",
       "SERVER_PORT": "80",
-      "TRAIN_CLUSTER_NAME": "train-local"
+      "TRAIN_CLUSTER_NAME": "train-local",
+      "TRAIN_CLUSTER_ZONES": "us-west-1a"
     },
     "dev": {
-      "AWS_REGION_NAME": "us-west-1a",
+      "AWS_REGION_NAME": "us-west-1",
       "BUILD_CLUSTER_NAME": "build-dev",
+      "BUILD_CLUSTER_ZONES": "us-west-1a",
       "CLOUD_PROVIDER": "aws",
       "CLUSTER_IMAGE": "099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1",
       "CORE_CLUSTER_NAME": "core-dev",
+      "CORE_CLUSTER_ZONES": "us-west-1a",
       "DEBUG": "true",
       "ENV": "dev",
       "K8S_VERSION": "1.7.10",
@@ -44,14 +49,17 @@
       "REPLICAS_COUNT": "3",
       "RESTART_POLICY": "Always",
       "SERVER_PORT": "80",
-      "TRAIN_CLUSTER_NAME": "train-dev"
+      "TRAIN_CLUSTER_NAME": "train-dev",
+      "TRAIN_CLUSTER_ZONES": "us-west-1a"
     },
     "staging": {
-      "AWS_REGION_NAME": "us-west-1a",
+      "AWS_REGION_NAME": "us-west-1",
       "BUILD_CLUSTER_NAME": "build-staging",
+      "BUILD_CLUSTER_ZONES": "us-west-1a",
       "CLOUD_PROVIDER": "aws",
       "CLUSTER_IMAGE": "099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1",
       "CORE_CLUSTER_NAME": "core-staging",
+      "CORE_CLUSTER_ZONES": "us-west-1a",
       "DEBUG": "false",
       "ENV": "staging",
       "K8S_VERSION": "1.7.10",
@@ -62,14 +70,17 @@
       "REPLICAS_COUNT": "3",
       "RESTART_POLICY": "Always",
       "SERVER_PORT": "80",
-      "TRAIN_CLUSTER_NAME": "train-staging"
+      "TRAIN_CLUSTER_NAME": "train-staging",
+      "TRAIN_CLUSTER_ZONES": "us-west-1a"
     },
     "prod": {
-      "AWS_REGION_NAME": "us-west-1a",
-      "BUILD_CLUSTER_NAME": "build",
+      "AWS_REGION_NAME": "us-west-1",
+      "BUILD_CLUSTER_NAME": "build-prod",
+      "BUILD_CLUSTER_ZONES": "us-west-1a",
       "CLOUD_PROVIDER": "aws",
       "CLUSTER_IMAGE": "099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1",
-      "CORE_CLUSTER_NAME": "core",
+      "CORE_CLUSTER_NAME": "core-prod",
+      "CORE_CLUSTER_ZONES": "us-west-1a",
       "DEBUG": "true",
       "ENV": "prod",
       "K8S_VERSION": "1.7.10",
@@ -80,7 +91,8 @@
       "REPLICAS_COUNT": "3",
       "RESTART_POLICY": "Always",
       "SERVER_PORT": "80",
-      "TRAIN_CLUSTER_NAME": "train"
+      "TRAIN_CLUSTER_NAME": "train-prod",
+      "TRAIN_CLUSTER_ZONES": "us-west-1a"
     }
   },
   "migrate": {
@@ -91,7 +103,6 @@
       "IMAGE_NAME": "rest-api-migrate"
     },
     "local": {
-      "CORE_CLUSTER_NAME": "core-local",
       "DATABASE_URL": "postgres://rest-api:rest-api@localhost:5432/rest-api?sslmode=disable",
       "DEBUG": "true",
       "DOMAIN": "localhost",
@@ -100,19 +111,16 @@
       "RESTART_POLICY": "Never"
     },
     "dev": {
-      "CORE_CLUSTER_NAME": "core-dev",
       "DEBUG": "true",
       "ENV": "dev",
       "RESTART_POLICY": "Never"
     },
     "staging": {
-      "CORE_CLUSTER_NAME": "core-staging",
       "DEBUG": "false",
       "ENV": "staging",
       "RESTART_POLICY": "Never"
     },
     "prod": {
-      "CORE_CLUSTER_NAME": "core",
       "DEBUG": "false",
       "ENV": "prod",
       "RESTART_POLICY": "Never"
@@ -126,11 +134,13 @@
       "IMAGE_NAME": "rest-api-worker"
     },
     "local": {
-      "AWS_REGION_NAME": "us-west-1a",
+      "AWS_REGION_NAME": "us-west-1",
       "BUILD_CLUSTER_NAME": "build-local",
+      "BUILD_CLUSTER_ZONES": "us-west-1a",
       "CLOUD_PROVIDER": "aws",
       "CLUSTER_IMAGE": "099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1",
       "CORE_CLUSTER_NAME": "core-local",
+      "CORE_CLUSTER_ZONES": "us-west-1a",
       "DATABASE_URL": "postgres://rest-api:rest-api@localhost:5432/rest-api?sslmode=disable",
       "DEBUG": "true",
       "DOMAIN": "localhost",
@@ -144,14 +154,17 @@
       "REDIS_URL": "localhost:6379",
       "REPLICAS_COUNT": "1",
       "RESTART_POLICY": "Always",
-      "TRAIN_CLUSTER_NAME": "train-local"
+      "TRAIN_CLUSTER_NAME": "train-local",
+      "TRAIN_CLUSTER_ZONES": "us-west-1a"
     },
     "dev": {
-      "AWS_REGION_NAME": "us-west-1a",
+      "AWS_REGION_NAME": "us-west-1",
       "BUILD_CLUSTER_NAME": "build-dev",
+      "BUILD_CLUSTER_ZONES": "us-west-1a",
       "CLOUD_PROVIDER": "aws",
       "CLUSTER_IMAGE": "099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1",
       "CORE_CLUSTER_NAME": "core-dev",
+      "CORE_CLUSTER_ZONES": "us-west-1a",
       "DEBUG": "true",
       "ENV": "dev",
       "K8S_VERSION": "1.7.10",
@@ -161,14 +174,17 @@
       "NODE_SIZE": "t2.micro",
       "REPLICAS_COUNT": "1",
       "RESTART_POLICY": "Always",
-      "TRAIN_CLUSTER_NAME": "train-dev"
+      "TRAIN_CLUSTER_NAME": "train-dev",
+      "TRAIN_CLUSTER_ZONES": "us-west-1a"
     },
     "staging": {
-      "AWS_REGION_NAME": "us-west-1a",
+      "AWS_REGION_NAME": "us-west-1",
       "BUILD_CLUSTER_NAME": "build-staging",
+      "BUILD_CLUSTER_ZONES": "us-west-1a",
       "CLOUD_PROVIDER": "aws",
       "CLUSTER_IMAGE": "099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1",
       "CORE_CLUSTER_NAME": "core-staging",
+      "CORE_CLUSTER_ZONES": "us-west-1a",
       "DEBUG": "false",
       "ENV": "staging",
       "K8S_VERSION": "1.7.10",
@@ -178,14 +194,17 @@
       "NODE_SIZE": "t2.small",
       "REPLICAS_COUNT": "1",
       "RESTART_POLICY": "Always",
-      "TRAIN_CLUSTER_NAME": "train-staging"
+      "TRAIN_CLUSTER_NAME": "train-staging",
+      "TRAIN_CLUSTER_ZONES": "us-west-1a"
     },
     "prod": {
-      "AWS_REGION_NAME": "us-west-1a",
-      "BUILD_CLUSTER_NAME": "build",
+      "AWS_REGION_NAME": "us-west-1",
+      "BUILD_CLUSTER_NAME": "build-prod",
+      "BUILD_CLUSTER_ZONES": "us-west-1a",
       "CLOUD_PROVIDER": "aws",
       "CLUSTER_IMAGE": "099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1",
-      "CORE_CLUSTER_NAME": "core",
+      "CORE_CLUSTER_NAME": "core-prod",
+      "CORE_CLUSTER_ZONES": "us-west-1a",
       "DEBUG": "false",
       "ENV": "prod",
       "K8S_VERSION": "1.7.10",
@@ -195,7 +214,8 @@
       "NODE_SIZE": "t2.small",
       "REPLICAS_COUNT": "1",
       "RESTART_POLICY": "Always",
-      "TRAIN_CLUSTER_NAME": "train"
+      "TRAIN_CLUSTER_NAME": "train-prod",
+      "TRAIN_CLUSTER_ZONES": "us-west-1a"
     }
   }
 }
