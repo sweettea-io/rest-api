@@ -19,14 +19,17 @@ if [[ "$hosted_zone_exists" ]]; then
 else
 	echo "Creating hosted zone \"$new_hosted_zone_name\"..."
 
+	# Generate uuid as a caller reference.
 	hz_creation_call_ref=$( uuidgen )
+
+	# Create hosted zone and store response JSON.
 	hosted_zone=$( aws route53 create-hosted-zone --name "$new_hosted_zone_name" --caller-reference "$hz_creation_call_ref" )
 
 	echo "Hosted zone created."
 
-	# Parse name servers from response.
+	# Parse name servers from response using jq.
 	hz_name_servers=$( echo "$hosted_zone" | jq ".DelegationSet.NameServers" | jq -c -r ".[]" )
 
-	# Register name servers as NS records on the naked domain's hosted zone.
+	# Register name servers as NS records on naked domain's hosted zone.
 	$this_dir/upsert_ns_records "$naked_hosted_zone_id" "$new_hosted_zone_name" "$hz_name_servers"
 fi
