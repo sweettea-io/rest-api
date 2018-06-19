@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# --- Create AWS S3 bucket with provided name --- #
+# --- Create AWS S3 bucket with provided name and region --- #
 
 bucket_name="$1"
+region="$2"
 
 echo "Creating S3 bucket \"$bucket_name\"..."
-aws s3api create-bucket --bucket "$bucket_name"
+aws s3api create-bucket --bucket "$bucket_name" --region "$region"
