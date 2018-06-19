@@ -51,10 +51,10 @@ if [[ "$app" = "migrate" ]]; then
 	uuid=$( uuidgen | tr "[:upper:]" "[:lower:]" )
 	job_uuid="${uuid:0:8}"
 	image_name="$image_name-$job_uuid"
-else
-	# TODO: For 'deployments', check to see if they already exist first.
-	# This will determine whether we should 'kubectl run' or simply 'kubectl set image'.
-	echo "TODO"
+
+# Otherwise, for deployments, check if the deployment already exists.
+elif ! kubectl get deployment "$resource_name" 2>/dev/null; then
+	new_deploy="true"
 fi
 
 # ======== FORMAT DEPLOY ARGS ======== #
@@ -66,7 +66,7 @@ deploy_envs=$( $this_dir/env_reader "$app" "$deploy_env" "all" "true" )
 
 # ======== DEPLOY ======== #
 
-if [[ "$new_deploy" ]]; then
+if [[ "$new_deploy" == "true" ]]; then
 	# Create a new k8s cluster deployment.
 	kubectl run "$resource_name" "--image=$image_repo" "$port" "$replicas" "$restart" "$deploy_envs"
 else
