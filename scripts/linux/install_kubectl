@@ -8,6 +8,6 @@ if [[ "$( which kubectl )" ]]; then
 else
 	echo "kubectl not detected -- Installing..."
 	wget -O kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-	chmod u+x ./kubectl
+	chmod +x ./kubectl
 	sudo mv ./kubectl /usr/local/bin/kubectl
 fi

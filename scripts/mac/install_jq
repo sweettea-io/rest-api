@@ -8,5 +8,5 @@ if [[ "$( which jq )" ]]; then
 else
 	echo "jq not detected -- Installing..."
 	brew install jq
-	chmod u+x $( which jq )
+	chmod +x $( which jq )
 fi

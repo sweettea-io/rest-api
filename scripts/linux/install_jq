@@ -10,8 +10,8 @@ else
 
 	# Make sure supported Linux flavor is running.
 	if [[ "$( which apt-get )" ]]; then
-		apt-get install jq
-		chmod u+x $( which jq )
+		sudo apt-get install jq
+		chmod +x $( which jq )
 	else
 		echo "Skipping jq installation...Linux flavor not an APT system. Will need to be done manually."
 	fi

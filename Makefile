@@ -1,7 +1,7 @@
 default: unlock
 
 unlock: ## Unlock all scripts
-	chmod -R u+x ./scripts/*
+	chmod -R +x ./scripts/*
 
 install: ## Setup & install project dependencies
 	./scripts/install
