@@ -6,27 +6,15 @@
 
 env_dir="./envs"
 examples_dir="$env_dir/examples"
-docker_env_defaults_path="$env_dir/docker-defaults.json"
-non_docker_env_defaults_path="$env_dir/non-docker-local-defaults.json"
-local_env_filepath="./.env"
+defaults_path="$env_dir/defaults.json"
 declare -a apps=("migrate" "server" "worker")
 declare -a env_tiers=("test" "local" "dev" "staging" "prod")
+declare -a dirs_to_upsert=("./bin/" "$env_dir")
 
-# Directories to upsert.
-declare -a dirs=(
-	"./bin/"
-	"$env_dir"
-	"$env_dir/test/"
-	"$env_dir/local/"
-	"$env_dir/dev/"
-	"$env_dir/staging/"
-	"$env_dir/prod/"
-)
+# ======== GENERIC FILE/DIR UPSERTION ======== #
 
-# ======== FILE/DIR UPSERTION ======== #
-
-# For each dir listed above...
-for dir in "${dirs[@]}"; do
+# Upsert specified dirs.
+for dir in "${dirs_to_upsert[@]}"; do
 	# If dir doesn't exist already, create it.
 	if [[ ! -d "$dir" ]]; then
 		echo "Creating directory $dir"
@@ -36,81 +24,44 @@ done
 
 # ======== ENV UPSERTION ======== #
 
-# Get all envs for each application from its respective <app>.example.env file.
-server_example_content=$( cat "$examples_dir/server.example.env" )
-migrate_example_content=$( cat "$examples_dir/migrate.example.env" )
-worker_example_content=$( cat "$examples_dir/worker.example.env" )
+# Get env keys from "common" section of defaults JSON env file and convert into bash array.
+common_env_keys=$( cat "$defaults_path" | jq -r ".common | keys[]" )
+IFS=$'\n' read -rd '' -a common_keys <<<"$common_env_keys"
 
-# Upsert docker env files for each app for each env tier.
+# Upsert env file for each env tier.
 for env_tier in "${env_tiers[@]}"; do
-	# Skip this tier if the dir already has content.
-	env_tier_dir="$env_dir/$env_tier"
-	num_files=$( ls -l "$env_tier_dir" | wc -l )
+	env_file_path="$env_dir/$env_tier.env"
 
-	if [ "$num_files" -gt "0" ]; then
-		echo "Directory \"$env_tier_dir\" not empty. Skipping env file creation..."
+	# Skip if file already exists.
+	if [[ -e "$env_file_path" ]]; then
 		continue
 	fi
 
-	# Empty example_envs.
-	IFS=$'\n' read -rd '' -a example_envs <<<""
+	# Collect all env vars for this environment and write to env file.
+	envs=""
+	for key in "${common_keys[@]}"; do
+		# Get env-specific value and common fallback value.
+		env_specific_val=$( cat "$defaults_path" | jq -r ".$env_tier.$key" )
+		common_env_val=$( cat "$defaults_path" | jq -r ".common.$key" )
 
-	# For each app...
-	for app in "${apps[@]}"; do
-		# Get the example envs for this app.
-		case "$app" in
-			server*)  example_content="$server_example_content";;
-			migrate*) example_content="$migrate_example_content";;
-			worker*)  example_content="$worker_example_content";;
-		esac
-
-		# Read envs into an array.
-		IFS=$'\n' read -rd '' -a example_envs <<<"$example_content"
-
-		# Build up a string of env vars to write to an env config file.
-		app_envs=""
-		for env_name in "${example_envs[@]}"; do
-			# Attempt to find env default value from docker-defaults.json, using 'jq'.
-			env_val=$( cat "$docker_env_defaults_path" | jq -r ".$app.$env_tier.$env_name" )
-
-			# Use empty string instead of null.
-			if [[ "$env_val" = "null" ]]; then
-				env_val=""
-			fi
-
-			# Append the new env var.
-			app_envs="$app_envs$env_name=$env_val\n"
-		done
-
-		app_env_file="$env_tier_dir/$app.env"
-
-		echo "Creating env file \"$app_env_file\"."
-
-		# Write env vars to file.
-		printf "$app_envs" > "$app_env_file"
-	done
-done
-
-# Upsert non-docker .env file used for local dev
-if [[ ! -e "$local_env_filepath" ]]; then
-	IFS=$'\n' read -rd '' -a server_example_envs <<<"$server_example_content"
-	local_envs=""
-
-	for env_name in "${server_example_envs[@]}"; do
-		# Attempt to find env default value from non-docker-local-defaults.json, using 'jq'.
-		env_val=$( cat "$non_docker_env_defaults_path" | jq -r ".$env_name" )
-
-		# Use empty string instead of null.
-		if [[ "$env_val" = "null" ]]; then
-			env_val=""
+		# Sub null values for empty strings
+		if [[ "$env_specific_val" = "null" ]]; then
+			env_specific_val=""
 		fi
 
-		# Append the new env var.
-		local_envs="${local_envs}export $env_name=\"$env_val\"\n"
+		if [[ "$common_env_val" = "null" ]]; then
+			common_env_val=""
+		fi
+
+		# Prioritize the env-specific value, but use the common env value as default.
+		val="${env_specific_val:-$common_env_val}"
+
+		# Add env key/value pair to this set of envs
+		envs="$envs$key=$val\n"
 	done
 
-	echo "Creating env file \"$local_env_filepath\"."
+	echo "Creating env file \"$env_file_path\"."
 
 	# Write env vars to file.
-	printf "$local_envs" > "$local_env_filepath"
-fi
+	printf "$envs" > "$env_file_path"
+done

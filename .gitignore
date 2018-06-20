@@ -5,6 +5,7 @@
 
 .idea/
 *.pem
+*.env
 
 *.exef
 *.test
@@ -12,9 +13,3 @@
 
 vendor/
 bin/
-envs/test
-envs/local
-envs/dev
-envs/staging
-envs/prod
-.env
