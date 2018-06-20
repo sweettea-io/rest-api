@@ -4,12 +4,11 @@
 
 # ======== PARSE ARGS ======== #
 
-app_arg="$1"
-env_tier="$2"
-env_name="$3"
-arg_name="$4"
+env_tier="$1"
+env_name="$2"
+arg_name="$3"
 envs_dir="./envs"
-env_file_path="$envs_dir/$env_tier/$app_arg.env"
+env_file_path="$envs_dir/$env_tier.env"
 
 # ======== RETRIEVE ENV VAL(s) ======== #
 

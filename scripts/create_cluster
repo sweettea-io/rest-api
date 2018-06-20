@@ -8,7 +8,7 @@ this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 provider="$1"
 type="$2"
 env="$3"
-upper_type=$( echo "$type" | tr "[:lower:]" "[:upper:]" )
+uppercase_type=$( echo "$type" | tr "[:lower:]" "[:upper:]" )
 
 # ======== VALIDATE ARGS ======== #
 
@@ -20,16 +20,13 @@ $this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
 
 # TODO: Handle vast difference in logic when $env == 'local'.
 
-# Read envs from server.env for the provided $env
-app_for_env_reading="server"
-
-# Required to have env values already
-cluster_name=$( $this_dir/env_reader "$app_for_env_reading" "$env" "${upper_type}_CLUSTER_NAME" )
-domain=$( $this_dir/env_reader "$app_for_env_reading" "$env" "DOMAIN" )
-hosted_zone_id=$( $this_dir/env_reader "$app_for_env_reading" "$env" "HOSTED_ZONE_ID" )
+# Required to have env values already.
+cluster_name=$( $this_dir/env_reader "$env" "${uppercase_type}_CLUSTER_NAME" )
+domain=$( $this_dir/env_reader "$env" "DOMAIN" )
+hosted_zone_id=$( $this_dir/env_reader "$env" "HOSTED_ZONE_ID" )
 
 if [[ ! "$cluster_name" ]]; then
-	echo "${upper_type}_CLUSTER_NAME env var must have a value already set. Exiting."
+	echo "${uppercase_type}_CLUSTER_NAME env var must have a value already set. Exiting."
 	exit
 fi
 
@@ -44,13 +41,13 @@ if [[ ! "$hosted_zone_id" ]]; then
 fi
 
 # Envs that can (but don't have to) be set yet.
-zones=$( $this_dir/env_reader "$app_for_env_reading" "$env" "${upper_type}_CLUSTER_ZONES" )
-master_size=$( $this_dir/env_reader "$app_for_env_reading" "$env" "MASTER_SIZE" )
-node_size=$( $this_dir/env_reader "$app_for_env_reading" "$env" "NODE_SIZE" )
-node_count=$( $this_dir/env_reader "$app_for_env_reading" "$env" "NODE_COUNT" )
-state=$( $this_dir/env_reader "$app_for_env_reading" "$env" "${upper_type}_CLUSTER_STATE" )
-image=$( $this_dir/env_reader "$app_for_env_reading" "$env" "CLUSTER_IMAGE" )
-k8s_version=$( $this_dir/env_reader "$app_for_env_reading" "$env" "K8S_VERSION" )
+zones=$( $this_dir/env_reader "$env" "${uppercase_type}_CLUSTER_ZONES" )
+master_size=$( $this_dir/env_reader "$env" "MASTER_SIZE" )
+node_size=$( $this_dir/env_reader "$env" "NODE_SIZE" )
+node_count=$( $this_dir/env_reader "$env" "NODE_COUNT" )
+state=$( $this_dir/env_reader "$env" "${uppercase_type}_CLUSTER_STATE" )
+image=$( $this_dir/env_reader "$env" "CLUSTER_IMAGE" )
+k8s_version=$( $this_dir/env_reader "$env" "K8S_VERSION" )
 
 # ======== USE FALLBACK DEFAULTS (if necessary) ======== #
 
@@ -61,8 +58,18 @@ node_count="${node_count:-2}"
 image="${image:-099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1}"
 k8s_version="${k8s_version:-1.7.10}"
 
-# ======== CREATE CLUSTER ======== #
+# ======== UPSERT CLUSTER ======== #
 
-$this_dir/$provider/upsert_cluster "$cluster_name" "$domain" "$hosted_zone_id" "$state" "$zones" "$master_size" "$node_size" "$node_count" "$image" "$k8s_version"
+$this_dir/$provider/upsert_cluster \
+	"$cluster_name" \
+	"$domain" \
+	"$hosted_zone_id" \
+	"$state" \
+	"$zones" \
+	"$master_size" \
+	"$node_size" \
+	"$node_count" \
+	"$image" \
+	"$k8s_version"
 
 echo "Done!"

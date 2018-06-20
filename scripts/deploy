@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# --- Deploy supported application to Kubernetes cluster of specified env tier --- #
+# --- Deploy Supported Application to Core Kubernetes Cluster of Specified Env Tier --- #
 
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 app="$1"
 deploy_env="$2"
+uppercase_app=$( echo "$app" | tr "[:lower:]" "[:upper:]" )
 
 # ======== VALIDATE ARGS ======== #
 
@@ -15,8 +16,8 @@ $this_dir/validate_arg "env" "$deploy_env" "local|dev|staging|prod"
 
 # ======== TAG/PUSH IMAGE TO REPOSITORY ======== #
 
-image_owner=$( $this_dir/env_reader "$app" "$deploy_env" "IMAGE_OWNER" )
-image_name=$( $this_dir/env_reader "$app" "$deploy_env" "IMAGE_NAME" )
+image_owner=$( $this_dir/env_reader "$deploy_env" "IMAGE_OWNER" )
+image_name=$( $this_dir/env_reader "$deploy_env" "${uppercase_app}_IMAGE_NAME" )
 image_repo="$image_owner/$image_name"
 image_version=$( $this_dir/latest_sha )
 
@@ -28,11 +29,12 @@ docker push "$image_repo:$image_version"
 
 # ======== SPECIFY/VALIDATE CLUSTER ======== #
 
-# Get cluster name from envs.
-cluster_name=$( $this_dir/env_reader "$app" "$deploy_env" "CLUSTER_NAME" )
+# Get core cluster name from envs.
+cluster_name=$( $this_dir/env_reader "$deploy_env" "CORE_CLUSTER_NAME" )
+domain=$( $this_dir/env_reader "$deploy_env" "DOMAIN" )
 
 # Switch to cluster context.
-kubectl config use-context "$cluster_name"
+kubectl config use-context "$cluster_name.$domain"
 
 if ! kubectl get nodes; then
 	echo "Error fetching cluster nodes. Not deploying."
@@ -59,10 +61,10 @@ fi
 
 # ======== FORMAT DEPLOY ARGS ======== #
 
-port=$( $this_dir/env_reader "$app" "$deploy_env" "SERVER_PORT" "port" )
-replicas=$( $this_dir/env_reader "$app" "$deploy_env" "REPLICAS_COUNT" "replicas" )
-restart=$( $this_dir/env_reader "$app" "$deploy_env" "RESTART_POLICY" "restart" )
-deploy_envs=$( $this_dir/env_reader "$app" "$deploy_env" "all" "true" )
+port=$( $this_dir/env_reader "$deploy_env" "SERVER_PORT" "port" )
+replicas=$( $this_dir/env_reader "$deploy_env" "${uppercase_app}_REPLICAS" "replicas" )
+restart=$( $this_dir/env_reader "$deploy_env" "${uppercase_app}_RESTART_POLICY" "restart" )
+deploy_envs=$( $this_dir/env_reader "$deploy_env" "all" "true" )
 
 # ======== DEPLOY ======== #
 
