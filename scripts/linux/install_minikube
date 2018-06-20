@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# --- Install minikube if not already installed --- #
+
+# Check for minikube existence.
+if [[ "$( which minikube )" ]]; then
+	echo "minikube detected -- Skipping installation"
+else
+	echo "minikube not detected -- Installing..."
+	curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.28.0/minikube-linux-amd64
+	chmod +x minikube
+	sudo mv minikube /usr/local/bin/
+fi

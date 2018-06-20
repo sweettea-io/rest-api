@@ -21,6 +21,9 @@ fi
 # Install jq to help with bash json parsing.
 $this_dir/$os/install_jq
 
+# Install minikube for local k8s development.
+$this_dir/$os/install_minikube
+
 # Install kops.
 $this_dir/$os/install_kops
 
