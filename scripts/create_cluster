@@ -18,6 +18,8 @@ $this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
 
 # ======== GET ENV VALS ======== #
 
+# TODO: Handle vast difference in logic when $env == 'local'.
+
 # Read envs from server.env for the provided $env
 app_for_env_reading="server"
 
