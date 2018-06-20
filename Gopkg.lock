@@ -50,6 +50,12 @@
   revision = "04140366298a54a039076d798123ffa108fff46c"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/joeshaw/envdecode"
+  packages = ["."]
+  revision = "c9e0158544672841c3ebf49308f536d918f2e525"
+
+[[projects]]
   name = "github.com/kelseyhightower/envconfig"
   packages = ["."]
   revision = "f611eb38b3875cc3bd991ca91c51d06446afa14c"
@@ -117,6 +123,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fedaeccd0b0d6ac43322a7b07f27b46eb51a7d7a3bbb8dd0db76483216c8dbb1"
+  inputs-digest = "6d6e9bda81680fa878381014456d08327a18d0ec46390c0113e58bdc293bf39c"
   solver-name = "gps-cdcl"
   solver-version = 1
