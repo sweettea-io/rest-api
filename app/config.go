@@ -36,8 +36,8 @@ type appConfig struct {
   RedisUrl            string  `env:"REDIS_URL,required"`
   RestApiToken        string  `env:"REST_API_TOKEN,required"`
   ServerPort          int     `env:"SERVER_PORT,required"`
-  TrainClusterName    string  `env:"TRAIN_CLUSTER_NAME,required"`
-  TrainClusterState   string  `env:"TRAIN_CLUSTER_STATE,required"`
+  TrainClusterName    string  `env:"TRAIN_CLUSTER_NAME"`
+  TrainClusterState   string  `env:"TRAIN_CLUSTER_STATE"`
   WildcardSslCertArn  string  `env:"WILDCARD_SSL_CERT_ARN,required"`
   WorkerCount         uint    `env:"WORKER_COUNT"`
 }

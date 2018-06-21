@@ -33,9 +33,9 @@ func main() {
   router := api.CreateRouter(baseRoute, db, logger)
 
   // Format address to listen on.
-  addr := fmt.Sprintf(":%v", app.Config.Port)
+  addr := fmt.Sprintf(":%v", app.Config.ServerPort)
 
-  logger.Infof("Listening on port %v...\n", app.Config.Port)
+  logger.Infof("Listening on port %v...\n", app.Config.ServerPort)
 
   // Start server.
   panic(http.ListenAndServe(addr, router))
