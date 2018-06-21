@@ -7,10 +7,10 @@ install: ## Setup & install project dependencies
 	./scripts/install
 
 export provider=aws
-export type
+export role
 export env
 cluster: ## Create the core, train, or build cluster for a specific environment.
-	./scripts/create_cluster $(provider) $(type) $(env)
+	./scripts/create_cluster $(provider) $(role) $(env)
 
 export target
 export env=local
