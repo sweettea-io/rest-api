@@ -25,7 +25,7 @@ RUN dep ensure -vendor-only
 COPY . .
 
 # Build Go binary.
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -o main ./cmd/$ROLE/
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -o main ./cmd/$ROLE
 
 # Switch over to alpine base image (*much* lighter) for running of Go binary.
 FROM alpine:latest
