@@ -69,7 +69,7 @@ deploy_envs=$( $this_dir/env_reader "$deploy_env" "all" "true" )
 # ======== DEPLOY ======== #
 
 if [[ "$new_deploy" == "true" ]]; then
-	# Create a new k8s cluster deployment.
+	# Create a new k8s cluster deployment (or job).
 	kubectl run "$resource_name" "--image=$image_repo" "$port" "$replicas" "$restart" "$deploy_envs"
 else
 	# Update the image of an existing k8s deployment.
