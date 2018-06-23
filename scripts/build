@@ -1,52 +1,49 @@
 #!/bin/bash
 
-# --- Build one or more Sweet Tea applications as either Go binaries or Docker images --- #
+# --- Build one or all Sweet Tea applications as either Go binaries or Docker images --- #
 
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-IFS=$',' read -rd '' -a apps <<<"$1"
+app="$1"
 build_env="$2"
 build_format="$3"
 go_build_output_dir="./bin"
 
 # ======== VALIDATE ARGS ======== #
 
+$this_dir/validate_arg "target" "$app" "server|migrate|worker|all"
 $this_dir/validate_arg "env" "$build_env" "test|local|dev|staging|prod"
 $this_dir/validate_arg "format" "$build_format" "image|binary"
 
 # ======== BUILD APPS ======== #
 
+# Create array of apps to build.
+if [[ "$app" = "all" ]]; then
+	declare -a apps_to_build=("server" "migrate" "worker")
+else
+	declare -a apps_to_build=("$app")
+fi
+
 # If building for Docker...
 if [[ "$build_format" = "image" ]]; then
 	# Build each app as a Docker image.
-	for app in "${apps[@]}"; do
-		# Strip newlines from app name
-		app=$( sed 's_\n__' <<<"$app" )
+	for app_to_build in "${apps_to_build[@]}"; do
+		uppercase_app=$( echo "$app_to_build" | tr "[:lower:]" "[:upper:]" )
 
-		# Construct the docker image name from dthe apps name.
-		# Tasks will use their dir names. Non-tasks will use env vars.
-		if grep "tasks/" <<<"$app" &>/dev/null; then
-			# Ex: 'tasks/upsert_user' --> 'upsert_user_task'
-			image_name=$( echo "$app" | sed -e "s_tasks/__" -e "s/$/_task/" )
-		else
-			uppercase_app=$( echo "$app" | tr "[:lower:]" "[:upper:]" )
-			image_name=$( $this_dir/env_reader "$build_env" "${uppercase_app}_IMAGE_NAME" )
-		fi
+		# Get the docker image name for the specified env and app.
+		image_name=$( $this_dir/env_reader "$build_env" "${uppercase_app}_IMAGE_NAME" )
 
-		echo "Building \"$app\" for \"$build_env\" environment into Docker image \"$image_name\"..."
+		echo "Building \"$app_to_build\" for \"$build_env\" environment into Docker image \"$image_name\"..."
 
 		# Build the app image.
-		docker build --build-arg ROLE="$app" -t "$image_name" .
+		docker build --build-arg ROLE="$app_to_build" -t "$image_name" .
 	done
 else
 	# Build each app as a Go binary.
-	for app in "${apps[@]}"; do
-		# Strip newlines from app name
-		app=$( sed 's_\n__' <<<"$app" )
-
-		echo "Building \"$app\" into Go binary at $go_build_output_dir/$app..."
-		go build -a -o "$go_build_output_dir/$app" "./cmd/$app"
+	for app_to_build in "${apps_to_build[@]}"; do
+		echo "Building \"$app_to_build\" into Go binary at $go_build_output_dir/$app_to_build..."
+		go build -a -o "$go_build_output_dir/$app_to_build" "./cmd/$app_to_build"
 	done
 fi
 
