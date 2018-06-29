@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# --- Create Sweet Tea User in database of specified environment --- #
+
+# ======== PARSE ARGS ======== #
+
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+env="$1"
+email="$2"
+pw="$3"
+admin="$4"
+
+# ======== VALIDATE ARGS ======== #
+
+$this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
+$this_dir/validate_arg "admin" "$admin" "true|false"
+
+if [[ ! "$email" ]]; then
+	echo "\"email\" argument cannot be empty. Exiting."
+	exit
+fi
+
+if [[ ! "$pw" ]]; then
+	echo "\"pw\" argument cannot be empty. Exiting."
+	exit
+fi
+
+# ======== PERFORM API CALL ======== #
+
+payload="{\"email\":\"$email\",\"password\":\"$pw\",\"admin\":$admin}"
+
+$this_dir/core_api_call "$env" "POST" "/users" "$payload"

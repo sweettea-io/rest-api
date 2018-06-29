@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# --- Perform an API call to the Core cluster for a specific environment --- #
+
+# ======== PARSE ARGS ======== #
+
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+env="$1"
+method="$2"
+route="$3"
+payload="4"
+
+# ======== VALIDATE ARGS ======== #
+
+$this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
+$this_dir/validate_arg "method" "$method" "GET|POST|PUT|DELETE"
+
+# ======== GET ENV VALS ======== #
+
+domain=$( $this_dir/env_reader "$env" "DOMAIN" )
+rest_api_token=$( $this_dir/env_reader "$env" "REST_API_TOKEN" )
+api_version=$( $this_dir/env_reader "$env" "API_VERSION" )
+
+if [[ ! "$domain" ]]; then
+	echo "DOMAIN env var must have a value already set. Exiting."
+	exit
+fi
+
+if [[ ! "$rest_api_token" ]]; then
+	echo "REST_API_TOKEN env var must have a value already set. Exiting."
+	exit
+fi
+
+if [[ ! "$api_version" ]]; then
+	echo "API_VERSION env var must have a value already set. Exiting."
+	exit
+fi
+
+# ======== FORMAT CURL ARGS ======== #
+
+if [[ "$payload" ]]; then
+	payload="-d $payload"
+fi
+
+url="https://api.$domain/$api_version${route}"
+
+# ======== PERFORM API CALL ======== #
+
+curl "$payload" -H "Content-Type: application/json" -H "Sweet-Tea-Api-Token: $rest_api_token" -X "$method" "$url"

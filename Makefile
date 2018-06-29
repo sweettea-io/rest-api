@@ -35,6 +35,13 @@ export env=local
 deploy: ## Deploy the latest Docker image of an application to a specific environment.
 	./scripts/deploy $(target) $(env)
 
+export env
+export email
+export pw
+export admin=false
+user: ## Create Sweet Tea User in the database of the specified environment.
+	./scripts/create_user $(env) $(email) $(pw) $(admin)
+
 clean: ## Remove all built Go binaries
 	rm ./bin/*
 

@@ -99,13 +99,7 @@ $this_dir/$provider/upsert_cluster \
 
 # ======== REGISTER NEW API CLUSTER WITH CORE CLUSTER FOR THIS ENV ======== #
 
-payload="{\"name\":\"$name\",\"bucket_name\":\"$bucket_name\"}"
-
-curl -d "$payload" \
-	-H "Content-Type: application/json" \
-	-H "Sweet-Tea-Api-Token: $rest_api_token" \
-	-X POST \
-	"https://api.$domain/$api_version/clusters"
+$this_dir/core_api_call "$env" "POST" "/clusters" "{\"name\":\"$name\",\"bucket_name\":\"$bucket_name\"}"
 
 # ======== RE-BUILD & DEPLOY TO CORE CLUSTER FOR THIS ENV ======== #
 
