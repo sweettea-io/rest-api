@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- Ingest args and prep them for provider-specific API cluster-creation script --- #
+# --- Create a new API cluster for a specific enviornment with the provided name --- #
 
 # ======== PARSE ARGS ======== #
 
@@ -12,12 +12,8 @@ env="$3"
 # ======== VALIDATE ARGS ======== #
 
 $this_dir/validate_arg "provider" "$provider" "aws"
+$this_dir/validate_arg "name" "$name"
 $this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
-
-if [[ ! "$name" ]]; then
-	echo "\"name\" argument cannot be empty. Exiting."
-	exit
-fi
 
 # ======== GET ENV VALS ======== #
 
