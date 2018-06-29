@@ -12,6 +12,12 @@ export env
 cluster: ## Create the core, train, or build cluster for a specific environment.
 	./scripts/create_cluster $(provider) $(role) $(env)
 
+export provider=aws
+export name
+export env
+api: ## Create a new API cluster for a specific environment.
+	./scripts/create_api $(provider) $(name) $(env)
+
 export target
 export env=local
 export format=image

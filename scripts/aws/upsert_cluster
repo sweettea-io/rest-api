@@ -48,7 +48,7 @@ if [[ ! "$state" ]]; then
 	# Give state a value using new bucket name.
 	state="s3://$bucket_name"
 
-	echo "Created S3 bucket, $bucket_name.\nSet \"$state\" as your *_CLUSTER_STATE environment variable."
+	echo "Created S3 bucket, $bucket_name."
 fi
 
 # Upsert hosted zone.
