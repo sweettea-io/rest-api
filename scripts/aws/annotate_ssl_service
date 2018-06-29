@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# --- Annotate K8S service with labels required for SSL to work --- #
+
+name="$1"
+ssl_cert="$2"
+ssl_ports="${3:-443}"
+
+kubectl annotate service "$name" \
+	service.beta.kubernetes.io/aws-load-balancer-ssl-cert="$ssl_cert" \
+	service.beta.kubernetes.io/aws-load-balancer-ssl-ports="$ssl_ports"

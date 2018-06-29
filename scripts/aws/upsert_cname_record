@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# --- Upsert CNAME record on Route53 --- #
+
+# ======== PARSE ARGS ======== #
+
+hosted_zone_id="$1"
+record_name="$2"
+record_val="$3"
+
+# ======== VALIDATE ARGS ======== #
+
+if [[ ! "$hosted_zone_id" ]]; then
+	echo "\"hosted_zone_id\" arg required. Exiting."
+	exit
+fi
+
+if [[ ! "$record_name" ]]; then
+	echo "\"record_name\" arg required. Exiting."
+	exit
+fi
+
+if [[ ! "$record_val" ]]; then
+	echo "\"record_val\" arg required. Exiting."
+	exit
+fi
+
+# ======== UPSERT CNAME RECORD ======== #
+
+# Create payload for CNAME record change.
+changes="{
+	\"Comment\": \"Upserting CNAME Record\",
+	\"Changes\": [{
+		\"Action\": \"UPSERT\",
+		\"ResourceRecordSet\": {
+		  \"Name\": \"$record_name\",
+		  \"Type\": \"CNAME\",
+		  \"TTL\": 60,
+		  \"ResourceRecords\": [{\"Value\": \"$record_val\"}]
+		}
+	}]
+}"
+
+# Register NS records.
+echo "Registering CNAME record on hosted zone ID \"$hosted_zone_id\" (name --> val): $record_name --> $record_val"
+aws route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "$changes"

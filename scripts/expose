@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# --- Expose a K8S deployment as a K8S service with a LoadBalancer --- #
+
+# ======== PARSE ARGS ======== #
+
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+name="$1"
+port="${2:-443}"
+target_port="${3:-80}"
+
+# ======== VALIDATE ARGS ======== #
+
+$this_dir/validate_arg "name" "$name"
+
+# ======== EXPOSE DEPLOYMENT ======== #
+
+echo "Exposing deployment \"$name\" as service \"$name\" with load balancer ($port <--> $target_port)..."
+
+kubectl expose "deployment/$name" \
+	--type=LoadBalancer \
+	--port="$port" \
+	--target-port="$target_port" \
+	--name="$name"
