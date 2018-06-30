@@ -4,7 +4,6 @@
 //    Session
 //    Company
 //    Cluster
-//    Bucket
 //    Project
 //    Dataset
 //    Env
@@ -20,10 +19,6 @@
 //    Company|Cluster
 //        Company --> has_one --> Cluster
 //        Cluster --> has_one --> Company
-//
-//    Company|Bucket
-//        Company --> has_one --> Bucket
-//        Bucket --> has_one --> Company
 //
 //    Company|Project
 //        Company --> has_many --> projects
@@ -41,9 +36,9 @@
 //        Project --> has_many --> commits
 //        Commit --> belongs_to --> Project
 //
-//    Commit|Deploys
+//    Commit|Deploy
 //        Commit --> has_many --> deploys
-//        Deploys --> belongs_to --> Commit
+//        Deploy --> belongs_to --> Commit
 //
 package models
 
@@ -75,37 +70,25 @@ type Session struct {
 
 type Company struct {
   gorm.Model
-  Uid         string  `gorm:"type:varchar(240);default:null;unique;not null;index:company_uid"`
-  Name        string  `gorm:"type:varchar(240);default:null;not null"`
-  Slug        string  `gorm:"type:varchar(240);default:null;unique;not null;index:company_slug"`
+  Uid         string    `gorm:"type:varchar(240);default:null;unique;not null;index:company_uid"`
+  Name        string    `gorm:"type:varchar(240);default:null;not null"`
+  Slug        string    `gorm:"type:varchar(240);default:null;unique;not null;index:company_slug"`
   Cluster     Cluster
-  ClusterID   int     `gorm:"default:null;index:company_cluster_id"`
-  Bucket      Bucket
-  BucketID    int     `gorm:"default:null;index:company_bucket_id"`
-  Projects       []Project
-  IsDestroyed bool    `gorm:"default:false"`
+  ClusterID   int       `gorm:"default:null;index:company_cluster_id"`
+  Projects    []Project
+  IsDestroyed bool      `gorm:"default:false"`
   WithUid
 }
 
 type Cluster struct {
   gorm.Model
-  Uid          string      `gorm:"type:varchar(240);default:null;unique;not null;index:cluster_uid"`
-  Name         string      `gorm:"type:varchar(360);default:null;not null"`
-  NsAddresses  utils.JsonB `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
-  Zones        utils.JsonB `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
-  HostedZoneID string      `gorm:"type:varchar(240);default:null"`
-  MasterType   string      `gorm:"type:varchar(240);default:null"`
-  NodeType     string      `gorm:"type:varchar(240);default:null"`
-  Image        string      `gorm:"type:varchar(240);default:null"`
-  Validated    bool        `gorm:"default:false"`
-  IsDestroyed  bool        `gorm:"default:false"`
+  Uid          string `gorm:"type:varchar(240);default:null;unique;not null;index:cluster_uid"`
+  Name         string `gorm:"type:varchar(360);default:null;not null"`
+  Slug         string `gorm:"type:varchar(240);default:null;unique;not null;index:cluster_slug"`
+  Cloud        string `gorm:"type:varchar(240);default:null;not null"`
+  State        string `gorm:"type:varchar(360);default:null;not null"`
+  IsDestroyed  bool   `gorm:"default:false"`
   WithUid
-}
-
-type Bucket struct {
-  gorm.Model
-  Name        string `gorm:"type:varchar(240);default:null"`
-  IsDestroyed bool   `gorm:"default:false"`
 }
 
 type Project struct {
@@ -118,8 +101,8 @@ type Project struct {
   Datasets         []Dataset
   Envs             []Env
   Commits          []Commit
-  Elb              string    `gorm:"type:varchar(240);default:null"`
-  Domain           string    `gorm:"type:varchar(360);default:null"`
+  LBHostName       string    `gorm:"type:varchar(240);default:null"`
+  HostName         string    `gorm:"type:varchar(360);default:null"`
   DeployName       string    `gorm:"type:varchar(360);default:null"`
   ClientID         string    `gorm:"type:varchar(240);default:null"`
   ClientSecret     string    `gorm:"type:varchar(240);default:null"`
@@ -131,47 +114,43 @@ type Project struct {
 
 type Dataset struct {
   gorm.Model
-  Uid                  string `gorm:"type:varchar(240);default:null;unique;not null;index:dataset_uid"`
-  Name                 string `gorm:"type:varchar(240);default:null;not null"`
-  Slug                 string `gorm:"type:varchar(240);default:null;unique;not null;index:dataset_slug"`
-  Project                 Project
-  ProjectID               int    `gorm:"default:null;not null;index:dataset_project_id"`
-  RetrainStepSize      int    `gorm:"default:0"`
-  LastTrainRecordCount int    `gorm:"default:0"`
-  IsDestroyed          bool   `gorm:"default:false"`
+  Uid                  string  `gorm:"type:varchar(240);default:null;unique;not null;index:dataset_uid"`
+  Name                 string  `gorm:"type:varchar(240);default:null;not null"`
+  Slug                 string  `gorm:"type:varchar(240);default:null;unique;not null;index:dataset_slug"`
+  Project              Project
+  ProjectID            int     `gorm:"default:null;not null;index:dataset_project_id"`
+  RetrainStepSize      int     `gorm:"default:0"`
+  LastTrainRecordCount int     `gorm:"default:0"`
+  IsDestroyed          bool    `gorm:"default:false"`
   WithUid
 }
 
 type Env struct {
   gorm.Model
-  Uid        string `gorm:"type:varchar(240);default:null;unique;not null;index:env_uid"`
-  Project       Project
-  ProjectID     int    `gorm:"default:null;not null;index:env_project_id"`
-  Name       string `gorm:"type:varchar(240);default:null;not null"`
-  Value      string `gorm:"type:varchar(240);default:null;not null"`
-  ForCluster string `gorm:"type:varchar(240);default:null;not null"`
+  Uid         string  `gorm:"type:varchar(240);default:null;unique;not null;index:env_uid"`
+  Project     Project
+  ProjectID   int     `gorm:"default:null;not null;index:env_project_id"`
+  Name        string  `gorm:"type:varchar(240);default:null;not null"`
+  Value       string  `gorm:"type:varchar(240);default:null;not null"`
+  ClusterRole string  `gorm:"type:varchar(240);default:null;not null"`
   WithUid
 }
 
 type Commit struct {
   gorm.Model
-  Project        Project
-  ProjectID      int          `gorm:"default:null;not null;index:commit_project_id"`
-  Deployss []Deploys
-  Sha         string       `gorm:"type:varchar(240);default:null;unique;not null;index:commit_sha"`
-  Message     string       `gorm:"type:varchar(240);default:null"`
-  Author      string       `gorm:"type:varchar(240);default:null"`
-  Branch      string       `gorm:"type:varchar(240);default:null"`
+  Project     Project
+  ProjectID   int      `gorm:"default:null;not null;index:commit_project_id"`
+  Deploys     []Deploy
+  Sha         string   `gorm:"type:varchar(240);default:null;unique;not null;index:commit_sha"`
+  Branch      string   `gorm:"type:varchar(240);default:null"`
 }
 
-type Deploys struct {
+type Deploy struct {
   gorm.Model
   Uid              string    `gorm:"type:varchar(240);default:null;unique;not null;index:deploy_uid"`
   Commit           Commit
   CommitID         int       `gorm:"default:null;not null;index:deploy_commit_id"`
-  Status           string    `gorm:"type:varchar(240);default:null"`
-  TrainTriggeredBy string    `gorm:"type:varchar(240);default:null"`
-  ServeTriggeredBy string    `gorm:"type:varchar(240);default:null"`
+  Stage            string    `gorm:"type:varchar(240);default:null"`
   Intent           string    `gorm:"type:varchar(240);default:null"`
   IntentUpdatedAt  time.Time
   Failed           bool      `gorm:"default:false"`
@@ -196,6 +175,13 @@ func (session *Session) BeforeCreate(scope *gorm.Scope) error {
 func (company *Company) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("Uid", utils.NewUid())
   scope.SetColumn("Slug", utils.Slugify(company.Name))
+  return nil
+}
+
+// Assign Uid & Slug to Cluster before creation.
+func (cluster *Cluster) BeforeCreate(scope *gorm.Scope) error {
+  scope.SetColumn("Uid", utils.NewUid())
+  scope.SetColumn("Slug", utils.Slugify(cluster.Name))
   return nil
 }
 
