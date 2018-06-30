@@ -2,7 +2,7 @@
 //
 //    User
 //    Session
-//    Team
+//    Company
 //    Cluster
 //    Bucket
 //    Repo
@@ -17,17 +17,17 @@
 //        User --> has_many --> sessions
 //        Session --> belongs_to --> User
 //
-//    Team|Cluster
-//        Team --> has_one --> Cluster
-//        Cluster --> has_one --> Team
+//    Company|Cluster
+//        Company --> has_one --> Cluster
+//        Cluster --> has_one --> Company
 //
-//    Team|Bucket
-//        Team --> has_one --> Bucket
-//        Bucket --> has_one --> Team
+//    Company|Bucket
+//        Company --> has_one --> Bucket
+//        Bucket --> has_one --> Company
 //
-//    Team|Repo
-//        Team --> has_many --> repos
-//        Repo --> belongs_to --> Team
+//    Company|Repo
+//        Company --> has_many --> repos
+//        Repo --> belongs_to --> Company
 //
 //    Repo|Dataset
 //        Repo --> has_many --> datasets
@@ -73,15 +73,15 @@ type Session struct {
   Token      string `gorm:"type:varchar(240);default:null;unique;not null;index:session_token"`
 }
 
-type Team struct {
+type Company struct {
   gorm.Model
-  Uid         string  `gorm:"type:varchar(240);default:null;unique;not null;index:team_uid"`
+  Uid         string  `gorm:"type:varchar(240);default:null;unique;not null;index:company_uid"`
   Name        string  `gorm:"type:varchar(240);default:null;not null"`
-  Slug        string  `gorm:"type:varchar(240);default:null;unique;not null;index:team_slug"`
+  Slug        string  `gorm:"type:varchar(240);default:null;unique;not null;index:company_slug"`
   Cluster     Cluster
-  ClusterID   int     `gorm:"default:null;index:team_cluster_id"`
+  ClusterID   int     `gorm:"default:null;index:company_cluster_id"`
   Bucket      Bucket
-  BucketID    int     `gorm:"default:null;index:team_bucket_id"`
+  BucketID    int     `gorm:"default:null;index:company_bucket_id"`
   Repos       []Repo
   IsDestroyed bool    `gorm:"default:false"`
   WithUid
@@ -113,8 +113,8 @@ type Repo struct {
   Uid              string    `gorm:"type:varchar(240);default:null;unique;not null;index:repo_uid"`
   Name             string    `gorm:"type:varchar(240);default:null;not null"`
   Slug             string    `gorm:"type:varchar(240);default:null;unique;not null;index:repo_slug"`
-  Team             Team
-  TeamID           int       `gorm:"default:null;not null;index:repo_team_id"`
+  Company          Company
+  CompanyID        int       `gorm:"default:null;not null;index:repo_company_id"`
   Datasets         []Dataset
   Envs             []Env
   Commits          []Commit
@@ -192,10 +192,10 @@ func (session *Session) BeforeCreate(scope *gorm.Scope) error {
   return nil
 }
 
-// Assign Uid & Slug to Team before creation.
-func (team *Team) BeforeCreate(scope *gorm.Scope) error {
+// Assign Uid & Slug to Company before creation.
+func (company *Company) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("Uid", utils.NewUid())
-  scope.SetColumn("Slug", utils.Slugify(team.Name))
+  scope.SetColumn("Slug", utils.Slugify(company.Name))
   return nil
 }
 
