@@ -36,8 +36,7 @@ if [[ "$build_format" = "image" ]]; then
 
 		echo "Building \"$app_to_build\" for \"$build_env\" environment into Docker image \"$image_name\"..."
 
-		# Create a fresh .kubeconfig file to copy into the Docker image
-		# if building either the server or worker app.
+		# Create a fresh .kubeconfig file to copy into the Docker image for the server and worker apps.
 		if [ "$app_to_build" == "server" ] || [ "$app_to_build" == "worker" ]; then
 			$this_dir/create_kubeconfig "$build_env"
 		fi
