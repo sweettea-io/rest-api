@@ -5,11 +5,11 @@
 //    Company
 //    Cluster
 //    Bucket
-//    Repo
+//    Project
 //    Dataset
 //    Env
 //    Commit
-//    Deployment
+//    Deploy
 //
 // Relationships:
 //
@@ -25,25 +25,25 @@
 //        Company --> has_one --> Bucket
 //        Bucket --> has_one --> Company
 //
-//    Company|Repo
-//        Company --> has_many --> repos
-//        Repo --> belongs_to --> Company
+//    Company|Project
+//        Company --> has_many --> projects
+//        Project --> belongs_to --> Company
 //
-//    Repo|Dataset
-//        Repo --> has_many --> datasets
-//        Dataset --> belongs_to --> Repo
+//    Project|Dataset
+//        Project --> has_many --> datasets
+//        Dataset --> belongs_to --> Project
 //
-//    Repo|Env
-//        Repo --> has_many --> envs
-//        Env --> belongs_to --> Repo
+//    Project|Env
+//        Project --> has_many --> envs
+//        Env --> belongs_to --> Project
 //
-//    Repo|Commit
-//        Repo --> has_many --> commits
-//        Commit --> belongs_to --> Repo
+//    Project|Commit
+//        Project --> has_many --> commits
+//        Commit --> belongs_to --> Project
 //
-//    Commit|Deployment
-//        Commit --> has_many --> deployments
-//        Deployment --> belongs_to --> Commit
+//    Commit|Deploys
+//        Commit --> has_many --> deploys
+//        Deploys --> belongs_to --> Commit
 //
 package models
 
@@ -82,7 +82,7 @@ type Company struct {
   ClusterID   int     `gorm:"default:null;index:company_cluster_id"`
   Bucket      Bucket
   BucketID    int     `gorm:"default:null;index:company_bucket_id"`
-  Repos       []Repo
+  Projects       []Project
   IsDestroyed bool    `gorm:"default:false"`
   WithUid
 }
@@ -108,19 +108,18 @@ type Bucket struct {
   IsDestroyed bool   `gorm:"default:false"`
 }
 
-type Repo struct {
+type Project struct {
   gorm.Model
-  Uid              string    `gorm:"type:varchar(240);default:null;unique;not null;index:repo_uid"`
+  Uid              string    `gorm:"type:varchar(240);default:null;unique;not null;index:project_uid"`
   Name             string    `gorm:"type:varchar(240);default:null;not null"`
-  Slug             string    `gorm:"type:varchar(240);default:null;unique;not null;index:repo_slug"`
+  Slug             string    `gorm:"type:varchar(240);default:null;unique;not null;index:project_slug"`
   Company          Company
-  CompanyID        int       `gorm:"default:null;not null;index:repo_company_id"`
+  CompanyID        int       `gorm:"default:null;not null;index:project_company_id"`
   Datasets         []Dataset
   Envs             []Env
   Commits          []Commit
   Elb              string    `gorm:"type:varchar(240);default:null"`
   Domain           string    `gorm:"type:varchar(360);default:null"`
-  ImageRepoOwner   string    `gorm:"type:varchar(240);default:null"`
   DeployName       string    `gorm:"type:varchar(360);default:null"`
   ClientID         string    `gorm:"type:varchar(240);default:null"`
   ClientSecret     string    `gorm:"type:varchar(240);default:null"`
@@ -135,8 +134,8 @@ type Dataset struct {
   Uid                  string `gorm:"type:varchar(240);default:null;unique;not null;index:dataset_uid"`
   Name                 string `gorm:"type:varchar(240);default:null;not null"`
   Slug                 string `gorm:"type:varchar(240);default:null;unique;not null;index:dataset_slug"`
-  Repo                 Repo
-  RepoID               int    `gorm:"default:null;not null;index:dataset_repo_id"`
+  Project                 Project
+  ProjectID               int    `gorm:"default:null;not null;index:dataset_project_id"`
   RetrainStepSize      int    `gorm:"default:0"`
   LastTrainRecordCount int    `gorm:"default:0"`
   IsDestroyed          bool   `gorm:"default:false"`
@@ -146,8 +145,8 @@ type Dataset struct {
 type Env struct {
   gorm.Model
   Uid        string `gorm:"type:varchar(240);default:null;unique;not null;index:env_uid"`
-  Repo       Repo
-  RepoID     int    `gorm:"default:null;not null;index:env_repo_id"`
+  Project       Project
+  ProjectID     int    `gorm:"default:null;not null;index:env_project_id"`
   Name       string `gorm:"type:varchar(240);default:null;not null"`
   Value      string `gorm:"type:varchar(240);default:null;not null"`
   ForCluster string `gorm:"type:varchar(240);default:null;not null"`
@@ -156,20 +155,20 @@ type Env struct {
 
 type Commit struct {
   gorm.Model
-  Repo        Repo
-  RepoID      int          `gorm:"default:null;not null;index:commit_repo_id"`
-  Deployments []Deployment
+  Project        Project
+  ProjectID      int          `gorm:"default:null;not null;index:commit_project_id"`
+  Deployss []Deploys
   Sha         string       `gorm:"type:varchar(240);default:null;unique;not null;index:commit_sha"`
   Message     string       `gorm:"type:varchar(240);default:null"`
   Author      string       `gorm:"type:varchar(240);default:null"`
   Branch      string       `gorm:"type:varchar(240);default:null"`
 }
 
-type Deployment struct {
+type Deploys struct {
   gorm.Model
-  Uid              string    `gorm:"type:varchar(240);default:null;unique;not null;index:deployment_uid"`
+  Uid              string    `gorm:"type:varchar(240);default:null;unique;not null;index:deploy_uid"`
   Commit           Commit
-  CommitID         int       `gorm:"default:null;not null;index:deployment_commit_id"`
+  CommitID         int       `gorm:"default:null;not null;index:deploy_commit_id"`
   Status           string    `gorm:"type:varchar(240);default:null"`
   TrainTriggeredBy string    `gorm:"type:varchar(240);default:null"`
   ServeTriggeredBy string    `gorm:"type:varchar(240);default:null"`
@@ -200,10 +199,10 @@ func (company *Company) BeforeCreate(scope *gorm.Scope) error {
   return nil
 }
 
-// Assign Uid & Slug to Repo before creation.
-func (repo *Repo) BeforeCreate(scope *gorm.Scope) error {
+// Assign Uid & Slug to Project before creation.
+func (project *Project) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("Uid", utils.NewUid())
-  scope.SetColumn("Slug", utils.Slugify(repo.Name))
+  scope.SetColumn("Slug", utils.Slugify(project.Name))
   return nil
 }
 
