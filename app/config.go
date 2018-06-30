@@ -6,7 +6,7 @@ import (
 )
 
 type appConfig struct {
-  ApiClusterZones     string  `env:"API_CLUSTER_ZONES,required"`
+  ApiClusterZones     string  `env:"API_CLUSTER_ZONES"`
   ApiVersion          string  `env:"API_VERSION,required"`
   AwsAccessKeyId      string  `env:"AWS_ACCESS_KEY_ID,required"`
   AwsRegionName       string  `env:"AWS_REGION_NAME,required"`

@@ -181,12 +181,13 @@ type Deployment struct {
 
 // -------- Model Creation-related Hooks ----------
 
-// Hook generating a uid for a model that needs one.
+// Assign Uid to model before creation.
 func (w *WithUid) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("Uid", utils.NewUid())
   return nil
 }
 
+// Assign newly minted secret to Session token before creation.
 func (session *Session) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("Token", utils.FreshSecret())
   return nil
