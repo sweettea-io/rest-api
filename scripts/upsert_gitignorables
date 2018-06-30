@@ -7,9 +7,10 @@
 env_dir="./envs"
 examples_dir="$env_dir/examples"
 defaults_path="$env_dir/defaults.json"
+tmp_kubeconfigs_dir="./tmp/kubeconfigs"
 declare -a apps=("migrate" "server" "worker")
 declare -a env_tiers=("test" "local" "dev" "staging" "prod")
-declare -a dirs_to_upsert=("./bin/" "$env_dir")
+declare -a dirs_to_upsert=("./bin/" "$tmp_kubeconfigs_dir" "$env_dir")
 
 # ======== GENERIC FILE/DIR UPSERTION ======== #
 
@@ -18,7 +19,17 @@ for dir in "${dirs_to_upsert[@]}"; do
 	# If dir doesn't exist already, create it.
 	if [[ ! -d "$dir" ]]; then
 		echo "Creating directory $dir"
-		mkdir "$dir"
+		mkdir -p "$dir"
+	fi
+done
+
+# Upsert a tmp kubeconfig file for each env
+for env_tier in "${env_tiers[@]}"; do
+	tmp_kubeconfig_path="$tmp_kubeconfigs_dir/$env_tier"
+
+	if [[ ! -e "$tmp_kubeconfig_path" ]]; then
+		echo "Creating empty temp kubeconfig file at $tmp_kubeconfig_path"
+		touch "$tmp_kubeconfig_path"
 	fi
 done
 

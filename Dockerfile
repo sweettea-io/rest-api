@@ -4,6 +4,9 @@ FROM golang:1.10 AS builder
 # Build arg used to specify which cmd inside cmd/ to build for/use as the entrypoint.
 ARG ROLE
 
+# Build arg used to specifiy which environment this image is for (i.e. dev, prod, etc.)
+ARG BUILD_ENV
+
 # Install dep so that dependencies can be installed.
 RUN apt-get update && apt-get install -y unzip --no-install-recommends && \
     apt-get autoremove -y && apt-get clean -y && \
@@ -34,6 +37,9 @@ RUN apk --no-cache add ca-certificates
 
 # Set working dir to /root inside alpine image.
 WORKDIR /root
+
+# Copy kubeconfig file for this BUILD_ENV
+COPY ./tmp/kubeconfigs/$BUILD_ENV ./.kubeconfig
 
 # Copy Go binary built in first image over to this image.
 COPY --from=builder /go/src/github.com/sweettea-io/rest-api/main ./main

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# --- Export a K8S cluster with kops --- #
+
+# ======== PARSE ARGS ======== #
+
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cluster_name="$1"
+cluster_state="$2"
+output_file="$3"
+
+# ======== VALIDATE ARGS ======== #
+
+$this_dir/validate_arg "cluster_name" "$cluster_name"
+$this_dir/validate_arg "cluster_state" "$cluster_state"
+$this_dir/validate_arg "output_file" "$output_file"
+
+# ======== EXPORT CLUSTER ======== #
+
+echo "Exporting cluster \"$cluster_name\"..."
+kops export kubecfg "$cluster_name" --state "$cluster_state" --config "$output_file"

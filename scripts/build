@@ -36,8 +36,17 @@ if [[ "$build_format" = "image" ]]; then
 
 		echo "Building \"$app_to_build\" for \"$build_env\" environment into Docker image \"$image_name\"..."
 
+		# Create a fresh .kubeconfig file to copy into the Docker image
+		# if building either the server or worker app.
+		if [ "$app_to_build" == "server" ] || [ "$app_to_build" == "worker" ]; then
+			$this_dir/create_kubeconfig "$build_env"
+		fi
+
 		# Build the app image.
-		docker build --build-arg ROLE="$app_to_build" -t "$image_name" .
+		docker build \
+			--build-arg ROLE="$app_to_build" \
+			--build-arg BUILD_ENV="$build_env" \
+			-t "$image_name" .
 	done
 else
 	# Build each app as a Go binary.
