@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# --- Upsert an AWS RDS database --- #
+
+name="$1"
+cluster="$2"
+
+echo "This isn't automated yet, so you should go to https://us-west-1.console.aws.amazon.com/rds/home and create a new PostgreSQL RDS Instance that can only be accessed from within the $cluster VPC."
+echo "The URL for this database should then be set as the DATABASE_URL environment variable for the appropriate env."
