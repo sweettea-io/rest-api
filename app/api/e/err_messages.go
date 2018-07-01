@@ -59,3 +59,13 @@ func UserCreationFailed() (*Error) {
 func SessionCreationFailed() (*Error) {
   return ApiError(http.StatusInternalServerError, 2001, "session_creation_failed")
 }
+
+// ------- Company Errors --------
+
+func CompanyAlreadyExists() (*Error) {
+  return ApiError(http.StatusInternalServerError, 3001, "company_already_exists")
+}
+
+func CompanyCreationFailed() (*Error) {
+  return ApiError(http.StatusInternalServerError, 3002, "company_creation_failed")
+}

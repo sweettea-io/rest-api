@@ -24,6 +24,7 @@ func CreateRouter(baseRoute string, database *gorm.DB, l *logrus.Logger) *mux.Ro
 
   // Create route groups for each model needing a REST-ful interface.
   InitUserRouter(baseRouter)
+  InitCompanyRouter(baseRouter)
 
   return baseRouter
 }

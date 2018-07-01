@@ -1,7 +1,6 @@
 package api
 
 import (
-  "fmt"
   "net/http"
   "github.com/gorilla/mux"
   "github.com/sweettea-io/rest-api/app/api/e"
@@ -11,6 +10,7 @@ import (
   "github.com/sweettea-io/rest-api/pkg/utils"
   "github.com/sweettea-io/rest-api/app/api/pl"
   "github.com/sweettea-io/rest-api/app"
+  "github.com/lib/pq"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -24,28 +24,27 @@ func InitUserRouter(baseRouter *mux.Router) {
   // Attach route handlers.
   userRouter.HandleFunc("", CreateUserHandler).Methods("POST")
   userRouter.HandleFunc("/auth", UserAuthHandler).Methods("POST")
-
-  fmt.Println(app.Config.RestApiToken)
 }
 
 // ----------- ROUTE HANDLERS -----------
 
 /*
-  Create a new User.
-  This is an internal route, not a CLI-facing route.
+  Create a new User (INTERNAL)
 
   Method:  POST
   Route:   /users
   Payload:
-    email    string (required)
-    password string (required)
-    admin    bool   (optional, default:false)
+    calling_email    string (required)
+    calling_password string (required)
+    new_email        string (required)
+    new_password     string (required)
+    admin            bool   (optional, default:false)
 */
 func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
-  // Validate internal token
-  internal_token := req.Header.Get(defs.AuthHeaderName)
+  // Validate internal token.
+  internalToken := req.Header.Get(defs.AuthHeaderName)
 
-  if internal_token != app.Config.RestApiToken {
+  if internalToken != app.Config.RestApiToken {
     respError(w, e.Unauthorized())
     return
   }
@@ -75,40 +74,37 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
 
   // Only admin users can create other users.
   if !callingUser.Admin {
-   logger.Errorf("Error creating new user -- calling user %s is not an admin.", callingUser.Email)
-   respError(w, e.Unauthorized())
-   return
-  }
-
-  // Check availability of this email.
-  var emailCount int
-  db.Where(&models.User{Email: payload.NewEmail, IsDestroyed: false}).Count(&emailCount)
-
-  if emailCount > 0 {
-   respError(w, e.EmailNotAvailable())
-   return
+    logger.Errorf("Error creating new user: calling user %s is not an admin.\n", callingUser.Email)
+    respError(w, e.Unauthorized())
+    return
   }
 
   // Hash provided user password.
   hashedPw, err := utils.HashPw(payload.NewPassword)
 
   if err != nil {
-   logger.Errorf("Error hashing password during new user creation: %s\n", err.Error())
-   respError(w, e.ISE())
-   return
+    logger.Errorf("Error hashing password during new user creation: %s\n", err.Error())
+    respError(w, e.ISE())
+    return
   }
 
   // Create new User.
   newUser := models.User{
-   Email: payload.NewEmail,
-   HashedPw: hashedPw,
-   Admin: payload.Admin,
+    Email: payload.NewEmail,
+    HashedPw: hashedPw,
+    Admin: payload.Admin,
   }
 
   if err := db.Create(&newUser).Error; err != nil {
-   logger.Errorf("Error creating new user: %s\n", err.Error())
-   respError(w, e.UserCreationFailed())
-   return
+    logger.Errorf("Error creating new user: %s\n", err.Error())
+
+    if err.(*pq.Error).Code.Name() == "unique_violation" {
+     respError(w, e.EmailNotAvailable())
+    } else {
+     respError(w, e.UserCreationFailed())
+    }
+
+    return
   }
 
   // Create response payload and respond.

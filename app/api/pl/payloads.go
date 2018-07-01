@@ -30,3 +30,15 @@ type UserAuthPayload struct {
 func (p *UserAuthPayload) Validate(req *http.Request) bool {
   return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }
+
+// ----------- POST /companies -----------
+
+type CreateCompanyPayload struct {
+  CallingEmail    string `json:"calling_email" validate:"nonzero"`
+  CallingPassword string `json:"calling_password" validate:"nonzero"`
+  Name            string `json:"name" validate:"nonzero"`
+}
+
+func (p *CreateCompanyPayload) Validate(req *http.Request) bool {
+  return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
+}

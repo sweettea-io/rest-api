@@ -77,7 +77,6 @@ type Company struct {
   ClusterID   int       `gorm:"default:null;index:company_cluster_id"`
   Projects    []Project
   IsDestroyed bool      `gorm:"default:false"`
-  WithUid
 }
 
 type Cluster struct {
@@ -88,7 +87,6 @@ type Cluster struct {
   Cloud        string `gorm:"type:varchar(240);default:null;not null"`
   State        string `gorm:"type:varchar(360);default:null;not null"`
   IsDestroyed  bool   `gorm:"default:false"`
-  WithUid
 }
 
 type Project struct {
@@ -109,7 +107,6 @@ type Project struct {
   ModelExt         string    `gorm:"type:varchar(240);default:null"`
   InternalMsgToken string    `gorm:"type:varchar(240);default:null"`
   IsDestroyed      bool      `gorm:"default:false"`
-  WithUid
 }
 
 type Dataset struct {
@@ -122,7 +119,6 @@ type Dataset struct {
   RetrainStepSize      int     `gorm:"default:0"`
   LastTrainRecordCount int     `gorm:"default:0"`
   IsDestroyed          bool    `gorm:"default:false"`
-  WithUid
 }
 
 type Env struct {
