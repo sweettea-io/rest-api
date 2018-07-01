@@ -10,3 +10,7 @@ var UserCreationSuccess = utils.JSON{"message": "User Creation Successful"}
 // ------- Company Responses --------
 
 var CompanyCreationSuccess = utils.JSON{"message": "Company Creation Successful"}
+
+// ------- Cluster Responses --------
+
+var ClusterCreationSuccess = utils.JSON{"message": "Cluster Creation Successful"}

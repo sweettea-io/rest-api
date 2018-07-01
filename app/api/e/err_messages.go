@@ -69,3 +69,17 @@ func CompanyAlreadyExists() (*Error) {
 func CompanyCreationFailed() (*Error) {
   return ApiError(http.StatusInternalServerError, 3002, "company_creation_failed")
 }
+
+func CompanyNotFound() (*Error) {
+  return ApiError(http.StatusNotFound, 3003, "company_not_found")
+}
+
+// ------- Cluster Errors --------
+
+func ClusterCreationFailed() (*Error) {
+  return ApiError(http.StatusInternalServerError, 4001, "cluster_creation_failed")
+}
+
+func ClusterAlreadyExists() (*Error) {
+  return ApiError(http.StatusInternalServerError, 4002, "cluster_already_exists")
+}
