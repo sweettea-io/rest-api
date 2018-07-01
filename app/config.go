@@ -31,7 +31,7 @@ type appConfig struct {
   TrainClusterName    string  `env:"TRAIN_CLUSTER_NAME"`
   TrainClusterState   string  `env:"TRAIN_CLUSTER_STATE"`
   WildcardSSLCertArn  string  `env:"WILDCARD_SSL_CERT_ARN,required"`
-  WorkerCount         uint    `env:"WORKER_COUNT"`
+  WorkerCount         uint    `env:"WORKER_COUNT,required"`
 }
 
 var Config appConfig
