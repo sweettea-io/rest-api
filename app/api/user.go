@@ -1,6 +1,7 @@
 package api
 
 import (
+  "fmt"
   "net/http"
   "github.com/gorilla/mux"
   "github.com/sweettea-io/rest-api/app/api/e"
@@ -9,6 +10,7 @@ import (
   "github.com/sweettea-io/rest-api/pkg/models"
   "github.com/sweettea-io/rest-api/pkg/utils"
   "github.com/sweettea-io/rest-api/app/api/pl"
+  "github.com/sweettea-io/rest-api/app"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -22,12 +24,15 @@ func InitUserRouter(baseRouter *mux.Router) {
   // Attach route handlers.
   userRouter.HandleFunc("", CreateUserHandler).Methods("POST")
   userRouter.HandleFunc("/auth", UserAuthHandler).Methods("POST")
+
+  fmt.Println(app.Config.RestApiToken)
 }
 
 // ----------- ROUTE HANDLERS -----------
 
 /*
-  Create a User.
+  Create a new User.
+  This is an internal route, not a CLI-facing route.
 
   Method:  POST
   Route:   /users
@@ -37,23 +42,15 @@ func InitUserRouter(baseRouter *mux.Router) {
     admin    bool   (optional, default:false)
 */
 func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
-  var currentUser models.User
+  // Validate internal token
+  internal_token := req.Header.Get(defs.AuthHeaderName)
 
-  // Get current user from session.
-  if err := LoadCurrentUser(w, req, &currentUser); err != nil {
-    logger.Errorln("Error loading current user")
+  if internal_token != app.Config.RestApiToken {
     respError(w, e.Unauthorized())
     return
   }
 
-  // Only admin users can create other users.
-  if !currentUser.Admin {
-    logger.Errorf("Error creating new user -- current user %s is not an admin.", currentUser.Email)
-    respError(w, e.Unauthorized())
-    return
-  }
-
-  // Parse & validate payload.
+  //Parse & validate payload.
   var payload pl.CreateUserPayload
 
   if !payload.Validate(req) {
@@ -61,35 +58,57 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  // Check availability of this email.
-  var emailCount int
-  db.Where(&models.User{Email: payload.Email, IsDestroyed: false}).Count(&emailCount)
+  // Get calling user by email.
+  var callingUser models.User
+  result := db.Where(&models.User{Email: payload.CallingEmail, IsDestroyed: false}).Find(&callingUser)
 
-  if emailCount > 0 {
-    respError(w, e.EmailNotAvailable())
+  if result.RecordNotFound() {
+    respError(w, e.UserNotFound())
     return
   }
 
+  // Ensure calling user's password is correct.
+  if !utils.VerifyPw(payload.CallingPassword, callingUser.HashedPw) {
+    respError(w, e.Unauthorized())
+    return
+  }
+
+  // Only admin users can create other users.
+  if !callingUser.Admin {
+   logger.Errorf("Error creating new user -- calling user %s is not an admin.", callingUser.Email)
+   respError(w, e.Unauthorized())
+   return
+  }
+
+  // Check availability of this email.
+  var emailCount int
+  db.Where(&models.User{Email: payload.NewEmail, IsDestroyed: false}).Count(&emailCount)
+
+  if emailCount > 0 {
+   respError(w, e.EmailNotAvailable())
+   return
+  }
+
   // Hash provided user password.
-  hashedPw, err := utils.HashPw(payload.Password)
+  hashedPw, err := utils.HashPw(payload.NewPassword)
 
   if err != nil {
-    logger.Errorf("Error hashing password during new user creation: %s\n", err.Error())
-    respError(w, e.ISE())
-    return
+   logger.Errorf("Error hashing password during new user creation: %s\n", err.Error())
+   respError(w, e.ISE())
+   return
   }
 
   // Create new User.
   newUser := models.User{
-    Email: payload.Email,
-    HashedPw: hashedPw,
-    Admin: payload.Admin,
+   Email: payload.NewEmail,
+   HashedPw: hashedPw,
+   Admin: payload.Admin,
   }
 
   if err := db.Create(&newUser).Error; err != nil {
-    logger.Errorf("Error creating new user: %s\n", err.Error())
-    respError(w, e.UserCreationFailed())
-    return
+   logger.Errorf("Error creating new user: %s\n", err.Error())
+   respError(w, e.UserCreationFailed())
+   return
   }
 
   // Create response payload and respond.

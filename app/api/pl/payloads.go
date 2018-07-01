@@ -9,9 +9,11 @@ import (
 // ----------- POST /users -----------
 
 type CreateUserPayload struct {
-  Email    string `json:"email" validate:"nonzero"`
-  Password string `json:"password" validate:"nonzero"`
-  Admin    bool   `json:"admin"`
+  CallingEmail    string `json:"calling_email" validate:"nonzero"`
+  CallingPassword string `json:"calling_password" validate:"nonzero"`
+  NewEmail        string `json:"new_email" validate:"nonzero"`
+  NewPassword     string `json:"new_password" validate:"nonzero"`
+  Admin           bool   `json:"admin"`
 }
 
 func (p *CreateUserPayload) Validate(req *http.Request) bool {

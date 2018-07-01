@@ -26,13 +26,12 @@ func Migrate(url string) {
   db.AutoMigrate(
     &models.User{},
     &models.Session{},
-    &models.Team{},
+    &models.Company{},
     &models.Cluster{},
-    &models.Bucket{},
-    &models.Repo{},
+    &models.Project{},
     &models.Dataset{},
     &models.Env{},
     &models.Commit{},
-    &models.Deployment{},
+    &models.Deploy{},
   )
 }
