@@ -1,21 +1,17 @@
 #!/bin/bash
 
-# --- Create Sweet Tea User in database of specified environment --- #
+# --- Create Sweet Tea Company in database of specified environment --- #
 
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 env="$1"
-email="$2"
-password="$3"
-admin="$4"
+name="$2"
 
 # ======== VALIDATE ARGS ======== #
 
 $this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
-$this_dir/validate_arg "admin" "$admin" "true|false"
-$this_dir/validate_arg "email" "$email"
-$this_dir/validate_arg "password" "$password"
+$this_dir/validate_arg "name" "$name"
 
 # ======== PROMPT CALLING USER FOR CREDENTIALS ======== #
 
@@ -37,11 +33,9 @@ done
 payload="{
 	\"calling_email\": \"$calling_email\",
 	\"calling_password\": \"$calling_password\",
-	\"new_email\": \"$email\",
-	\"new_password\": \"$password\",
-	\"admin\": $admin
+	\"name\": \"$name\"
 }"
 
-printf "\nCreating user...\n"
+printf "\nCreating company...\n"
 
-$this_dir/core_api_call "$env" "POST" "/users" "$payload"
+$this_dir/core_api_call "$env" "POST" "/companies" "$payload"

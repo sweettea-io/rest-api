@@ -42,6 +42,11 @@ export admin=false
 user: ## Create Sweet Tea User in the database of the specified environment.
 	./scripts/create_user $(env) $(email) $(password) $(admin)
 
+export env
+export name
+company: ## Create Sweet Tea Company in the database of the specified environment.
+	./scripts/create_company $(env) $(name)
+
 clean: ## Remove all built Go binaries
 	rm ./bin/*
 

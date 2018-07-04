@@ -50,10 +50,10 @@ func (p *CreateCompanyPayload) Validate(req *http.Request) bool {
 type CreateClusterPayload struct {
   CallingEmail    string `json:"calling_email" validate:"nonzero"`
   CallingPassword string `json:"calling_password" validate:"nonzero"`
-  CompanyName            string `json:"company_name" validate:"nonzero"`
+  CompanyName     string `json:"company_name" validate:"nonzero"`
   Name            string `json:"name" validate:"nonzero"`
-  Cloud           string `json:"name" validate:"nonzero"`
-  State           string `json:"name" validate:"nonzero"`
+  Cloud           string `json:"cloud" validate:"nonzero"`
+  State           string `json:"state" validate:"nonzero"`
 }
 
 func (p *CreateClusterPayload) Validate(req *http.Request) bool {
