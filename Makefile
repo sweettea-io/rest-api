@@ -37,10 +37,10 @@ api: ## Create a new API cluster for a specific environment.
 
 export env
 export email
-export pw
+export password
 export admin=false
 user: ## Create Sweet Tea User in the database of the specified environment.
-	./scripts/create_user $(env) $(email) $(pw) $(admin)
+	./scripts/create_user $(env) $(email) $(password) $(admin)
 
 clean: ## Remove all built Go binaries
 	rm ./bin/*

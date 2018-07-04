@@ -8,7 +8,7 @@ this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 env="$1"
 method="$2"
 route="$3"
-payload="4"
+payload="$4"
 
 # ======== VALIDATE ARGS ======== #
 
@@ -38,12 +38,27 @@ fi
 
 # ======== FORMAT CURL ARGS ======== #
 
+# Add payload if there is one.
 if [[ "$payload" ]]; then
 	payload="-d $payload"
 fi
 
-url="https://api.$domain/$api_version${route}"
+# Create base url for API call based on if DOMAIN is localhost or not.
+if [[ "$domain" == "localhost" ]]; then
+	port=$( $this_dir/env_reader "$env" "SERVER_PORT" )
+	port="${port:-80}"
+
+	base_url="http://localhost:$port"
+else
+	base_url="https://api.$domain"
+fi
+
+url="$base_url/$api_version${route}"
 
 # ======== PERFORM API CALL ======== #
 
-curl "$payload" -H "Content-Type: application/json" -H "Sweet-Tea-Api-Token: $rest_api_token" -X "$method" "$url"
+curl "$payload" \
+	-H "Content-Type: application/json" \
+	-H "Sweet-Tea-Api-Token: $rest_api_token" \
+	-X "$method" \
+	"$url"

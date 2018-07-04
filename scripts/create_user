@@ -7,7 +7,7 @@
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 env="$1"
 email="$2"
-pw="$3"
+password="$3"
 admin="$4"
 
 # ======== VALIDATE ARGS ======== #
@@ -20,13 +20,36 @@ if [[ ! "$email" ]]; then
 	exit
 fi
 
-if [[ ! "$pw" ]]; then
-	echo "\"pw\" argument cannot be empty. Exiting."
+if [[ ! "$password" ]]; then
+	echo "\"password\" argument cannot be empty. Exiting."
 	exit
 fi
 
+# ======== PROMPT CALLING USER FOR CREDENTIALS ======== #
+
+calling_email=""
+calling_password=""
+
+printf "Enter your credentials for the $env Sweet Tea environment.\n"
+
+until [[ "$calling_email" ]]; do
+	read -p 'Email: ' calling_email
+done
+
+until [[ "$calling_password" ]]; do
+	read -sp 'Password: ' calling_password
+done
+
 # ======== PERFORM API CALL ======== #
 
-payload="{\"email\":\"$email\",\"password\":\"$pw\",\"admin\":$admin}"
+payload="{
+	\"calling_email\": \"$calling_email\",
+	\"calling_password\": \"$calling_password\",
+	\"new_email\": \"$email\",
+	\"new_password\": \"$password\",
+	\"admin\": $admin
+}"
+
+printf "\nCreating user...\n"
 
 $this_dir/core_api_call "$env" "POST" "/users" "$payload"

@@ -6,6 +6,8 @@ import (
   "gopkg.in/validator.v2"
 )
 
+// TODO: Add regex for emails in tags
+
 // ----------- POST /users -----------
 
 type CreateUserPayload struct {
