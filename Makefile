@@ -31,9 +31,10 @@ deploy: ## Deploy the latest Docker image of an application to a specific enviro
 
 export provider=aws
 export name
+export company
 export env
 api: ## Create a new API cluster for a specific environment.
-	./scripts/create_api $(provider) $(name) $(env)
+	./scripts/create_api $(provider) $(name) $(company) $(env)
 
 export env
 export email
