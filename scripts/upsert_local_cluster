@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# --- Upsert local K8S cluster with minikube --- #
+
+# ======== PARSE ARGS ======== #
+
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cluster_name="$1"
+k8s_version="$2"
+
+# ======== VALIDATIONS ======== #
+
+# Validate args.
+$this_dir/validate_arg "cluster_name" "$cluster_name"
+$this_dir/validate_arg "k8s_version" "$k8s_version"
+
+# Ensure minikube is installed.
+if ! which minikube &>/dev/null; then
+	echo "Minikube not detected...run 'make install' and then try again."
+	exit
+fi
+
+# Ensure cluster name is available.
+if kubectl config get-clusters | grep "^${cluster_name}$" &>/dev/null; then
+	echo "Local cluster \"$cluster_name\" already exists. Exiting."
+	exit
+fi
+
+# ======== GET USABLE K8S VERSION ======== #
+
+kubernetes_version_arg=""
+
+# Only add the k8s version arg if that version supported.
+if minikube get-k8s-versions | grep "v${k8s_version}$" &>/dev/null; then
+	kubernetes_version_arg="--kubernetes-version v$k8s_version"
+fi
+
+# ======== CREATE LOCAL CLUSTER ======== #
+
+# We're gonna use localkube, so ignore this deprecation error.
+minikube config set ShowBootstrapperDeprecationNotification false
+
+# Start the cluster.
+minikube start --bootstrapper localkube --profile "$cluster_name" "$kubernetes_version_arg"
