@@ -18,12 +18,19 @@ $this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
 
 # ======== GET ENVS ======== #
 
-# TODO: Handle vast difference in logic when $env == 'local'.
-
 # Required to have env values already.
 cluster_name=$( $this_dir/env_reader "$env" "${uppercase_role}_CLUSTER_NAME" )
 domain=$( $this_dir/env_reader "$env" "DOMAIN" )
 hosted_zone_id=$( $this_dir/env_reader "$env" "HOSTED_ZONE_ID" )
+
+# ======== IF LOCAL ========= #
+
+if [[ "$env" == "local" ]]; then
+	# TODO: Check if minikube is already running and if so, don't do this...
+	# TODO: Figure out if you can run multiple minikube clusters and name them as well.
+	minikube config set ShowBootstrapperDeprecationNotification false
+	minikube start --bootstrapper localkube
+fi
 
 # ======== VALIDATE ENVS ======== #
 
