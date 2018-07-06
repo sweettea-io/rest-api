@@ -85,7 +85,7 @@ type Cluster struct {
   Name         string `gorm:"type:varchar(360);default:null;not null"`
   Slug         string `gorm:"type:varchar(240);default:null;unique;not null;index:cluster_slug"`
   Cloud        string `gorm:"type:varchar(240);default:null;not null"`
-  State        string `gorm:"type:varchar(360);default:null;not null"`
+  State        string `gorm:"type:varchar(360);default:null"`
   IsDestroyed  bool   `gorm:"default:false"`
 }
 
