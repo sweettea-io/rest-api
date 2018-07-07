@@ -5,8 +5,8 @@ import (
   "net/http"
   "github.com/Sirupsen/logrus"
   "github.com/sweettea-io/rest-api/app"
-  "github.com/sweettea-io/rest-api/app/api"
   "github.com/sweettea-io/rest-api/pkg/database"
+  "github.com/sweettea-io/rest-api/app/api/routes"
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
   baseRoute := fmt.Sprintf("/%s", app.Config.ApiVersion)
 
   // Create API router.
-  router := api.CreateRouter(baseRoute, db, logger)
+  router := routes.CreateRouter(baseRoute, db, logger)
 
   // Format address to listen on.
   addr := fmt.Sprintf(":%v", app.Config.ServerPort)
