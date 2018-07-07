@@ -18,7 +18,7 @@ type appConfig struct {
   Debug               bool    `env:"DEBUG,required"`
   Domain              string  `env:"DOMAIN,required"`
   Env                 string  `env:"ENV,required"`
-  HostedZoneId        string  `env:"HOSTED_ZONE_ID,required"`
+  HostedZoneId        string  `env:"HOSTED_ZONE_ID"`
   ImageOwner          string  `env:"IMAGE_OWNER,required"`
   ImageOwnerPw        string  `env:"IMAGE_OWNER_PW,required"`
   JobQueueNsp         string  `env:"JOB_QUEUE_NSP,required"`
@@ -55,6 +55,11 @@ func LoadConfig() {
     // BUILD_CLUSTER_STATE is required.
     if Config.BuildClusterState == "" {
       panic(fmt.Errorf(errMsg, "BUILD_CLUSTER_STATE"))
+    }
+
+    // HOSTED_ZONE_ID is required.
+    if Config.HostedZoneId == "" {
+      panic(fmt.Errorf(errMsg, "HOSTED_ZONE_ID"))
     }
 
     // WILDCARD_SSL_CERT_ARN is required.
