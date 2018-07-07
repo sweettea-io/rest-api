@@ -41,18 +41,18 @@ deploy: ## Deploy the latest Docker image of an application to a specific enviro
 export provider=aws
 export name
 export company
-export env
+export env=local
 api: ## Create a new API cluster for a specific environment.
 	./scripts/create_api $(provider) $(name) $(company) $(env)
 
-export env
+export env=local
 export email
 export password
 export admin=false
 user: ## Create Sweet Tea User in the database of the specified environment.
 	./scripts/create_user $(env) $(email) $(password) $(admin)
 
-export env
+export env=local
 export name
 company: ## Create Sweet Tea Company in the database of the specified environment.
 	./scripts/create_company $(env) $(name)
