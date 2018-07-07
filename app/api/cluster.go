@@ -38,7 +38,7 @@ func InitClusterRouter(baseRouter *mux.Router) {
     company_name      string (required)
     name              string (required)
     cloud             string (required)
-    state             string (required)
+    state             string (required on all environments except 'local')
 */
 func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   // Validate internal token.
@@ -52,7 +52,9 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   // Parse & validate payload.
   var payload pl.CreateClusterPayload
 
-  if !payload.Validate(req) {
+  // 'state' param can only be empty on local environments.
+  // TODO: Use struct with envs instead of the hardcoded "local".
+  if !payload.Validate(req) || (payload.State == "" && app.Config.Env != "local") {
     respError(w, e.InvalidPayload())
   }
 
