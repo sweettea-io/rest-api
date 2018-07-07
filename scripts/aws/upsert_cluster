@@ -67,3 +67,5 @@ kops create cluster \
 	--image "$image" \
 	--kubernetes-version "$k8s_version" \
 	--yes
+
+echo "Successfully created cluster \"$cluster_name\"."
