@@ -10,6 +10,7 @@ import (
 var db *gorm.DB
 var logger *logrus.Logger
 
+// Initialize global vars for the middleware package (mw).
 func Init(database *gorm.DB, l *logrus.Logger) {
   db = database
   logger = l

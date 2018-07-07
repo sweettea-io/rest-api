@@ -10,6 +10,7 @@ import (
 var db *gorm.DB
 var logger *logrus.Logger
 
+// Initialize global vars for the helpers package.
 func Init(database *gorm.DB, l *logrus.Logger) {
   db = database
   logger = l
