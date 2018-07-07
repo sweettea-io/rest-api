@@ -33,12 +33,12 @@ func InitClusterRouter(baseRouter *mux.Router) {
   Method:  POST
   Route:   /clusters
   Payload:
-    calling_email    string (required)
-    calling_password string (required)
-    company_name     string (required)
-    name             string (required)
-    cloud            string (required)
-    state            string (required)
+    executor_email    string (required)
+    executor_password string (required)
+    company_name      string (required)
+    name              string (required)
+    cloud             string (required)
+    state             string (required)
 */
 func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   // Validate internal token.
@@ -58,24 +58,24 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
 
   // TODO: Validate cloud payload param is one of supported values.
 
-  // Get calling user by email.
-  var callingUser models.User
-  userResult := db.Where(&models.User{Email: payload.CallingEmail, IsDestroyed: false}).Find(&callingUser)
+  // Get executor user by email.
+  var executorUser models.User
+  userResult := db.Where(&models.User{Email: payload.ExecutorEmail, IsDestroyed: false}).Find(&executorUser)
 
   if userResult.RecordNotFound() {
     respError(w, e.UserNotFound())
     return
   }
 
-  // Ensure calling user's password is correct.
-  if !utils.VerifyPw(payload.CallingPassword, callingUser.HashedPw) {
+  // Ensure executor user's password is correct.
+  if !utils.VerifyPw(payload.ExecutorPassword, executorUser.HashedPw) {
     respError(w, e.Unauthorized())
     return
   }
 
   // Only admin users can create companies.
-  if !callingUser.Admin {
-    logger.Errorf("Error creating new cluster: calling user %s is not an admin.\n", callingUser.Email)
+  if !executorUser.Admin {
+    logger.Errorf("Error creating new cluster: executor user %s is not an admin.\n", executorUser.Email)
     respError(w, e.Unauthorized())
     return
   }

@@ -33,9 +33,9 @@ func InitCompanyRouter(baseRouter *mux.Router) {
   Method:  POST
   Route:   /companies
   Payload:
-    calling_email    string (required)
-    calling_password string (required)
-    name             string (required)
+    executor_email    string (required)
+    executor_password string (required)
+    name              string (required)
 */
 func CreateCompanyHandler(w http.ResponseWriter, req *http.Request) {
   // Validate internal token.
@@ -53,24 +53,24 @@ func CreateCompanyHandler(w http.ResponseWriter, req *http.Request) {
     respError(w, e.InvalidPayload())
   }
 
-  // Get calling user by email.
-  var callingUser models.User
-  result := db.Where(&models.User{Email: payload.CallingEmail, IsDestroyed: false}).Find(&callingUser)
+  // Get executor user by email.
+  var executorUser models.User
+  result := db.Where(&models.User{Email: payload.ExecutorEmail, IsDestroyed: false}).Find(&executorUser)
 
   if result.RecordNotFound() {
     respError(w, e.UserNotFound())
     return
   }
 
-  // Ensure calling user's password is correct.
-  if !utils.VerifyPw(payload.CallingPassword, callingUser.HashedPw) {
+  // Ensure executor user's password is correct.
+  if !utils.VerifyPw(payload.ExecutorPassword, executorUser.HashedPw) {
     respError(w, e.Unauthorized())
     return
   }
 
   // Only admin users can create companies.
-  if !callingUser.Admin {
-    logger.Errorf("Error creating new company: calling user %s is not an admin.\n", callingUser.Email)
+  if !executorUser.Admin {
+    logger.Errorf("Error creating new company: executor user %s is not an admin.\n", executorUser.Email)
     respError(w, e.Unauthorized())
     return
   }

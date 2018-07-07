@@ -34,11 +34,11 @@ func InitUserRouter(baseRouter *mux.Router) {
   Method:  POST
   Route:   /users
   Payload:
-    calling_email    string (required)
-    calling_password string (required)
-    new_email        string (required)
-    new_password     string (required)
-    admin            bool   (optional, default:false)
+    executor_email    string (required)
+    executor_password string (required)
+    new_email         string (required)
+    new_password      string (required)
+    admin             bool   (optional, default:false)
 */
 func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   // Validate internal token.
@@ -49,7 +49,7 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  //Parse & validate payload.
+  // Parse & validate payload.
   var payload pl.CreateUserPayload
 
   if !payload.Validate(req) {
@@ -57,24 +57,24 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  // Get calling user by email.
-  var callingUser models.User
-  result := db.Where(&models.User{Email: payload.CallingEmail, IsDestroyed: false}).Find(&callingUser)
+  // Get executor user by email.
+  var executorUser models.User
+  result := db.Where(&models.User{Email: payload.ExecutorEmail, IsDestroyed: false}).Find(&executorUser)
 
   if result.RecordNotFound() {
     respError(w, e.UserNotFound())
     return
   }
 
-  // Ensure calling user's password is correct.
-  if !utils.VerifyPw(payload.CallingPassword, callingUser.HashedPw) {
+  // Ensure executor user's password is correct.
+  if !utils.VerifyPw(payload.ExecutorPassword, executorUser.HashedPw) {
     respError(w, e.Unauthorized())
     return
   }
 
   // Only admin users can create other users.
-  if !callingUser.Admin {
-    logger.Errorf("Error creating new user: calling user %s is not an admin.\n", callingUser.Email)
+  if !executorUser.Admin {
+    logger.Errorf("Error creating new user: executor user %s is not an admin.\n", executorUser.Email)
     respError(w, e.Unauthorized())
     return
   }

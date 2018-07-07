@@ -17,26 +17,26 @@ $this_dir/validate_arg "admin" "$admin" "true|false"
 $this_dir/validate_arg "email" "$email"
 $this_dir/validate_arg "password" "$password"
 
-# ======== PROMPT CALLING USER FOR CREDENTIALS ======== #
+# ======== PROMPT EXECUTOR USER FOR CREDENTIALS ======== #
 
-calling_email=""
-calling_password=""
+executor_email=""
+executor_password=""
 
 printf "Enter your credentials for the $env Sweet Tea environment.\n"
 
-until [[ "$calling_email" ]]; do
-	read -p 'Email: ' calling_email
+until [[ "$executor_email" ]]; do
+	read -p 'Email: ' executor_email
 done
 
-until [[ "$calling_password" ]]; do
-	read -sp 'Password: ' calling_password
+until [[ "$executor_password" ]]; do
+	read -sp 'Password: ' executor_password
 done
 
 # ======== PERFORM API CALL ======== #
 
 payload="{
-	\"calling_email\": \"$calling_email\",
-	\"calling_password\": \"$calling_password\",
+	\"executor_email\": \"$executor_email\",
+	\"executor_password\": \"$executor_password\",
 	\"new_email\": \"$email\",
 	\"new_password\": \"$password\",
 	\"admin\": $admin

@@ -11,11 +11,11 @@ import (
 // ----------- POST /users -----------
 
 type CreateUserPayload struct {
-  CallingEmail    string `json:"calling_email" validate:"nonzero"`
-  CallingPassword string `json:"calling_password" validate:"nonzero"`
-  NewEmail        string `json:"new_email" validate:"nonzero"`
-  NewPassword     string `json:"new_password" validate:"nonzero"`
-  Admin           bool   `json:"admin"`
+  ExecutorEmail    string `json:"executor_email" validate:"nonzero"`
+  ExecutorPassword string `json:"executor_password" validate:"nonzero"`
+  NewEmail         string `json:"new_email" validate:"nonzero"`
+  NewPassword      string `json:"new_password" validate:"nonzero"`
+  Admin            bool   `json:"admin"`
 }
 
 func (p *CreateUserPayload) Validate(req *http.Request) bool {
@@ -36,9 +36,9 @@ func (p *UserAuthPayload) Validate(req *http.Request) bool {
 // ----------- POST /companies -----------
 
 type CreateCompanyPayload struct {
-  CallingEmail    string `json:"calling_email" validate:"nonzero"`
-  CallingPassword string `json:"calling_password" validate:"nonzero"`
-  Name            string `json:"name" validate:"nonzero"`
+  ExecutorEmail    string `json:"executor_email" validate:"nonzero"`
+  ExecutorPassword string `json:"executor_password" validate:"nonzero"`
+  Name             string `json:"name" validate:"nonzero"`
 }
 
 func (p *CreateCompanyPayload) Validate(req *http.Request) bool {
@@ -48,12 +48,12 @@ func (p *CreateCompanyPayload) Validate(req *http.Request) bool {
 // ----------- POST /clusters -----------
 
 type CreateClusterPayload struct {
-  CallingEmail    string `json:"calling_email" validate:"nonzero"`
-  CallingPassword string `json:"calling_password" validate:"nonzero"`
-  CompanyName     string `json:"company_name" validate:"nonzero"`
-  Name            string `json:"name" validate:"nonzero"`
-  Cloud           string `json:"cloud" validate:"nonzero"`
-  State           string `json:"state" validate:"nonzero"`
+  ExecutorEmail    string `json:"executor_email" validate:"nonzero"`
+  ExecutorPassword string `json:"executor_password" validate:"nonzero"`
+  CompanyName      string `json:"company_name" validate:"nonzero"`
+  Name             string `json:"name" validate:"nonzero"`
+  Cloud            string `json:"cloud" validate:"nonzero"`
+  State            string `json:"state" validate:"nonzero"`
 }
 
 func (p *CreateClusterPayload) Validate(req *http.Request) bool {
