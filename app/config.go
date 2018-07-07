@@ -32,7 +32,7 @@ type appConfig struct {
   TrainClusterName    string  `env:"TRAIN_CLUSTER_NAME"`
   TrainClusterState   string  `env:"TRAIN_CLUSTER_STATE"`
   UserCreationHash    string  `env:"USER_CREATION_HASH,required"`
-  WildcardSSLCertArn  string  `env:"WILDCARD_SSL_CERT_ARN,required"`
+  WildcardSSLCertArn  string  `env:"WILDCARD_SSL_CERT_ARN"`
   WorkerCount         uint    `env:"WORKER_COUNT,required"`
 }
 
@@ -46,8 +46,20 @@ func LoadConfig() {
 
   // --- Evaluate any configs reliant on more sophisticated validation ---
 
-  // Ensure BuildClusterState exists for all non-local environments.
-  if Config.BuildClusterState == "" && Config.Env != utils.Envs.Local {
-    panic(fmt.Errorf("Failed to load app config: BUILD_CLUSTER_STATE required on non-local environments.\n"))
+  // Non-local env checks.
+  if Config.Env != utils.Envs.Local {
+    errMsg := "Failed to load app config: %s required on non-local environments.\n"
+
+    // Not using for-loop for the following in case a non-string env is needed here in the future.
+
+    // BUILD_CLUSTER_STATE is required.
+    if Config.BuildClusterState == "" {
+      panic(fmt.Errorf(errMsg, "BUILD_CLUSTER_STATE"))
+    }
+
+    // WILDCARD_SSL_CERT_ARN is required.
+    if Config.WildcardSSLCertArn == "" {
+      panic(fmt.Errorf(errMsg, "WILDCARD_SSL_CERT_ARN"))
+    }
   }
 }
