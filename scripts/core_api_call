@@ -55,10 +55,17 @@ fi
 
 url="$base_url/$api_version${route}"
 
+# Get content type based on method.
+if [ "$method" == "GET" ] || [ "$method" == "DELETE" ]; then
+	content_type="application/x-www-form-urlencoded"
+else
+	content_type="application/json"
+fi
+
 # ======== PERFORM API CALL ======== #
 
 curl "$payload" \
-	-H "Content-Type: application/json" \
+	-H "Content-Type: $content_type" \
 	-H "Sweet-Tea-Api-Token: $rest_api_token" \
 	-X "$method" \
 	"$url"
