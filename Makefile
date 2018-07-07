@@ -6,6 +6,10 @@ unlock: ## Unlock all scripts
 install: ## Install project dependencies
 	./scripts/install
 
+export password
+user-creation-hash: ## Create the user-creation hash to be used on the environments of your choice.
+	go run tasks/generate_user_creation_hash.go $(password)
+
 local-clusters: ## Create the core, train, and build clusters for the local environment.
 	./scripts/create_cluster '' core local
 	./scripts/create_cluster '' train local
