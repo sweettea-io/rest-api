@@ -54,7 +54,7 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
 
   if !payload.Validate(req) ||
     (payload.State == "" && app.Config.Env != utils.Envs.Local) || // state required on all non-local envs
-    (payload.Cloud != utils.Clouds.AWS) { // aws is the only supported cloud at this point
+    (!utils.IsValidCloud(payload.Cloud)) {
 
     respError(w, e.InvalidPayload())
   }
