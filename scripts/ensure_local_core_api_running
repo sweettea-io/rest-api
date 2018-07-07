@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# --- Verify with user that their local Core cluster is running --- #
+
+cont=""
+
+until [ "$( tr '[:upper:]' '[:lower:]' <<<$cont )" == "y" ] || [ "$( tr '[:upper:]' '[:lower:]' <<<$cont )" == "n" ]; do
+	read -p "This script assumes you have your local Core cluster running. Continue? (y/n): " cont
+done
+
+if [[ "$cont" == "n" ]]; then
+	echo "Exiting."
+	exit
+fi

@@ -10,12 +10,17 @@ email="$2"
 password="$3"
 admin="$4"
 
-# ======== VALIDATE ARGS ======== #
+# ======== VALIDATIONS ======== #
 
 $this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
 $this_dir/validate_arg "admin" "$admin" "true|false"
 $this_dir/validate_arg "email" "$email"
 $this_dir/validate_arg "password" "$password"
+
+if [[ "$env" == "local" ]]; then
+	# Check with the executor that their local Core cluster is running.
+	$this_dir/ensure_local_core_api_running
+fi
 
 # ======== PROMPT EXECUTOR USER FOR CREDENTIALS ======== #
 

@@ -8,10 +8,15 @@ this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 env="$1"
 name="$2"
 
-# ======== VALIDATE ARGS ======== #
+# ======== VALIDATIONS ======== #
 
 $this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
 $this_dir/validate_arg "name" "$name"
+
+if [[ "$env" == "local" ]]; then
+	# Check with the executor that their local Core cluster is running.
+	$this_dir/ensure_local_core_api_running
+fi
 
 # ======== PROMPT EXECUTOR USER FOR CREDENTIALS ======== #
 

@@ -52,16 +52,8 @@ k8s_version="${k8s_version:-1.7.10}"
 state=""
 
 if [[ "$env" == "local" ]]; then
-	# Verify with the executor that their local Core cluster is running.
-	cont=""
-	until [ "$cont" == "y" ] || [ "$cont" == "n" ]; do
-		read -p 'This script assumes you have your local Core cluster running. Continue? (y/n): ' cont
-	done
-
-	if [[ "$cont" == "n" ]]; then
-		"Exiting."
-		exit
-	fi
+	# Check with the executor that their local Core cluster is running.
+	$this_dir/ensure_local_core_api_running
 
 	# Upsert local cluster.
 	$this_dir/upsert_local_cluster "$name" "$k8s_version"
