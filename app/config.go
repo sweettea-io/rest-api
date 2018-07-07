@@ -62,4 +62,11 @@ func LoadConfig() {
       panic(fmt.Errorf(errMsg, "WILDCARD_SSL_CERT_ARN"))
     }
   }
+
+  if !utils.IsValidCloud(Config.CloudProvider) {
+    panic(fmt.Errorf(
+      "%s is not a valid cloud provider. Check 'pkg/utils/clouds.go' for a list of valid options.\n",
+      Config.CloudProvider,
+    ))
+  }
 }
