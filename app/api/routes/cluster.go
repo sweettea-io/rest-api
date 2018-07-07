@@ -52,12 +52,12 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   // Parse & validate payload.
   var payload pl.CreateClusterPayload
 
-  // 'state' param can only be empty on local environments.
-  if !payload.Validate(req) || (payload.State == "" && app.Config.Env != utils.Envs.Local) {
+  if !payload.Validate(req) ||
+    (payload.State == "" && app.Config.Env != utils.Envs.Local) || // state required on all non-local envs
+    (payload.Cloud != utils.Clouds.AWS) { // aws is the only supported cloud at this point
+
     respError(w, e.InvalidPayload())
   }
-
-  // TODO: Validate cloud payload param is one of supported values.
 
   // Get executor user by email.
   var executorUser models.User
