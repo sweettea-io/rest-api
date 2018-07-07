@@ -34,7 +34,7 @@ func InitUserRouter(baseRouter *mux.Router) {
   Method:  POST
   Route:   /users
   Payload:
-    executor_email    string (required)
+    executor_email    string (required unless using user-creation password for 'executor_password' param)
     executor_password string (required)
     new_email         string (required)
     new_password      string (required)
@@ -52,31 +52,39 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   // Parse & validate payload.
   var payload pl.CreateUserPayload
 
-  if !payload.Validate(req) {
+  // Check if the executor is using the USER_CREATION_HASH to create this user.
+  usingUserCreationPw := payload.ExecutorEmail == "" &&
+    utils.VerifyPw(payload.ExecutorPassword, app.Config.UserCreationHash)
+
+  // executor_email can only be empty when using USER_CREATION_HASH as auth method.
+  if !payload.Validate(req) || (payload.ExecutorEmail == "" && !usingUserCreationPw) {
     respError(w, e.InvalidPayload())
     return
   }
 
-  // Get executor user by email.
-  var executorUser models.User
-  result := db.Where(&models.User{Email: payload.ExecutorEmail, IsDestroyed: false}).Find(&executorUser)
+  // If not using USER_CREATION_HASH for auth, verify executor exists using email/pw.
+  if !usingUserCreationPw {
+    // Get executor user by email.
+    var executorUser models.User
+    result := db.Where(&models.User{Email: payload.ExecutorEmail, IsDestroyed: false}).Find(&executorUser)
 
-  if result.RecordNotFound() {
-    respError(w, e.UserNotFound())
-    return
-  }
+    if result.RecordNotFound() {
+      respError(w, e.UserNotFound())
+      return
+    }
 
-  // Ensure executor user's password is correct.
-  if !utils.VerifyPw(payload.ExecutorPassword, executorUser.HashedPw) {
-    respError(w, e.Unauthorized())
-    return
-  }
+    // Ensure executor user's password is correct.
+    if !utils.VerifyPw(payload.ExecutorPassword, executorUser.HashedPw) {
+      respError(w, e.Unauthorized())
+      return
+    }
 
-  // Only admin users can create other users.
-  if !executorUser.Admin {
-    logger.Errorf("Error creating new user: executor user %s is not an admin.\n", executorUser.Email)
-    respError(w, e.Unauthorized())
-    return
+    // Only admin users can create other users.
+    if !executorUser.Admin {
+      logger.Errorf("Error creating new user: executor user %s is not an admin.\n", executorUser.Email)
+      respError(w, e.Unauthorized())
+      return
+    }
   }
 
   // Hash provided user password.

@@ -11,7 +11,7 @@ import (
 // ----------- POST /users -----------
 
 type CreateUserPayload struct {
-  ExecutorEmail    string `json:"executor_email" validate:"nonzero"`
+  ExecutorEmail    string `json:"executor_email"`
   ExecutorPassword string `json:"executor_password" validate:"nonzero"`
   NewEmail         string `json:"new_email" validate:"nonzero"`
   NewPassword      string `json:"new_password" validate:"nonzero"`
