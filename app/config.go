@@ -11,7 +11,7 @@ type appConfig struct {
   AwsRegionName       string  `env:"AWS_REGION_NAME,required"`
   AwsSecretAccessKey  string  `env:"AWS_SECRET_ACCESS_KEY,required"`
   BuildClusterName    string  `env:"BUILD_CLUSTER_NAME,required"`
-  BuildClusterState   string  `env:"BUILD_CLUSTER_STATE,required"`
+  BuildClusterState   string  `env:"BUILD_CLUSTER_STATE"`
   CloudProvider       string  `env:"CLOUD_PROVIDER,required"`
   DatabaseUrl         string  `env:"DATABASE_URL,required"`
   Debug               bool    `env:"DEBUG,required"`
@@ -39,6 +39,13 @@ var Config appConfig
 func LoadConfig() {
   // Unmarshal envs into Config struct.
   if err := envdecode.Decode(&Config); err != nil {
-   panic(fmt.Errorf("Failed to load app config: %s", err.Error()))
+    panic(fmt.Errorf("Failed to load app config: %s\n", err.Error()))
+  }
+
+  // --- Evaluate any configs reliant on more sophisticated validation ---
+
+  // Ensure BuildClusterState exists for all non-local environments.
+  if Config.BuildClusterState == "" && Config.Env != "local" {
+    panic(fmt.Errorf("Failed to load app config: BUILD_CLUSTER_STATE required on non-local environments.\n"))
   }
 }
