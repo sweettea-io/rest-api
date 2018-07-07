@@ -3,7 +3,7 @@ default: unlock
 unlock: ## Unlock all scripts
 	chmod -R +x ./scripts/*
 
-install: ## Setup & install project dependencies
+install: ## Install project dependencies
 	./scripts/install
 
 export provider=aws
@@ -11,6 +11,11 @@ export role
 export env
 cluster: ## Create the core, train, or build cluster for a specific environment.
 	./scripts/create_cluster $(provider) $(role) $(env)
+
+local-clusters: ## Create the core, train, and build clusters for the local environment.
+	./scripts/create_cluster '' core local
+	./scripts/create_cluster '' train local
+	./scripts/create_cluster '' build local
 
 export target
 export env=local
