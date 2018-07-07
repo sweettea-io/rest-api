@@ -14,10 +14,28 @@ uppercase_app=$( echo "$app" | tr "[:lower:]" "[:upper:]" )
 $this_dir/validate_arg "target" "$app" "server|migrate|worker"
 $this_dir/validate_arg "env" "$deploy_env" "local|dev|staging|prod"
 
-# ======== TAG/PUSH IMAGE TO REPOSITORY ======== #
+# ======== GET ENVS ======== #
 
 image_owner=$( $this_dir/env_reader "$deploy_env" "IMAGE_OWNER" )
 image_name=$( $this_dir/env_reader "$deploy_env" "${uppercase_app}_IMAGE_NAME" )
+cluster_name=$( $this_dir/env_reader "$deploy_env" "CORE_CLUSTER_NAME" )
+domain=$( $this_dir/env_reader "$deploy_env" "DOMAIN" )
+
+# ======== VALIDATE ENVS ======== #
+
+$this_dir/assert_env "IMAGE_OWNER" "$image_owner"
+$this_dir/assert_env "${uppercase_app}_IMAGE_NAME" "$image_name"
+$this_dir/assert_env "CORE_CLUSTER_NAME" "$cluster_name"
+
+if [[ "$deploy_env" != "local" ]]; then
+	$this_dir/assert_env "DOMAIN" "$domain"
+
+	#  For non-local envs, the actual cluster/context name includes the domain.
+	cluster_name="$cluster_name.$domain"
+fi
+
+# ======== TAG/PUSH IMAGE TO REPOSITORY ======== #
+
 image_repo="$image_owner/$image_name"
 image_version=$( $this_dir/latest_sha )
 
@@ -29,12 +47,8 @@ docker push "$image_repo:$image_version"
 
 # ======== SPECIFY/VALIDATE CLUSTER ======== #
 
-# Get core cluster name from envs.
-cluster_name=$( $this_dir/env_reader "$deploy_env" "CORE_CLUSTER_NAME" )
-domain=$( $this_dir/env_reader "$deploy_env" "DOMAIN" )
-
 # Switch to cluster context.
-kubectl config use-context "$cluster_name.$domain"
+kubectl config use-context "$cluster_name"
 
 if ! kubectl get nodes; then
 	echo "Error fetching cluster nodes. Not deploying."
