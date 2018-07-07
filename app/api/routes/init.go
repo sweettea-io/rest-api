@@ -42,7 +42,7 @@ func CreateRouter(baseRoute string, database *gorm.DB, l *logrus.Logger) *mux.Ro
   return baseRouter
 }
 
-// ---------- Route-agnostic util functions ----------
+// ---------- Route-agnostic utilities ----------
 
 func respJson(w http.ResponseWriter, status int, data *utils.JSON) {
   // Write status header.
