@@ -53,8 +53,7 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   var payload pl.CreateClusterPayload
 
   // 'state' param can only be empty on local environments.
-  // TODO: Use struct with envs instead of the hardcoded "local".
-  if !payload.Validate(req) || (payload.State == "" && app.Config.Env != "local") {
+  if !payload.Validate(req) || (payload.State == "" && app.Config.Env != utils.Envs.Local) {
     respError(w, e.InvalidPayload())
   }
 

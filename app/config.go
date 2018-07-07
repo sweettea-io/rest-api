@@ -3,6 +3,7 @@ package app
 import (
   "fmt"
   "github.com/joeshaw/envdecode"
+  "github.com/sweettea-io/rest-api/pkg/utils"
 )
 
 type appConfig struct {
@@ -45,7 +46,7 @@ func LoadConfig() {
   // --- Evaluate any configs reliant on more sophisticated validation ---
 
   // Ensure BuildClusterState exists for all non-local environments.
-  if Config.BuildClusterState == "" && Config.Env != "local" {
+  if Config.BuildClusterState == "" && Config.Env != utils.Envs.Local {
     panic(fmt.Errorf("Failed to load app config: BUILD_CLUSTER_STATE required on non-local environments.\n"))
   }
 }
