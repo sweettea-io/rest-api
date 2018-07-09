@@ -54,6 +54,7 @@ user: ## Create Sweet Tea User in the database of the specified environment.
 
 export env=local
 export name
+export with-api=false
 company: ## Create Sweet Tea Company in the database of the specified environment.
 	./scripts/create_company $(env) $(name)
 

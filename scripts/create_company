@@ -7,11 +7,13 @@
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 env="$1"
 name="$2"
+with_api="$3"
 
 # ======== VALIDATIONS ======== #
 
 $this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
 $this_dir/validate_arg "name" "$name"
+$this_dir/validate_arg "with-api" "$with_api" "true|false"
 
 if [[ "$env" == "local" ]]; then
 	# Check with the executor that their local Core cluster is running.
@@ -44,3 +46,8 @@ payload="{
 printf "\nCreating company...\n"
 
 $this_dir/core_api_call "$env" "POST" "/companies" "$payload"
+
+# Create api cluster for company as well, if desired.
+if [[ "$with_api" == "true" ]]; then
+	$this_dir/create_api "aws" "$name" "$name" "$env"
+fi
