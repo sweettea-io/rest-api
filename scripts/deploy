@@ -66,7 +66,7 @@ if [[ "$app" = "migrate" ]]; then
 	# For a job, the resource name needs to differ with each deploy, so generate a uuid for suffix.
 	uuid=$( uuidgen | tr "[:upper:]" "[:lower:]" )
 	job_uuid="${uuid:0:8}"
-	image_name="$image_name-$job_uuid"
+	resource_name="$image_name-$job_uuid"
 
 # Otherwise, for deployments, check if the deployment already exists.
 elif ! kubectl get deployment "$resource_name" 2>/dev/null; then
@@ -84,7 +84,8 @@ deploy_envs=$( $this_dir/env_reader "$deploy_env" "all" "true" )
 
 if [[ "$new_deploy" == "true" ]]; then
 	# Create a new k8s cluster deployment.
-	kubectl run "$resource_name" "--image=$image_repo" "$port" "$replicas" "$restart" "$deploy_envs"
+	cmd="kubectl run $resource_name --image=$image_repo:$image_version $port $replicas $restart $deploy_envs"
+	eval $cmd
 
 	# Expose the deployment as a K8S service if this is the first time server deployment.
 	if [[ "$app" == "server" ]]; then

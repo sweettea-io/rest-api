@@ -31,7 +31,7 @@ type appConfig struct {
   ServerPort          int     `env:"SERVER_PORT,required"`
   TrainClusterName    string  `env:"TRAIN_CLUSTER_NAME"`
   TrainClusterState   string  `env:"TRAIN_CLUSTER_STATE"`
-  UserCreationHash    string  `env:"USER_CREATION_HASH,required"`
+  UserCreationHash    string  `env:"USER_CREATION_HASH"`
   WildcardSSLCertArn  string  `env:"WILDCARD_SSL_CERT_ARN"`
   WorkerCount         uint    `env:"WORKER_COUNT,required"`
 }
