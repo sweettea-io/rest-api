@@ -25,6 +25,8 @@ domain=$( $this_dir/env_reader "$env" "DOMAIN" )
 
 # ======== VALIDATE ENVS ======== #
 
+# TODO: validate these according to env=local or not
+
 $this_dir/assert_env "CLOUD_PROVIDER" "$provider"
 $this_dir/assert_env "WILDCARD_SSL_CERT_ARN" "$ssl_cert"
 $this_dir/assert_env "HOSTED_ZONE_ID" "$hosted_zone_id"

@@ -95,12 +95,13 @@ if [[ "$new_deploy" == "true" ]]; then
 	eval $cmd
 
 	# Expose the deployment as a K8S service if this is the first time server deployment.
-	if [[ "$app" == "server" ]]; then
-		echo "First time server deployment detected...preparing to publicize deployment..."
-		sleep 3
-
-		$this_dir/publicize_deployment "$deploy_env" "$resource_name"
-	fi
+	# TODO: Figure this one out on local
+#	if [[ "$app" == "server" ]]; then
+#		echo "First time server deployment detected...preparing to publicize deployment..."
+#		sleep 3
+#
+#		$this_dir/publicize_deployment "$deploy_env" "$resource_name"
+#	fi
 else
 	# Update the image of an existing k8s deployment.
 	kubectl set image "deployment/$resource_name" "$image_name=$image_repo:$image_version"
