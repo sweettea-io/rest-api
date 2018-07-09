@@ -12,28 +12,28 @@ This file outlines the environment variables used in Sweet Tea.
 * `API_VERSION`:
 	- **Required to start app:** Yes
 	- **Type:** `string`
-	- **In-app ref:** `app.Config.ApiVersion`
+	- **In-app ref:** `app.Config.APIVersion`
 	- **Description:** Version of the SweetTea API to use. All API routes will be prefixed with this value
 	- **Ex:** `v1`
 	 
 * `AWS_ACCESS_KEY_ID`:
 	- **Required to start app:** Yes
 	- **Type:** `string`
-	- **In-app ref:** `app.Config.AwsAccessKeyId`
+	- **In-app ref:** `app.Config.AWSAccessKeyId`
 	- **Description:** TODO
 	- **Ex:** `AKABC123DEF456GHI789`
 
 * `AWS_REGION_NAME`:
 	- **Required to start app:** Yes
 	- **Type:** `string`
-	- **In-app ref:** `app.Config.AwsRegionName`
+	- **In-app ref:** `app.Config.AWSRegionName`
 	- **Description:** TODO 
 	- **Ex:** `us-west-1`
 
 * `AWS_SECRET_ACCESS_KEY`:
 	- **Required to start app:** Yes
 	- **Type:** `string`
-	- **In-app ref:** `app.Config.AwsSecretAccessKey`
+	- **In-app ref:** `app.Config.AWSSecretAccessKey`
 	- **Description:** TODO
 	- **Ex:** `ay+aBc123dEf/456gHi7/89JkLmNoPqRsTuVwXyZ`
 	 

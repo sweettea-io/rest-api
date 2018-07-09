@@ -27,7 +27,7 @@ func main() {
   logger := logrus.New()
 
   // Construct base route from API version (i.e. "/v1").
-  baseRoute := fmt.Sprintf("/%s", app.Config.ApiVersion)
+  baseRoute := fmt.Sprintf("/%s", app.Config.APIVersion)
 
   // Create API router.
   router := routes.CreateRouter(baseRoute, db, logger)

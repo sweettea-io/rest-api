@@ -7,10 +7,10 @@ import (
 )
 
 type appConfig struct {
-  ApiVersion          string  `env:"API_VERSION,required"`
-  AwsAccessKeyId      string  `env:"AWS_ACCESS_KEY_ID,required"`
-  AwsRegionName       string  `env:"AWS_REGION_NAME,required"`
-  AwsSecretAccessKey  string  `env:"AWS_SECRET_ACCESS_KEY,required"`
+  APIVersion          string  `env:"API_VERSION,required"`
+  AWSAccessKeyId      string  `env:"AWS_ACCESS_KEY_ID,required"`
+  AWSRegionName       string  `env:"AWS_REGION_NAME,required"`
+  AWSSecretAccessKey  string  `env:"AWS_SECRET_ACCESS_KEY,required"`
   BuildClusterName    string  `env:"BUILD_CLUSTER_NAME,required"`
   BuildClusterState   string  `env:"BUILD_CLUSTER_STATE"`
   CloudProvider       string  `env:"CLOUD_PROVIDER,required"`
