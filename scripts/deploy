@@ -36,11 +36,21 @@ fi
 
 # ======== PUSH IMAGE TO REPOSITORY ======== #
 
-image_version=$( $this_dir/latest_sha )
-image="$image_owner/$image_name:$image_version"
+image_repo="$image_owner/$image_name"
+image_version="$( docker images $image_repo | sed -n 2p | awk '{print $2}' )"
+
+if [[ ! "$image_version" ]]; then
+	echo "Couldn't find tag for Docker repository \"$image_repo\"...Exiting."
+	exit
+fi
+
+if [[ "$image_version" == "<none>" ]]; then
+	echo "Tag for latest Docker repository \"$image_repo\" can't be \"<none>\"...Exiting."
+	exit
+fi
 
 # Push Docker image to external repository.
-docker push "$image"
+docker push "$image_repo:$image_version"
 
 # ======== SPECIFY/VALIDATE CLUSTER ======== #
 
@@ -81,7 +91,7 @@ deploy_envs=$( $this_dir/env_reader "$deploy_env" "all" "true" )
 
 if [[ "$new_deploy" == "true" ]]; then
 	# Create a new k8s cluster deployment.
-	cmd="kubectl run $resource_name --image=$image $port $replicas $restart $deploy_envs"
+	cmd="kubectl run $resource_name --image=$image_repo:$image_version $port $replicas $restart $deploy_envs"
 	eval $cmd
 
 	# Expose the deployment as a K8S service if this is the first time server deployment.
@@ -93,7 +103,7 @@ if [[ "$new_deploy" == "true" ]]; then
 	fi
 else
 	# Update the image of an existing k8s deployment.
-	kubectl set image "deployment/$resource_name" "$image_name=$image"
+	kubectl set image "deployment/$resource_name" "$image_name=$image_repo:$image_version"
 fi
 
 echo "Done!"

@@ -31,7 +31,7 @@ if [[ "$build_format" = "image" ]]; then
 	for app_to_build in "${apps_to_build[@]}"; do
 		uppercase_app=$( echo "$app_to_build" | tr "[:lower:]" "[:upper:]" )
 
-		# Get the docker image name for the specified env and app.
+		# Get the docker image specs for the specified env and app.
 		image_owner=$( $this_dir/env_reader "$build_env" "IMAGE_OWNER" )
 		image_name=$( $this_dir/env_reader "$build_env" "${uppercase_app}_IMAGE_NAME" )
 		image_version=$( $this_dir/latest_sha )
