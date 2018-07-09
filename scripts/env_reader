@@ -23,7 +23,10 @@ if [[ "$env_name" = "all" ]]; then
 	# Format env pairs (1 per line) into args formatted with '--env="<env_pair>"'
 	env_args=""
 	for env_pair in "${all_envs_arr[@]}"; do
-		env_args="$env_args--env=\"$env_pair\" "
+		# Only use the env pairs with non-empty values.
+		if [[ "$( cut -d '=' -f 2 <<< $env_pair )" ]]; then
+			env_args="$env_args--env=\"$env_pair\" "
+		fi
 	done
 
 	echo "$env_args"
