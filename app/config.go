@@ -68,6 +68,7 @@ func LoadConfig() {
     }
   }
 
+  
   // Ensure CLOUD_PROVIDER value is supported.
   if !utils.IsValidCloud(Config.CloudProvider) {
     panic(fmt.Errorf(
