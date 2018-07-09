@@ -26,7 +26,7 @@ if [[ "$env_name" = "all" ]]; then
 		env_args="$env_args--env=\"$env_pair\" "
 	done
 
-	echo "$env_args"c
+	echo "$env_args"
 
 elif [[ "$env_name" ]]; then
 	# Get value for specific env name.
