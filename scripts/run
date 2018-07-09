@@ -23,25 +23,41 @@ $this_dir/validate_arg "format" "$run_type" "image|binary|file"
 
 # Run app as a Docker image.
 if [[ "$run_type" = "image" ]]; then
-	# Get Docker image name for 'local' env tier.
+	# Construct Docker image name to run.
+	image_owner=$( $this_dir/env_reader "$run_env" "IMAGE_OWNER" )
 	image_name=$( $this_dir/env_reader "$run_env" "${uppercase_app}_IMAGE_NAME" )
+	image_repo="$image_owner/$image_name"
+	image_version="$( docker images $image_repo | sed -n 2p | awk '{print $2}' )"
 
-	# Build up args for 'docker run' command.
-	cmd_args="--env-file $envs_dir/$run_env/$app.env"
+	if [[ ! "$image_version" ]]; then
+		echo "Couldn't find tag for Docker repository \"$image_repo\"...Exiting."
+		exit
+	fi
+
+	if [[ "$image_version" == "<none>" ]]; then
+		echo "Tag for latest Docker repository \"$image_repo\" can't be \"<none>\"...Exiting."
+		exit
+	fi
+
+	# Build the 'docker run' command.
+	cmd="docker run --env-file=\"$envs_dir/$run_env.env\""
 
 	# Add port binding for 'server' app.
 	if [[ "$app" = "server" ]]; then
 		server_port=$( $this_dir/env_reader "$run_env" "SERVER_PORT" )
-		cmd_args="$cmd_args -p $server_port:$server_port"
+		cmd+=" -p $server_port:$server_port"
 	fi
 
 	# Run as daemon if desired.
 	if [[ "$run_as_daemon" = "true" ]]; then
-		cmd_args="$cmd_args -d"
+		cmd+=" -d"
 	fi
 
+	# Specify image to run.
+	cmd+=" $image_repo:$image_version"
+
 	# Run Docker image.
-	docker run "$image_name" "$cmd_args"
+	eval $cmd
 
 elif [[ "$run_type" = "binary" ]]; then
 	# Run app as Go binary.
