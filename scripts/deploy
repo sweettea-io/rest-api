@@ -50,7 +50,7 @@ docker push "$image_repo:$image_version"
 # Switch to cluster context.
 kubectl config use-context "$cluster_name"
 
-if ! kubectl get nodes; then
+if ! kubectl get nodes 1>/dev/null; then
 	echo "Error fetching cluster nodes. Not deploying."
 	exit
 fi
