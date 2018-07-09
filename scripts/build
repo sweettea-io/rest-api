@@ -33,6 +33,7 @@ if [[ "$build_format" = "image" ]]; then
 
 		# Get the docker image name for the specified env and app.
 		image_name=$( $this_dir/env_reader "$build_env" "${uppercase_app}_IMAGE_NAME" )
+		image_version=$( $this_dir/latest_sha )
 
 		echo "Building \"$app_to_build\" for \"$build_env\" environment into Docker image \"$image_name\"..."
 
@@ -45,7 +46,7 @@ if [[ "$build_format" = "image" ]]; then
 		docker build \
 			--build-arg ROLE="$app_to_build" \
 			--build-arg BUILD_ENV="$build_env" \
-			-t "$image_name" .
+			-t "$image_name:$image_version" .
 	done
 else
 	# Build each app as a Go binary.
