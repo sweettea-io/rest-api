@@ -29,10 +29,11 @@
     "MIGRATE_RESTART_POLICY": "Never",
     "NODE_COUNT": "2",
     "NODE_SIZE": "t2.micro",
-    "REDIS_POOL_MAX_ACTIVE": "5",
-    "REDIS_POOL_MAX_IDLE": "5",
+    "REDIS_POOL_MAX_ACTIVE": "1000",
+    "REDIS_POOL_MAX_IDLE": "10",
     "REDIS_POOL_WAIT": "true",
-    "REDIS_URL": "",
+    "REDIS_ADDRESS": "",
+    "REDIS_PASSWORD": "",
     "REST_API_TOKEN": "",
     "SERVER_IMAGE_NAME": "rest-api-server",
     "SERVER_PORT": "80",
@@ -57,10 +58,8 @@
   "local": {
     "BUILD_CLUSTER_NAME": "build-local",
     "CORE_CLUSTER_NAME": "core-local",
-    "DATABASE_URL": "postgres://rest-api:rest-api@localhost:5432/rest-api?sslmode=disable",
     "DOMAIN": "localhost",
     "ENV": "local",
-    "REDIS_URL": "localhost:6379",
     "SERVER_REPLICAS": "1",
     "TRAIN_CLUSTER_NAME": "train-local"
   },
@@ -85,8 +84,6 @@
     "ENV": "prod",
     "MASTER_SIZE": "t2.small",
     "NODE_SIZE": "t2.small",
-    "REDIS_POOL_MAX_ACTIVE": "10",
-    "REDIS_POOL_MAX_IDLE": "10",
     "TRAIN_CLUSTER_NAME": "train-prod"
   }
 }
