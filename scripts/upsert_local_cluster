@@ -5,12 +5,14 @@
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cluster_name="$1"
-k8s_version="$2"
+role="$1"
+cluster_name="$2"
+k8s_version="$3"
 
 # ======== VALIDATIONS ======== #
 
 # Validate args.
+$this_dir/validate_arg "role" "$role" "core|build|train"
 $this_dir/validate_arg "cluster_name" "$cluster_name"
 $this_dir/validate_arg "k8s_version" "$k8s_version"
 
@@ -35,5 +37,10 @@ minikube config set ShowBootstrapperDeprecationNotification false
 
 # Start the cluster.
 minikube start --bootstrapper localkube --profile "$cluster_name" "$kubernetes_version_arg"
+
+# If creating the core cluster, also enable ingress.
+if [[ "$role" == "core" ]]; then
+	minikube addons enable ingress --profile "$cluster_name"
+fi
 
 echo "Successfully created cluster \"$cluster_name\"."

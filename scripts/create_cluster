@@ -56,7 +56,7 @@ fi
 
 if [[ "$env" == "local" ]]; then
 	# Upsert local cluster.
-	$this_dir/upsert_local_cluster "$cluster_name" "$k8s_version"
+	$this_dir/upsert_local_cluster "$role" "$cluster_name" "$k8s_version"
 else
 	# Upsert cloud-based cluster.
 	$this_dir/$provider/upsert_cluster \
