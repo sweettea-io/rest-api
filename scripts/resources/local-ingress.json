@@ -1,0 +1,32 @@
+{
+  "apiVersion": "extensions/v1beta1",
+  "kind": "Ingress",
+  "metadata": {
+    "name": "<YOUR_K8S_INGRESS_RESOURCE_NAME>",
+    "annotations": {
+      "nginx.ingress.kubernetes.io/rewrite-target": "/"
+    }
+  },
+  "spec": {
+    "backend": {
+      "serviceName": "default-http-backend",
+      "servicePort": 80
+    },
+    "rules": [
+      {
+        "host": "<your host>",
+        "http": {
+          "paths": [
+            {
+              "path": "/",
+              "backend": {
+                "serviceName": "<YOUR_K8S_SERVICE_NAME>",
+                "servicePort": 80
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
