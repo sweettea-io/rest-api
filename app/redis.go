@@ -13,11 +13,23 @@ func CreateRedisPool() {
     // Max number of idle connections in the pool.
     MaxIdle: Config.RedisPoolMaxIdle,
 
-    // Wait for new connections to be available if pool is at its MaxActive limit?
+    // Whether to wait for newly available connections if the pool is at its MaxActive limit.
     Wait: Config.RedisPoolWait,
 
     Dial: func() (redis.Conn, error) {
-      return redis.Dial("tcp", Config.RedisUrl)
+      // Connect to Redis address (hostname:port)
+      c, err := redis.Dial("tcp", Config.RedisAddress)
+
+      if err != nil {
+        panic(err)
+      }
+
+      // If Redis password is needed, use that.
+      if Config.RedisPassword != "" {
+        c.Do("AUTH", Config.RedisPassword)
+      }
+
+      return c, nil
     },
   }
 }

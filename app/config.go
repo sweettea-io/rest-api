@@ -26,7 +26,8 @@ type appConfig struct {
   RedisPoolMaxActive  int     `env:"REDIS_POOL_MAX_ACTIVE,required"`
   RedisPoolMaxIdle    int     `env:"REDIS_POOL_MAX_IDLE,required"`
   RedisPoolWait       bool    `env:"REDIS_POOL_WAIT,required"`
-  RedisUrl            string  `env:"REDIS_URL,required"`
+  RedisAddress        string  `env:"REDIS_ADDRESS,required"`
+  RedisPassword       string  `env:"REDIS_PASSWORD"`
   RestApiToken        string  `env:"REST_API_TOKEN,required"`
   ServerPort          int     `env:"SERVER_PORT,required"`
   TrainClusterName    string  `env:"TRAIN_CLUSTER_NAME"`
@@ -67,7 +68,6 @@ func LoadConfig() {
       panic(fmt.Errorf(errMsg, "WILDCARD_SSL_CERT_ARN"))
     }
   }
-
 
   // Ensure CLOUD_PROVIDER value is supported.
   if !utils.IsValidCloud(Config.CloudProvider) {
