@@ -58,7 +58,7 @@
   "local": {
     "BUILD_CLUSTER_NAME": "build-local",
     "CORE_CLUSTER_NAME": "core-local",
-    "DOMAIN": "sweettea.local",
+    "DOMAIN": "localtea",
     "ENV": "local",
     "SERVER_REPLICAS": "1",
     "TRAIN_CLUSTER_NAME": "train-local"
