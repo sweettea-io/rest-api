@@ -56,7 +56,7 @@ if [[ "$env" == "local" ]]; then
 	$this_dir/ensure_local_core_api_running
 
 	# Upsert local cluster.
-	$this_dir/upsert_local_cluster "$name" "$k8s_version"
+	$this_dir/upsert_local_cluster "api" "$name" "$k8s_version"
 else
 	# Ensure hosted zone id exists.
 	$this_dir/assert_env "HOSTED_ZONE_ID" "$hosted_zone_id"

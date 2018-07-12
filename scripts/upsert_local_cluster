@@ -7,14 +7,13 @@
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 role="$1"
 cluster_name="$2"
-k8s_version="$3"
+k8s_version="${3:-1.10.0}"
 
 # ======== VALIDATIONS ======== #
 
 # Validate args.
-$this_dir/validate_arg "role" "$role" "core|build|train"
+$this_dir/validate_arg "role" "$role" "core|build|train|api"
 $this_dir/validate_arg "cluster_name" "$cluster_name"
-$this_dir/validate_arg "k8s_version" "$k8s_version"
 
 # Ensure minikube is installed.
 if [[ ! "$( which minikube )" ]]; then
