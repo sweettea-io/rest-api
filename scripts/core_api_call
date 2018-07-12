@@ -21,34 +21,26 @@ domain=$( $this_dir/env_reader "$env" "DOMAIN" )
 rest_api_token=$( $this_dir/env_reader "$env" "REST_API_TOKEN" )
 api_version=$( $this_dir/env_reader "$env" "API_VERSION" )
 
-if [[ ! "$domain" ]]; then
-	echo "DOMAIN env var must have a value already set. Exiting."
-	exit
-fi
-
-if [[ ! "$rest_api_token" ]]; then
-	echo "REST_API_TOKEN env var must have a value already set. Exiting."
-	exit
-fi
-
-if [[ ! "$api_version" ]]; then
-	echo "API_VERSION env var must have a value already set. Exiting."
-	exit
-fi
+$this_dir/assert_env "DOMAIN" "$domain"
+$this_dir/assert_env "REST_API_TOKEN" "$rest_api_token"
+$this_dir/assert_env "API_VERSION" "#$api_version"
 
 # ======== FORMAT CURL ARGS ======== #
 
-# Add payload if there is one.
-if [[ "$payload" ]]; then
-	payload="-d $payload"
-fi
-
 # Create base url for API call based on if DOMAIN is localhost or not.
-if [[ "$domain" == "localhost" ]]; then
+if [[ "$env" == "local" ]]; then
+	# Attempt to get port from envs, but default to 80.
 	port=$( $this_dir/env_reader "$env" "SERVER_PORT" )
 	port="${port:-80}"
 
-	base_url="http://localhost:$port"
+	hostname="$domain"
+
+	# Add port if not 80
+	if [[ "$port" != "80" ]]; then
+		hostname+=":$port"
+	fi
+
+	base_url="http://$hostname"
 else
 	base_url="https://api.$domain"
 fi
@@ -60,6 +52,11 @@ if [ "$method" == "GET" ] || [ "$method" == "DELETE" ]; then
 	content_type="application/x-www-form-urlencoded"
 else
 	content_type="application/json"
+fi
+
+# Add payload if there is one.
+if [[ "$payload" ]]; then
+	payload="-d $payload"
 fi
 
 # ======== PERFORM API CALL ======== #
