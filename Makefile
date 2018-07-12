@@ -56,7 +56,7 @@ export env=local
 export name
 export with-api=false
 company: ## Create Sweet Tea Company in the database of the specified environment.
-	./scripts/create_company $(env) $(name)
+	./scripts/create_company $(env) $(name) $(with-api)
 
 clean: ## Remove all built Go binaries
 	rm ./bin/*
