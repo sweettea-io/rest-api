@@ -9,7 +9,7 @@ import (
 func main() {
   // Ensure password arg was provided.
   if len(os.Args) <= 1 {
-    panic(fmt.Errorf("Task must be called with one argument -- the password to hash."))
+    panic(fmt.Errorf("task must be called with one argument -- the password to hash"))
   }
 
   // Hash the provided password.
