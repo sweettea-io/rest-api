@@ -55,9 +55,9 @@ docker push "$image_repo:$image_version"
 # ======== SPECIFY/VALIDATE CLUSTER ======== #
 
 # Switch to cluster context.
-kubectl config use-context "$cluster_name"
+kubectl config use-context "$cluster_name" 1>/dev/null
 
-if ! kubectl get nodes 1>/dev/null; then
+if ! kubectl get nodes &>/dev/null; then
 	echo "Error fetching cluster nodes. Not deploying."
 	exit
 fi
@@ -95,13 +95,16 @@ if [[ "$new_deploy" == "true" ]]; then
 	eval $cmd
 
 	# Expose the deployment as a K8S service if this is the first time server deployment.
-	# TODO: Figure this one out on local
-#	if [[ "$app" == "server" ]]; then
-#		echo "First time server deployment detected...preparing to publicize deployment..."
-#		sleep 3
-#
-#		$this_dir/publicize_deployment "$deploy_env" "$resource_name"
-#	fi
+	if [[ "$app" == "server" ]]; then
+		echo "First time server deployment detected...preparing to publicize deployment..."
+		sleep 3
+
+		if [[ "$deploy_env" == "local" ]]; then
+			$this_dir/expose_local_deployment "$resource_name"
+		else
+			$this_dir/publicize_deployment "$deploy_env" "$resource_name"
+		fi
+	fi
 else
 	# Update the image of an existing k8s deployment.
 	kubectl set image "deployment/$resource_name" "$image_name=$image_repo:$image_version"

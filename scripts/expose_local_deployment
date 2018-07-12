@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# --- Expose local K8S deployment to a hostname locally -- #
+
+# ======== PARSE ARGS ======== #
+
+# Parse args
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ingress_path="$this_dir/resources/local-ingress.json"
+deployment="$1"
+env="local"
+
+# ======== VALIDATE ARGS ======== #
+
+$this_dir/validate_arg "deployment" "$deployment"
+
+# ======== GET ENVS ======== #
+
+domain=$( $this_dir/env_reader "$env" "DOMAIN" )
+cluster_name=$( $this_dir/env_reader "$env" "CORE_CLUSTER_NAME" )
+
+# ======== VALIDATE ENVS ======== #
+
+$this_dir/assert_env "DOMAIN" "$domain"
+$this_dir/assert_env "CORE_CLUSTER_NAME" "$cluster_name"
+
+# ======== UPSERT SERVICE ======== #
+
+# Ensure service doesn't already exist.
+if kubectl get services | awk "{print $1}" | grep "^${deployment}$" &>/dev/null; then
+	echo "Service \"$deployment\" already exists...not creating."
+	exit
+fi
+
+# Create new NodePort service for this deployment (we only use this type locally).
+echo "Exposing deployment \"$deployment\" as NodePort service..."
+kubectl expose "deployment/$deployment" --type=NodePort
+
+# ======== UPSERT INGRESS ======== #
+
+# Ensure ingress doesn't already exist.
+if kubectl get ing | awk "{print $1}" | grep "^${deployment}$" &>/dev/null; then
+	echo "Ingress \"$deployment\" already exists...not creating."
+	exit
+fi
+
+echo "Creating ingress for service \"$deployment\"..."
+
+# Modify default ingress resource file and create ingress resource from it.
+cat "$ingress_path" \
+	| jq ".metadata.name = \"$deployment\"" \
+	| jq ".spec.rules[0].host = \"$domain\"" \
+	| jq ".spec.rules[0].http.paths[0].backend.serviceName = \"$deployment\"" \
+	| kubectl create -f -
+
+# ======== UPSERT SERVICE ======== #
+
+# Get the Core cluster IP
+cluster_ip="$(minikube ip --profile $cluster_name)"
+
+# Add that IP/hostname pair to /etc/hosts.
+echo "Configuring service availability at \"$domain\"..."
+echo "$cluster_ip $domain" | sudo tee -a /etc/hosts

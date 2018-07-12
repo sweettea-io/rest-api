@@ -1,19 +1,19 @@
 #!/bin/bash
 
-# --- Take steps necessary to publicize a K8S deployment to a publicly available SSL endpoint --- #
+# --- Take steps necessary to publicize a K8S deployment to an SSL endpoint --- #
 
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 env="$1"
 name="$2"
-subdomain="$3"
+deployment="$3"
 
 # ======== VALIDATE ARGS ======== #
 
-$this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
+$this_dir/validate_arg "env" "$env" "dev|staging|prod"
 $this_dir/validate_arg "name" "$name"
-$this_dir/validate_arg "subdomain" "$subdomain"
+$this_dir/validate_arg "deployment" "$deployment"
 
 # ======== GET ENVS ======== #
 
@@ -24,8 +24,6 @@ hosted_zone_id=$( $this_dir/env_reader "$env" "HOSTED_ZONE_ID" )
 domain=$( $this_dir/env_reader "$env" "DOMAIN" )
 
 # ======== VALIDATE ENVS ======== #
-
-# TODO: validate these according to env=local or not
 
 $this_dir/assert_env "CLOUD_PROVIDER" "$provider"
 $this_dir/assert_env "WILDCARD_SSL_CERT_ARN" "$ssl_cert"
@@ -55,5 +53,5 @@ done
 
 # ======== UPSERT CNAME RECORD ======== #
 
-# Add CNAME record connecting the provided subdomain with the load balancer url.
-$this_dir/$provider/upsert_cname_record "$hosted_zone_id" "$subdomain.$domain" "$lb_url"
+# Add CNAME record connecting the following subdomain with the load balancer url.
+$this_dir/$provider/upsert_cname_record "$hosted_zone_id" "$deployment.$domain" "$lb_url"
