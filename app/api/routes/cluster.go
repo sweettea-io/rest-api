@@ -69,7 +69,7 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Ensure executor user's password is correct.
-  if !utils.VerifyPw(payload.ExecutorPassword, executorUser.HashedPw) {
+  if !utils.VerifyBcrypt(payload.ExecutorPassword, executorUser.HashedPw) {
     respError(w, e.Unauthorized())
     return
   }

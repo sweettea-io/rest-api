@@ -54,7 +54,7 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
 
   // Check if the executor is using the USER_CREATION_HASH to create this user.
   usingUserCreationPw := payload.ExecutorEmail == "" && app.Config.UserCreationHash != "" &&
-    utils.VerifyPw(payload.ExecutorPassword, app.Config.UserCreationHash)
+    utils.VerifySha256(payload.ExecutorPassword, app.Config.UserCreationHash)
 
   // executor_email can only be empty when using USER_CREATION_HASH as auth method.
   if !payload.Validate(req) || (payload.ExecutorEmail == "" && !usingUserCreationPw) {
@@ -74,7 +74,7 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
     }
 
     // Ensure executor user's password is correct.
-    if !utils.VerifyPw(payload.ExecutorPassword, executorUser.HashedPw) {
+    if !utils.VerifyBcrypt(payload.ExecutorPassword, executorUser.HashedPw) {
       respError(w, e.Unauthorized())
       return
     }
@@ -88,7 +88,7 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Hash provided user password.
-  hashedPw, err := utils.HashPw(payload.NewPassword)
+  hashedPw, err := utils.BcryptHash(payload.NewPassword)
 
   if err != nil {
     logger.Errorf("Error hashing password during new user creation: %s\n", err.Error())
@@ -151,7 +151,7 @@ func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Ensure passwords match.
-  if !utils.VerifyPw(payload.Password, user.HashedPw) {
+  if !utils.VerifyBcrypt(payload.Password, user.HashedPw) {
     respError(w, e.Unauthorized())
     return
   }

@@ -13,11 +13,7 @@ func main() {
   }
 
   // Hash the provided password.
-  hash, err := utils.HashPw(os.Args[1])
-
-  if err != nil {
-    panic(fmt.Errorf("Error generating hash: %s", err.Error()))
-  }
+  hash := utils.Sha256Hash(os.Args[1])
 
   // Let the executor know what the hashed password is.
   fmt.Printf("Successfully generated hash.\nSet the USER_CREATION_HASH env var to %s for the environment you wish to use this for.\n", hash)
