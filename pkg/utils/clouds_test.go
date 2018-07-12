@@ -13,7 +13,7 @@ func TestIsValidCloud(t *testing.T) {
   }{
     {
       name: "invalid cloud",
-      cloud: "asdasdfasdf",
+      cloud: "invalid-cloud-value",
       expected: false,
     },
     {

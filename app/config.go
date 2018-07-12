@@ -45,6 +45,14 @@ func LoadConfig() {
     panic(fmt.Errorf("Failed to load app config: %s\n", err.Error()))
   }
 
+  // Ensure ENV value is supported.
+  if !utils.IsValidEnv(Config.Env) {
+    panic(fmt.Errorf(
+      "%s is not a valid env. Check 'pkg/utils/envs.go' for a list of valid options.\n",
+      Config.Env,
+    ))
+  }
+
   // --- Evaluate any configs reliant on more sophisticated validation ---
 
   // Non-local env checks.

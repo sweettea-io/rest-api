@@ -4,17 +4,15 @@ type cloudsType struct {
   AWS string
 }
 
-type cloudsMapType map[string]bool
-
 var Clouds = cloudsType{
   AWS: "aws",
 }
 
-var CloudsMap = cloudsMapType{
+var validClouds = map[string]bool {
   Clouds.AWS: true,
 }
 
 // Check if a cloud is supported.
 func IsValidCloud(cloud string) bool {
-  return CloudsMap[cloud] == true
+  return validClouds[cloud] == true
 }
