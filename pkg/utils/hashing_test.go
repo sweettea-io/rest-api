@@ -6,7 +6,8 @@ import (
 )
 
 func TestVerifyBcrypt(t *testing.T) {
-  blueHash, _ := BcryptHash("blue")
+  blueHash, err := BcryptHash("blue")
+  assert.NoError(t, err, "expected no error")
 
   // Test passwords do NOT match.
   assert.Equal(t, false, VerifyBcrypt("red", blueHash), "passwords do NOT match")
