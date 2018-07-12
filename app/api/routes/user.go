@@ -52,15 +52,14 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   // Parse & validate payload.
   var payload pl.CreateUserPayload
 
-  // Check if the executor is using the USER_CREATION_HASH to create this user.
-  usingUserCreationPw := payload.ExecutorEmail == "" && app.Config.UserCreationHash != "" &&
-    utils.VerifySha256(payload.ExecutorPassword, app.Config.UserCreationHash)
-
-  // executor_email can only be empty when using USER_CREATION_HASH as auth method.
-  if !payload.Validate(req) || (payload.ExecutorEmail == "" && !usingUserCreationPw) {
+  if !payload.Validate(req) {
     respError(w, e.InvalidPayload())
     return
   }
+
+  // Check if the executor is using the USER_CREATION_HASH to create this user.
+  usingUserCreationPw := payload.ExecutorEmail == "" && app.Config.UserCreationHash != "" &&
+    utils.VerifySha256(payload.ExecutorPassword, app.Config.UserCreationHash)
 
   // If not using USER_CREATION_HASH for auth, verify executor exists using email/pw.
   if !usingUserCreationPw {
