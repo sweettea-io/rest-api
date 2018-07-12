@@ -2,6 +2,8 @@
 
 # --- Upsert local K8S cluster with minikube --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -18,7 +20,7 @@ $this_dir/validate_arg "cluster_name" "$cluster_name"
 # Ensure minikube is installed.
 if [[ ! "$( which minikube )" ]]; then
 	echo "Minikube not detected...run 'make install' and then try again."
-	exit
+	exit 1
 fi
 
 # ======== GET USABLE K8S VERSION ======== #

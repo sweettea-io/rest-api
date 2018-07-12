@@ -2,6 +2,8 @@
 
 # --- Take steps necessary to publicize a K8S deployment to an SSL endpoint --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

@@ -29,12 +29,12 @@ if [[ "$supported_vals" ]]; then
 		space_del="${supported_vals_arr[@]}"
 		comma_del="${space_del// /, }"
 		echo "Invalid value \"$provided_val\" provided for argument \"$arg_name\". Supported values: $comma_del"
-		exit
+		exit 1
 	fi
 else
 	# Supported values were NOT provided, so just ensure the provided val is NOT empty.
 	if [[ ! "$provided_val" ]]; then
 		echo "Argument \"$arg_name\" required to exist."
-		exit
+		exit 1
 	fi
 fi

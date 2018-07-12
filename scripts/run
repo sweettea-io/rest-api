@@ -2,6 +2,8 @@
 
 # --- Run supported application as either a Go binary or Docker image (and potentially as a daemon if Docker image) --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -31,12 +33,12 @@ if [[ "$run_type" = "image" ]]; then
 
 	if [[ ! "$image_version" ]]; then
 		echo "Couldn't find tag for Docker repository \"$image_repo\"...Exiting."
-		exit
+		exit 1
 	fi
 
 	if [[ "$image_version" == "<none>" ]]; then
 		echo "Tag for latest Docker repository \"$image_repo\" can't be \"<none>\"...Exiting."
-		exit
+		exit 1
 	fi
 
 	# Build the 'docker run' command.

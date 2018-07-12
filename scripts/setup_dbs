@@ -2,6 +2,8 @@
 
 # --- Setup databases and database roles for dev and test environments --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # Directory of this script
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 

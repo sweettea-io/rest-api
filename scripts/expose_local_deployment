@@ -2,6 +2,8 @@
 
 # --- Expose local K8S deployment to a hostname locally -- #
 
+set -e # exit if any child script exits with non-zero status
+
 # ======== PARSE ARGS ======== #
 
 # Parse args
@@ -30,7 +32,7 @@ $this_dir/assert_env "CORE_CLUSTER_NAME" "$cluster_name"
 # Ensure service doesn't already exist.
 if [[ $( kubectl get services | awk "{print $1}" | grep "^${deployment}$" ) ]]; then
 	echo "Service \"$deployment\" already exists...not creating."
-	exit
+	exit 1
 fi
 
 # Create new NodePort service for this deployment (we only use this type locally).
@@ -42,7 +44,7 @@ kubectl expose "deployment/$deployment" --type=NodePort
 # Ensure ingress doesn't already exist.
 if [[ $( kubectl get ing | awk "{print $1}" | grep "^${deployment}$" ) ]]; then
 	echo "Ingress \"$deployment\" already exists...not creating."
-	exit
+	exit 1
 fi
 
 echo "Creating ingress for service \"$deployment\"..."

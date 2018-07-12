@@ -2,6 +2,8 @@
 
 # --- Create a new API cluster for a specific enviornment with the provided name --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -116,6 +118,8 @@ payload="{
 	\"cloud\": \"$provider\",
 	\"state\": \"$state\"
 }"
+
+printf "\Registering API cluster...\n"
 
 $this_dir/core_api_call "$env" "POST" "/clusters" "$payload"
 

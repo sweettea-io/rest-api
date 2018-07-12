@@ -2,6 +2,8 @@
 
 # --- Upsert CNAME record on Route53 --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # ======== PARSE ARGS ======== #
 
 hosted_zone_id="$1"
@@ -12,17 +14,17 @@ record_val="$3"
 
 if [[ ! "$hosted_zone_id" ]]; then
 	echo "\"hosted_zone_id\" arg required. Exiting."
-	exit
+	exit 1
 fi
 
 if [[ ! "$record_name" ]]; then
 	echo "\"record_name\" arg required. Exiting."
-	exit
+	exit 1
 fi
 
 if [[ ! "$record_val" ]]; then
 	echo "\"record_val\" arg required. Exiting."
-	exit
+	exit 1
 fi
 
 # ======== UPSERT CNAME RECORD ======== #

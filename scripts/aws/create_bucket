@@ -10,5 +10,5 @@ if aws s3api create-bucket --bucket "$bucket_name"; then
 	echo "Successfully created S3 bucket."
 else
 	echo "Failed to create S3 bucket. Exiting."
-	exit
+	exit 1
 fi

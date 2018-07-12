@@ -7,5 +7,5 @@ val="$2"
 
 if [[ ! "$val" ]]; then
 	echo "$name env var not set for this environment. Exiting."
-	exit
+	exit 1
 fi

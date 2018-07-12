@@ -10,5 +10,5 @@ done
 
 if [[ "$cont" == "n" ]]; then
 	echo "Exiting."
-	exit
+	exit 1
 fi

@@ -2,6 +2,8 @@
 
 # --- Perform an API call to the Core cluster for a specific environment --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

@@ -2,6 +2,8 @@
 
 # --- Upsert NS Records For a Route53 Hosted Zone --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

@@ -2,6 +2,8 @@
 
 # --- Install everything required to get up and running with Sweet Tea --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # Directory of this script.
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -15,7 +17,7 @@ if [[ "$os" = "mac" ]]; then
 elif [[ "$os" = "unknown" ]]; then
 	# Exit early if not on mac or linux.
 	echo "Only Linux and Mac operating systems supported. Exiting..."
-	exit
+	exit 1
 fi
 
 # Install jq to help with bash json parsing.
@@ -46,6 +48,8 @@ $this_dir/install_redis
 $this_dir/$os/install_pg
 
 # Upsert local databases for dev and testing.
-$this_dir/setup_dbs
+# Commenting out for now and using cloud-based DBs even for local development.
+# ^This avoids the headache of exposing local dbs to a local minikube cluster.
+# $this_dir/setup_dbs
 
 echo "Done!"

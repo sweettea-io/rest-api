@@ -2,6 +2,8 @@
 
 # --- Upsert Kubernetes cluster on AWS --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -23,7 +25,7 @@ group_name="kops"
 # Ensure AWS environment variables are currently set.
 if [ ! "$AWS_ACCESS_KEY_ID" ] || [ ! "$AWS_SECRET_ACCESS_KEY" ]; then
 	echo "AWS environment variables not currently set.\nSet \"AWS_ACCESS_KEY_ID\" and \"AWS_SECRET_ACCESS_KEY\" and then try again."
-	exit
+	exit 1
 fi
 
 # Upsert AWS group.

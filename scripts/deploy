@@ -2,6 +2,8 @@
 
 # --- Deploy Supported Application to Core Kubernetes Cluster of Specified Env Tier --- #
 
+set -e # exit if any child script exits with non-zero status
+
 # ======== PARSE ARGS ======== #
 
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -41,12 +43,12 @@ image_version="$( docker images $image_repo | sed -n 2p | awk '{print $2}' )"
 
 if [[ ! "$image_version" ]]; then
 	echo "Couldn't find tag for Docker repository \"$image_repo\"...Exiting."
-	exit
+	exit 1
 fi
 
 if [[ "$image_version" == "<none>" ]]; then
 	echo "Tag for latest Docker repository \"$image_repo\" can't be \"<none>\"...Exiting."
-	exit
+	exit 1
 fi
 
 # Push Docker image to external repository.
@@ -59,7 +61,7 @@ kubectl config use-context "$cluster_name" 1>/dev/null
 
 if ! kubectl get nodes &>/dev/null; then
 	echo "Error fetching cluster nodes. Not deploying."
-	exit
+	exit 1
 fi
 
 # ======== DETERMINE DEPLOYMENT EXISTENCE ======== #
