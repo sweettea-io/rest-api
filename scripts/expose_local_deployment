@@ -7,6 +7,7 @@
 # Parse args
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ingress_path="$this_dir/resources/local-ingress.json"
+host_path="/etc/hosts"
 deployment="$1"
 env="local"
 
@@ -27,7 +28,7 @@ $this_dir/assert_env "CORE_CLUSTER_NAME" "$cluster_name"
 # ======== UPSERT SERVICE ======== #
 
 # Ensure service doesn't already exist.
-if kubectl get services | awk "{print $1}" | grep "^${deployment}$" &>/dev/null; then
+if [[ $( kubectl get services | awk "{print $1}" | grep "^${deployment}$" ) ]]; then
 	echo "Service \"$deployment\" already exists...not creating."
 	exit
 fi
@@ -39,7 +40,7 @@ kubectl expose "deployment/$deployment" --type=NodePort
 # ======== UPSERT INGRESS ======== #
 
 # Ensure ingress doesn't already exist.
-if kubectl get ing | awk "{print $1}" | grep "^${deployment}$" &>/dev/null; then
+if [[ $( kubectl get ing | awk "{print $1}" | grep "^${deployment}$" ) ]]; then
 	echo "Ingress \"$deployment\" already exists...not creating."
 	exit
 fi
@@ -53,11 +54,29 @@ cat "$ingress_path" \
 	| jq ".spec.rules[0].http.paths[0].backend.serviceName = \"$deployment\"" \
 	| kubectl create -f -
 
-# ======== UPSERT SERVICE ======== #
+# ======== REGISTER LOCAL IP/HOSTNAME GROUP ======== #
 
 # Get the Core cluster IP
 cluster_ip="$(minikube ip --profile $cluster_name)"
+new_host_line="$cluster_ip $domain"
 
-# Add that IP/hostname pair to /etc/hosts.
-echo "Configuring service availability at \"$domain\"..."
-echo "$cluster_ip $domain" | sudo tee -a /etc/hosts
+echo "Configuring service availability at hostname: \"$domain\""
+
+# If the entire entry already exists, don't re-add it.
+if [[ $( cat "$host_path" | grep "^${new_host_line}$" ) ]]; then
+	echo "Hostname already configured."
+
+# If just the IP already exists, notify the user.
+elif [[ $( cat "$host_path" | awk "{print $1}" | grep "^${cluster_ip}$" ) ]]; then
+	echo "IP \"$cluster_ip\" already exists as an entry to $host_path"
+	echo "Manually modify $host_path to have the entry \"$new_host_line\""
+
+# If just the hostname already exists, notify the user.
+elif [[ $( cat "$host_path" | awk "{print $2}" | grep "^${domain}$" ) ]]; then
+	echo "Hostname \"$domain\" already exists as an entry to $host_path."
+	echo "Manually modify $host_path to have the entry \"$new_host_line\""
+
+# Add the entry if not there at all.
+else
+	echo "$new_host_line" | sudo tee -a "$host_path"
+fi

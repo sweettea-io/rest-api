@@ -28,7 +28,7 @@ if [[ "$supported_vals" ]]; then
 	if [[ ! "$valid" ]]; then
 		space_del="${supported_vals_arr[@]}"
 		comma_del="${space_del// /, }"
-		echo "Invalid value \"$provided_val\" provided for argument \"$arg_name\. Supported values: $comma_del."
+		echo "Invalid value \"$provided_val\" provided for argument \"$arg_name\". Supported values: $comma_del"
 		exit
 	fi
 else
