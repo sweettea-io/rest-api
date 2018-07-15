@@ -26,11 +26,8 @@ func main() {
   // Create logger.
   logger := logrus.New()
 
-  // Construct base route from API version (i.e. "/v1").
-  baseRoute := fmt.Sprintf("/%s", app.Config.APIVersion)
-
   // Create API router.
-  router := routes.CreateRouter(baseRoute, db, logger)
+  router := routes.CreateRouter(app.Config.BaseRoute(), db, logger)
 
   // Format address to listen on.
   addr := fmt.Sprintf(":%v", app.Config.ServerPort)

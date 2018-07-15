@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# --- Run all tests for this project --- #
+
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+test_env_path="./envs/test.env"
+
+# Get all test envs from the test env file if it exists.
+# Then use these envs as prefixes to the test command.
+if [[ -e "$test_env_path" ]]; then
+	test_envs=$( $this_dir/env_reader "test" "all" )
+else
+	test_envs=""
+fi
+
+# TODO: Run migrations here too?
+
+cmd="${test_envs} go test -p 1 ./..."
+
+eval $cmd

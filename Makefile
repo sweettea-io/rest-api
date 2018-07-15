@@ -65,4 +65,4 @@ ensure: ## Update dependencies
 	dep ensure -vendor-only
 
 test: ## Run all tests
-	go test -p 1 ./...
+	./scripts/run_tests

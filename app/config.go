@@ -37,6 +37,10 @@ type appConfig struct {
   WorkerCount         uint    `env:"WORKER_COUNT,required"`
 }
 
+func (c *appConfig) BaseRoute() string {
+  return fmt.Sprintf("/%s", c.APIVersion)
+}
+
 var Config appConfig
 
 func LoadConfig() {

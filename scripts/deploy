@@ -87,7 +87,7 @@ fi
 port=$( $this_dir/env_reader "$deploy_env" "SERVER_PORT" "port" )
 replicas=$( $this_dir/env_reader "$deploy_env" "${uppercase_app}_REPLICAS" "replicas" )
 restart=$( $this_dir/env_reader "$deploy_env" "${uppercase_app}_RESTART_POLICY" "restart" )
-deploy_envs=$( $this_dir/env_reader "$deploy_env" "all" "true" )
+deploy_envs=$( $this_dir/env_reader "$deploy_env" "all" "" "true" )
 
 # ======== DEPLOY ======== #
 
