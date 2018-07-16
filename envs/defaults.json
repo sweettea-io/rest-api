@@ -50,10 +50,7 @@
     "WORKER_RESTART_POLICY": "Always"
   },
   "test": {
-    "DOMAIN": "localhost",
-    "ENV": "test",
-    "JOB_QUEUE_NSP": "rest_api_job_queue_test",
-    "SERVER_REPLICAS": "1"
+    "ENV": "test"
   },
   "local": {
     "BUILD_CLUSTER_NAME": "build-local",
