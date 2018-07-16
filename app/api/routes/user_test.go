@@ -7,5 +7,5 @@ import (
 
 func TestCreateUserHandler(t *testing.T) {
   res := TestRouter.JSONRequest("POST", UserRoute, nil, false)
-  assert.Equal(t, 401, res.Result().StatusCode)
+  assert.Equal(t, 401, res.StatusCode())
 }

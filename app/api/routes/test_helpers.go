@@ -11,7 +11,10 @@ import (
   "github.com/sweettea-io/rest-api/defs"
   "github.com/sweettea-io/rest-api/pkg/database"
   "github.com/sweettea-io/rest-api/pkg/utils"
+  "encoding/json"
 )
+
+// --------------- TEST ROUTER ---------------
 
 type testRouter struct {
   Router *mux.Router
@@ -32,21 +35,21 @@ func (tr *testRouter) Configure() {
   tr.Router = CreateRouter(app.Config.BaseRoute(), db, logger)
 }
 
-func (tr *testRouter) Request(method string, route string, body io.Reader, authed bool) *httptest.ResponseRecorder {
+func (tr *testRouter) Request(method string, route string, body io.Reader, authed bool) *testResponse {
   if tr.Router == nil {
     tr.Configure()
   }
 
-  req := newRequestObj(method, route, body, authed)
+  req := tr.createRequest(method, route, body, authed)
 
   res := httptest.NewRecorder()
 
   tr.Router.ServeHTTP(res, req)
 
-  return res
+  return &testResponse{raw: res}
 }
 
-func (tr *testRouter) JSONRequest(method string, route string, data *utils.JSON, authed bool) *httptest.ResponseRecorder {
+func (tr *testRouter) JSONRequest(method string, route string, data *utils.JSON, authed bool) *testResponse {
   if tr.Router == nil {
     tr.Configure()
   }
@@ -57,7 +60,7 @@ func (tr *testRouter) JSONRequest(method string, route string, data *utils.JSON,
     body, _ = data.AsBuffer()
   }
 
-  req := newRequestObj(method, route, body, authed)
+  req := tr.createRequest(method, route, body, authed)
 
   req.Header.Set("Content-Type", "application/json")
 
@@ -65,12 +68,10 @@ func (tr *testRouter) JSONRequest(method string, route string, data *utils.JSON,
 
   tr.Router.ServeHTTP(res, req)
 
-  // TODO:
-
-  return res
+  return &testResponse{raw: res}
 }
 
-func newRequestObj(method string, route string, body io.Reader, authed bool) *http.Request {
+func (tr *testRouter) createRequest(method string, route string, body io.Reader, authed bool) *http.Request {
   req, err := http.NewRequest(method, app.Config.BaseRoute() + route, body)
 
   if err != nil {
@@ -85,3 +86,21 @@ func newRequestObj(method string, route string, body io.Reader, authed bool) *ht
 }
 
 var TestRouter = &testRouter{}
+
+// --------------- TEST RESPONSE ---------------
+
+type testResponse struct {
+  raw *httptest.ResponseRecorder
+}
+
+func (res *testResponse) ParseJSON() *utils.JSON {
+  // Parse body into JSON type.
+  var data utils.JSON
+  json.Unmarshal(res.raw.Body.Bytes(), &data)
+
+  return &data
+}
+
+func (res *testResponse) StatusCode() int {
+  return res.raw.Result().StatusCode
+}
