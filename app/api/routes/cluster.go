@@ -61,7 +61,7 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
 
   // Get executor user by email.
   var executorUser models.User
-  userResult := db.Where(&models.User{Email: payload.ExecutorEmail, IsDestroyed: false}).Find(&executorUser)
+  userResult := db.Where(&models.User{Email: payload.ExecutorEmail}).Find(&executorUser)
 
   if userResult.RecordNotFound() {
     respError(w, e.UserNotFound())
@@ -84,7 +84,7 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   // Find company to attach cluster to.
   var company models.Company
   companySlug := utils.Slugify(payload.CompanyName)
-  companyResult := db.Where(&models.Company{Slug: companySlug, IsDestroyed: false}).First(&company)
+  companyResult := db.Where(&models.Company{Slug: companySlug}).First(&company)
 
   // Ensure company exists.
   if companyResult.RecordNotFound() {

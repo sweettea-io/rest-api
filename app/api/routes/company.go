@@ -55,7 +55,7 @@ func CreateCompanyHandler(w http.ResponseWriter, req *http.Request) {
 
   // Get executor user by email.
   var executorUser models.User
-  result := db.Where(&models.User{Email: payload.ExecutorEmail, IsDestroyed: false}).Find(&executorUser)
+  result := db.Where(&models.User{Email: payload.ExecutorEmail}).Find(&executorUser)
 
   if result.RecordNotFound() {
     respError(w, e.UserNotFound())

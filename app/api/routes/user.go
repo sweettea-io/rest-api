@@ -65,7 +65,7 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   if !usingUserCreationPw {
     // Get executor user by email.
     var executorUser models.User
-    result := db.Where(&models.User{Email: payload.ExecutorEmail, IsDestroyed: false}).Find(&executorUser)
+    result := db.Where(&models.User{Email: payload.ExecutorEmail}).Find(&executorUser)
 
     if result.RecordNotFound() {
       respError(w, e.UserNotFound())
@@ -141,7 +141,7 @@ func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
 
   // Get user by email.
   var user models.User
-  result := db.Where(&models.User{Email: payload.Email, IsDestroyed: false}).First(&user)
+  result := db.Where(&models.User{Email: payload.Email}).First(&user)
 
   // Ensure user exists.
   if result.RecordNotFound() {

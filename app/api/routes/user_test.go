@@ -6,6 +6,10 @@ import (
 )
 
 func TestCreateUserHandler(t *testing.T) {
+  // TODO: Add this to TestMain(m *testing.M)
+  ClearTables()
+
   res := TestRouter.JSONRequest("POST", UserRoute, nil, false)
-  assert.Equal(t, 401, res.StatusCode())
+
+  assert.Equal(t, 200, res.StatusCode())
 }

@@ -13,8 +13,11 @@ else
 	test_envs=""
 fi
 
-# TODO: Run migrations here too?
+test_cmd="${test_envs} go test -p 1 ./..."
+migrate_cmd="${test_envs} go run cmd/migrate/main.go"
 
-cmd="${test_envs} go test -p 1 ./..."
+echo "Migrating test DB..."
+eval $migrate_cmd
 
-eval $cmd
+echo "Running tests..."
+eval $test_cmd

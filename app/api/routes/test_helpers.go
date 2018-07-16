@@ -15,6 +15,7 @@ import (
   "github.com/sweettea-io/rest-api/defs"
   "github.com/sweettea-io/rest-api/pkg/database"
   "github.com/sweettea-io/rest-api/pkg/utils"
+  "github.com/sweettea-io/rest-api/pkg/models"
 )
 
 // --------------- TEST ROUTER ---------------
@@ -30,11 +31,11 @@ func (tr *testRouter) Init() {
   app.LoadConfig()
 
   // Establish connection to database.
-  db := database.Connection(app.Config.DatabaseUrl)
+  db = database.Connection(app.Config.DatabaseUrl)
   db.LogMode(app.Config.Debug)
 
   // Create logger.
-  logger := logrus.New()
+  logger = logrus.New()
 
   // Create API router.
   tr.Router = CreateRouter(app.Config.BaseRoute(), db, logger)
@@ -149,3 +150,31 @@ func (res *testResponse) ParseJSON() *utils.JSON {
 func (res *testResponse) StatusCode() int {
   return res.raw.Result().StatusCode
 }
+
+// --------------- DB TEST HELPERS ---------------
+
+// Clear all database tables (ala the common "setup" test function)
+func ClearTables() {
+  // Init the mux router if non-existent.
+  if TestRouter.Router == nil {
+    TestRouter.Init()
+  }
+
+  // Turn off db logging for the table clearing to hide the noise.
+  db.LogMode(false)
+
+  // Clear all tables.
+  db.Unscoped().Delete(&models.User{})
+  db.Unscoped().Delete(&models.Session{})
+  db.Unscoped().Delete(&models.Company{})
+  db.Unscoped().Delete(&models.Cluster{})
+  db.Unscoped().Delete(&models.Project{})
+  db.Unscoped().Delete(&models.Dataset{})
+  db.Unscoped().Delete(&models.Env{})
+  db.Unscoped().Delete(&models.Commit{})
+  db.Unscoped().Delete(&models.Deploy{})
+
+  // Revert db log mode to its original form.
+  db.LogMode(app.Config.Debug)
+}
+
