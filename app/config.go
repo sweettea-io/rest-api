@@ -6,6 +6,8 @@ import (
   "github.com/sweettea-io/rest-api/pkg/utils"
 )
 
+var Config appConfig
+
 type appConfig struct {
   APIVersion          string  `env:"API_VERSION,required"`
   AWSAccessKeyId      string  `env:"AWS_ACCESS_KEY_ID,required"`
@@ -41,44 +43,26 @@ func (c *appConfig) BaseRoute() string {
   return fmt.Sprintf("/%s", c.APIVersion)
 }
 
-var Config appConfig
-
+// Load environment variables into app Config.
 func LoadConfig() {
-  // Unmarshal envs into Config struct.
+  // Unmarshal values into Config struct.
   if err := envdecode.Decode(&Config); err != nil {
     panic(fmt.Errorf("Failed to load app config: %s\n", err.Error()))
   }
 
+  // Validate config values.
+  validateConfigs()
+}
+
+// Validate Config values even further than what has
+// already been done during the Decode process.
+func validateConfigs() {
   // Ensure ENV value is supported.
   if !utils.IsValidEnv(Config.Env) {
     panic(fmt.Errorf(
       "%s is not a valid env. Check 'pkg/utils/envs.go' for a list of valid options.\n",
       Config.Env,
     ))
-  }
-
-  // --- Evaluate any configs reliant on more sophisticated validation ---
-
-  // Non-local env checks.
-  if Config.Env != utils.Envs.Local {
-    errMsg := "Failed to load app config: %s required on non-local environments.\n"
-
-    // Not using for-loop for the following in case a non-string env is needed here in the future.
-
-    // BUILD_CLUSTER_STATE is required.
-    if Config.BuildClusterState == "" {
-      panic(fmt.Errorf(errMsg, "BUILD_CLUSTER_STATE"))
-    }
-
-    // HOSTED_ZONE_ID is required.
-    if Config.HostedZoneId == "" {
-      panic(fmt.Errorf(errMsg, "HOSTED_ZONE_ID"))
-    }
-
-    // WILDCARD_SSL_CERT_ARN is required.
-    if Config.WildcardSSLCertArn == "" {
-      panic(fmt.Errorf(errMsg, "WILDCARD_SSL_CERT_ARN"))
-    }
   }
 
   // Ensure CLOUD_PROVIDER value is supported.
@@ -88,4 +72,31 @@ func LoadConfig() {
       Config.CloudProvider,
     ))
   }
+
+  // TODO: Fork github.com/joeshaw/envdecode and add in env-tier specific validation tags and accepted values
+
+  // ------ Env-specific validations ------
+
+  //errMsg := "Failed to load app config: %s required on non-local environments.\n"
+
+  // Non-local env checks.
+  //if Config.Env != utils.Envs.Local {
+  //
+  //  // Not using for-loop for the following in case a non-string env is needed here in the future.
+  //
+  //  // BUILD_CLUSTER_STATE is required.
+  //  if Config.BuildClusterState == "" {
+  //    panic(fmt.Errorf(errMsg, "BUILD_CLUSTER_STATE"))
+  //  }
+  //
+  //  // HOSTED_ZONE_ID is required.
+  //  if Config.HostedZoneId == "" {
+  //    panic(fmt.Errorf(errMsg, "HOSTED_ZONE_ID"))
+  //  }
+  //
+  //  // WILDCARD_SSL_CERT_ARN is required.
+  //  if Config.WildcardSSLCertArn == "" {
+  //    panic(fmt.Errorf(errMsg, "WILDCARD_SSL_CERT_ARN"))
+  //  }
+  //}
 }
