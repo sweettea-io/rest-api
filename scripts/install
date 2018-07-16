@@ -48,8 +48,6 @@ $this_dir/install_redis
 $this_dir/$os/install_pg
 
 # Upsert local databases for dev and testing.
-# Commenting out for now and using cloud-based DBs even for local development.
-# ^This avoids the headache of exposing local dbs to a local minikube cluster.
-# $this_dir/setup_dbs
+$this_dir/setup_dbs
 
 echo "Done!"
