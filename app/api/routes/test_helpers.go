@@ -41,14 +41,21 @@ func (tr *testRouter) Init() {
 }
 
 // Perform an HTTP request, responding with a testResponse object.
-func (tr *testRouter) Request(method string, route string, body io.Reader, authed bool) *testResponse {
+func (tr *testRouter) Request(method string, route string, body io.Reader, authed bool, extraHeaders ...map[string]string) *testResponse {
   // Init the mux router if non-existent.
   if tr.Router == nil {
     tr.Init()
   }
 
+  // Get extra headers from arg (if they exist).
+  var headers map[string]string
+
+  if len(extraHeaders) > 0 {
+    headers = extraHeaders[0]
+  }
+
   // Create HTTP request object.
-  req := tr.createRequest(method, route, body, authed)
+  req := tr.createRequest(method, route, body, authed, headers)
 
   // Create new response recorder.
   res := httptest.NewRecorder()
@@ -60,7 +67,7 @@ func (tr *testRouter) Request(method string, route string, body io.Reader, authe
   return &testResponse{raw: res}
 }
 
-func (tr *testRouter) JSONRequest(method string, route string, data *utils.JSON, authed bool) *testResponse {
+func (tr *testRouter) JSONRequest(method string, route string, data *utils.JSON, authed bool, extraHeaders ...map[string]string) *testResponse {
   // Init the mux router if non-existent.
   if tr.Router == nil {
     tr.Init()
@@ -73,8 +80,15 @@ func (tr *testRouter) JSONRequest(method string, route string, data *utils.JSON,
     body, _ = data.AsBuffer()
   }
 
+  // Get extra headers from arg (if they exist).
+  var headers map[string]string
+
+  if len(extraHeaders) > 0 {
+    headers = extraHeaders[0]
+  }
+
   // Create HTTP request object.
-  req := tr.createRequest(method, route, body, authed)
+  req := tr.createRequest(method, route, body, authed, headers)
 
   // Configure request body to be of JSON type.
   req.Header.Set("Content-Type", "application/json")
@@ -90,7 +104,7 @@ func (tr *testRouter) JSONRequest(method string, route string, data *utils.JSON,
 }
 
 // Create and return a new HTTP request object for the test router.
-func (tr *testRouter) createRequest(method string, route string, body io.Reader, authed bool) *http.Request {
+func (tr *testRouter) createRequest(method string, route string, body io.Reader, authed bool, extraHeaders map[string]string) *http.Request {
   // Create new HTTP request.
   req, err := http.NewRequest(method, app.Config.BaseRoute() + route, body)
 
@@ -101,6 +115,11 @@ func (tr *testRouter) createRequest(method string, route string, body io.Reader,
   // Add Sweet Tea auth header if specified as an 'authed' request.
   if authed {
     req.Header.Set(defs.AuthHeaderName, app.Config.RestApiToken)
+  }
+
+  // Set any extra headers provided.
+  for k, v := range extraHeaders {
+    req.Header.Set(k, v)
   }
 
   return req
