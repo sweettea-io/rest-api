@@ -13,7 +13,7 @@ else
 	test_envs=""
 fi
 
-test_cmd="${test_envs} go test -v -p 1 ./..."
+test_cmd="${test_envs} go test -p 1 ./..."
 migrate_cmd="${test_envs} go run cmd/migrate/main.go"
 
 echo "Migrating test DB..."
