@@ -5,4 +5,4 @@
 
 # License
 
-All Rights Reserved, Sweet Tea, 2018.
+© 2018 Sweet Tea, All rights reserved.
