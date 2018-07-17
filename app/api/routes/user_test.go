@@ -30,7 +30,7 @@ func TestCreateUserHandler(t *testing.T) {
   // Evaluate each test case and teardown after each.
   for _, tc  := range testCases {
     func () {
-      defer RouteTeardown()
+      defer Teardown()
 
       // Make request.
       res := router.Request(tc.Request)

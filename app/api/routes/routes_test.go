@@ -37,9 +37,9 @@ func TestMain(m *testing.M) {
   os.Exit(code)
 }
 
-// RouteTeardown function called after each test in this package is run.
-// Call `defer RouteTeardown()` at the top of each test you want to use this with.
-func RouteTeardown() {
+// Teardown function called after each test in this package is run.
+// Call `defer Teardown()` at the top of each test you want to use this with.
+func Teardown() {
   // Clear all DB tables.
   test_utils.ClearTables(db, app.Config.Debug)
 }
