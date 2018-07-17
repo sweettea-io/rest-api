@@ -13,7 +13,11 @@ type Error struct {
 func ApiError(status int, code int, msg string) (*Error) {
   return &Error{
     Status: status,
-    Data: utils.JSON{"ok": false, "code": code, "error": msg},
+    Data: utils.JSON{
+      "ok": false,
+      "code": code,
+      "error": msg,
+    },
   }
 }
 

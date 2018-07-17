@@ -7,8 +7,8 @@ import (
 
 func TestIsValidEnv(t *testing.T) {
   testCases := []struct {
-    name string
-    env string
+    name     string
+    env      string
     expected bool
   }{
     {

@@ -5,13 +5,14 @@ import (
   "testing"
   "github.com/Sirupsen/logrus"
   "github.com/sweettea-io/rest-api/app"
-  "github.com/sweettea-io/rest-api/defs"
   "github.com/sweettea-io/rest-api/pkg/database"
   "github.com/sweettea-io/rest-api/pkg/test_utils"
 )
 
+// Global test router used by tests as wrapper to *mux.Router
 var router *test_utils.TestRouter
 
+// Setup function called before all tests in this package are run.
 func TestMain(m *testing.M) {
   // Load app config.
   app.LoadConfig()
@@ -26,15 +27,9 @@ func TestMain(m *testing.M) {
   // Create logger.
   logger = logrus.New()
 
-  // Create the core router instance.
-  apiRouter := CreateRouter(app.Config.BaseRoute(), db, logger)
-
   // Create API router.
   router = &test_utils.TestRouter{
-    Router: apiRouter,
-    BaseRoute: app.Config.BaseRoute(),
-    AuthHeaderName: defs.AuthHeaderName,
-    AuthHeaderVal: app.Config.RestApiToken,
+    Router: CreateRouter(app.Config.BaseRoute(), db, logger),
   }
 
   // Run the tests in this package and exit.
@@ -42,9 +37,9 @@ func TestMain(m *testing.M) {
   os.Exit(code)
 }
 
-// Teardown function called after each test in this package is run.
-// Call `defer Teardown()` at the top of each test you want to use this with.
-func Teardown() {
+// RouteTeardown function called after each test in this package is run.
+// Call `defer RouteTeardown()` at the top of each test you want to use this with.
+func RouteTeardown() {
   // Clear all DB tables.
   test_utils.ClearTables(db, app.Config.Debug)
 }
