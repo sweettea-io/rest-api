@@ -1,18 +1,12 @@
 language: go
-
-go: # Specify which Go version to use
+go:
   - 1.10.x
   - master
-
-before_install: # Install dep before installing Go vendor packages
-    - sudo apt-get update
-    - sudo apt-get install -y unzip --no-install-recommends
-    - sudo apt-get autoremove -y
-    - sudo apt-get clean -y
- 	- curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-
-install: # Install Go vendor packages with dep
-  - dep ensure -vendor-only
-
-script: # Run all of our tests
-  - make test
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y unzip --no-install-recommends
+  - sudo apt-get autoremove -y
+  - sudo apt-get clean -y
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+install: dep ensure -vendor-only
+script: make test
