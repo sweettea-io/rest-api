@@ -1,9 +1,9 @@
 package main
 
 import (
-  "github.com/sweettea-io/rest-api/pkg/utils"
   "fmt"
   "os"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/crypt"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
   }
 
   // Hash the provided password.
-  hash := utils.Sha256Hash(os.Args[1])
+  hash := crypt.Sha256Hash(os.Args[1])
 
   // Let the executor know what the hashed password is.
   fmt.Printf("Successfully generated hash.\nSet the USER_CREATION_HASH env var to %s for the environment you wish to use this for.\n", hash)

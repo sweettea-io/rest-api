@@ -17,9 +17,16 @@ func TestMain(m *testing.M) {
   // Start with a teardown.
   Teardown()
 
-  // Setup test router.
+  // Initialize base mux Router.
   InitRouter()
-  TestRouter = &testutil.Router{Raw: Router}
+
+  // Create test router wrapping the base router.
+  TestRouter = &testutil.Router{
+    Raw: Router,
+    BaseRoute: app.Config.BaseRoute(),
+    AuthHeaderName: app.Config.AuthHeaderName,
+    AuthHeaderVal: app.Config.RestApiToken,
+  }
 
   // Run the tests in this package and exit.
   code := m.Run()
