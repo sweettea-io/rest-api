@@ -13,7 +13,14 @@ else
 	test_envs=""
 fi
 
-test_cmd="${test_envs} go test -p 1 ./..."
+# If running on Travis CI, use goveralls to run tests.
+if [ "$TRAVIS_BUILD_DIR" ] && [ -e "$GOPATH/bin/goveralls" ]; then
+	test_cmd="${test_envs} $GOPATH/bin/goveralls -service=travis-ci"
+else
+	# Running locally
+	test_cmd="${test_envs} go test -p 1 ./..."
+fi
+
 migrate_cmd="${test_envs} go run cmd/migrate/main.go"
 
 echo "Migrating test DB..."
