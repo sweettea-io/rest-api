@@ -3,37 +3,22 @@ package main
 import (
   "fmt"
   "net/http"
-  "github.com/Sirupsen/logrus"
-  "github.com/sweettea-io/rest-api/app"
-  "github.com/sweettea-io/rest-api/pkg/database"
-  "github.com/sweettea-io/rest-api/app/api/routes"
+  "github.com/sweettea-io/rest-api/internal/app"
+  "github.com/sweettea-io/rest-api/internal/app/route"
+  "github.com/sweettea-io/rest-api/internal/pkg/config"
 )
 
 func main() {
-  // Load app config.
-  app.LoadConfig()
+  // Initialize the app.
+  app.Init(config.New())
 
-  // Create redis pool.
-  app.CreateRedisPool()
-
-  // Create job queue.
-  app.CreateJobQueue()
-
-  // Establish connection to database.
-  db := database.Connection(app.Config.DatabaseUrl)
-  db.LogMode(app.Config.Debug)
-
-  // Create logger.
-  logger := logrus.New()
-
-  // Create API router.
-  router := routes.CreateRouter(app.Config.BaseRoute(), db, logger)
+  // Build API routes.
+  route.InitRouter()
 
   // Format address to listen on.
   addr := fmt.Sprintf(":%v", app.Config.ServerPort)
 
-  logger.Infof("Listening on port %v...\n", app.Config.ServerPort)
-
   // Start server.
-  panic(http.ListenAndServe(addr, router))
+  app.Log.Infof("Listening on port %v...\n", app.Config.ServerPort)
+  panic(http.ListenAndServe(addr, route.Router))
 }

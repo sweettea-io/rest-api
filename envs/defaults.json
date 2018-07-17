@@ -2,6 +2,7 @@
   "common": {
     "API_CLUSTER_ZONES": "us-west-1a",
     "API_VERSION": "v1",
+    "AUTH_HEADER_NAME": "Sweet-Tea-Api-Token",
     "AWS_ACCESS_KEY_ID": "",
     "AWS_REGION_NAME": "us-west-1",
     "AWS_SECRET_ACCESS_KEY": "",
