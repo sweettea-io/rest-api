@@ -1,14 +1,15 @@
 package main
 
 import (
-  "github.com/sweettea-io/rest-api/app"
-  "github.com/sweettea-io/rest-api/pkg/database"
+  "github.com/sweettea-io/rest-api/internal/app"
+  "github.com/sweettea-io/rest-api/internal/pkg/config"
+  "github.com/sweettea-io/rest-api/internal/pkg/db"
 )
 
 func main() {
-  // Load app config
-  app.LoadConfig()
+  // Initialize the app.
+  app.Init(config.New())
 
-  // Migrate any DB changes
-  database.Migrate(app.Config.DatabaseUrl)
+  // Auto-migrate any DB changes.
+  db.Migrate(app.DB)
 }

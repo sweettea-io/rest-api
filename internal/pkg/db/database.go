@@ -22,8 +22,8 @@ func NewConnection(url string, logMode bool) *gorm.DB {
   return database
 }
 
-func Migrate(url string, logMode bool) {
-  NewConnection(url, logMode).AutoMigrate(
+func Migrate(database *gorm.DB) {
+  database.AutoMigrate(
     &model.User{},
     &model.Session{},
     &model.Company{},

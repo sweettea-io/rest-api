@@ -18,7 +18,8 @@ func main() {
   // Format address to listen on.
   addr := fmt.Sprintf(":%v", app.Config.ServerPort)
 
-  // Start server.
   app.Log.Infof("Listening on port %v...\n", app.Config.ServerPort)
+
+  // Start server.
   panic(http.ListenAndServe(addr, route.Router))
 }
