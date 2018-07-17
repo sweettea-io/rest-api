@@ -15,7 +15,7 @@ fi
 
 # If running on Travis CI, use goveralls to run tests.
 if [ "$TRAVIS_BUILD_DIR" ] && [ -e "$GOPATH/bin/goveralls" ]; then
-	test_cmd="${test_envs} $GOPATH/bin/goveralls -v -show -service=travis-ci"
+	test_cmd="${test_envs} $GOPATH/bin/goveralls -v -show -service=travis-ci -repotoken $COVERALLS_TOKEN"
 else
 	# Running locally
 	test_cmd="${test_envs} go test -v -p 1 ./..."
