@@ -8,11 +8,10 @@ before_install:
   - sudo apt-get autoremove -y
   - sudo apt-get clean -y
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - go get github.com/mattn/goveralls
 
 install:
   - dep ensure -vendor-only
-  - go get golang.org/x/tools/cmd/cover
-  - go get github.com/mattn/goveralls
 
 script:
   - make test
