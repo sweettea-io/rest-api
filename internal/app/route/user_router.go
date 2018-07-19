@@ -123,6 +123,7 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
 
 /*
   User login with basic auth.
+  If successful, returns newly minted session token inside header.
 
   Method:  POST
   Route:   /users/auth
