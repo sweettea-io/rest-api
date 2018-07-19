@@ -57,12 +57,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/joeshaw/envdecode"
-  packages = ["."]
-  revision = "c9e0158544672841c3ebf49308f536d918f2e525"
-
-[[projects]]
-  branch = "master"
   name = "github.com/lib/pq"
   packages = [
     ".",
@@ -102,6 +96,12 @@
   version = "v1.2.2"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/sweettea-io/envdecode"
+  packages = ["."]
+  revision = "ca7031789d3e6939bea556f0941bece10be8ea01"
+
+[[projects]]
   name = "github.com/sweettea-io/work"
   packages = ["."]
   revision = "1d4117a214abff263b472043871c8666aedb716b"
@@ -135,6 +135,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e7ffa2ba5de45e1919892780e4b5ca26008c638d85c4ef396fab6e8dd2b4fdf3"
+  inputs-digest = "82859b275b098ba7830351a1138687ad77d99139e9fcc7b8c03657c8a427b7d0"
   solver-name = "gps-cdcl"
   solver-version = 1

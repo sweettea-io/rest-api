@@ -40,7 +40,7 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/joeshaw/envdecode"
+  name = "github.com/sweettea-io/envdecode"
 
 [[constraint]]
   name = "k8s.io/api"

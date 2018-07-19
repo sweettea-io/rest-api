@@ -2,7 +2,7 @@ package config
 
 import (
   "fmt"
-  "github.com/joeshaw/envdecode"
+  "github.com/sweettea-io/envdecode"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cloud"
   "github.com/sweettea-io/rest-api/internal/pkg/util/env"
 )
@@ -10,19 +10,19 @@ import (
 type Config struct {
   APIVersion          string  `env:"API_VERSION,required"`
   AuthHeaderName      string  `env:"AUTH_HEADER_NAME,required"`
-  AWSAccessKeyId      string  `env:"AWS_ACCESS_KEY_ID,required"`
-  AWSRegionName       string  `env:"AWS_REGION_NAME,required"`
-  AWSSecretAccessKey  string  `env:"AWS_SECRET_ACCESS_KEY,required"`
-  BuildClusterName    string  `env:"BUILD_CLUSTER_NAME,required"`
+  AWSAccessKeyId      string  `env:"AWS_ACCESS_KEY_ID,required,ignore_on_envs=test"`
+  AWSRegionName       string  `env:"AWS_REGION_NAME,required,ignore_on_envs=test"`
+  AWSSecretAccessKey  string  `env:"AWS_SECRET_ACCESS_KEY,required,ignore_on_envs=test"`
+  BuildClusterName    string  `env:"BUILD_CLUSTER_NAME,required,ignore_on_envs=test"`
   BuildClusterState   string  `env:"BUILD_CLUSTER_STATE"`
-  CloudProvider       string  `env:"CLOUD_PROVIDER,required"`
+  CloudProvider       string  `env:"CLOUD_PROVIDER,required,ignore_on_envs=test"`
   DatabaseUrl         string  `env:"DATABASE_URL,required"`
   Debug               bool    `env:"DEBUG,required"`
-  Domain              string  `env:"DOMAIN,required"`
+  Domain              string  `env:"DOMAIN,required,ignore_on_envs=test"`
   Env                 string  `env:"ENV,required"`
-  HostedZoneId        string  `env:"HOSTED_ZONE_ID"`
-  ImageOwner          string  `env:"IMAGE_OWNER,required"`
-  ImageOwnerPw        string  `env:"IMAGE_OWNER_PW,required"`
+  HostedZoneId        string  `env:"HOSTED_ZONE_ID,ignore_on_envs=test|local"`
+  ImageOwner          string  `env:"IMAGE_OWNER,required,ignore_on_envs=test"`
+  ImageOwnerPw        string  `env:"IMAGE_OWNER_PW,required,ignore_on_envs=test"`
   JobQueueNsp         string  `env:"JOB_QUEUE_NSP,required"`
   KubeConfig          string  `env:"KUBECONFIG,required"`
   RedisPoolMaxActive  int     `env:"REDIS_POOL_MAX_ACTIVE,required"`
@@ -35,8 +35,8 @@ type Config struct {
   TrainClusterName    string  `env:"TRAIN_CLUSTER_NAME"`
   TrainClusterState   string  `env:"TRAIN_CLUSTER_STATE"`
   UserCreationHash    string  `env:"USER_CREATION_HASH"`
-  WildcardSSLCertArn  string  `env:"WILDCARD_SSL_CERT_ARN"`
-  WorkerCount         uint    `env:"WORKER_COUNT,required"`
+  WildcardSSLCertArn  string  `env:"WILDCARD_SSL_CERT_ARN,required,ignore_on_envs=test|local"`
+  WorkerCount         uint    `env:"WORKER_COUNT,required,ignore_on_envs=test"`
 }
 
 func (cfg *Config) BaseRoute() string {
@@ -70,7 +70,7 @@ func validateConfigs(cfg *Config) {
   }
 
   // Ensure CLOUD_PROVIDER value is supported.
-  if !cloud.IsValidCloud(cfg.CloudProvider) {
+  if cfg.CloudProvider != "" && !cloud.IsValidCloud(cfg.CloudProvider) {
     panic(fmt.Errorf(
       "%s is not a valid cloud provider. Check 'internal/pkg/util/cloud/clouds.go' for a list of valid options.\n",
       cfg.CloudProvider,
