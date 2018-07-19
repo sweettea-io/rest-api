@@ -118,7 +118,7 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   respData := successmsg.UserCreationSuccess
   respData["uid"] = newUser.Uid
 
-  respond.Ok(w, respData)
+  respond.Created(w, respData)
 }
 
 /*

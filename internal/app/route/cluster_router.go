@@ -117,5 +117,5 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   respData := successmsg.ClusterCreationSuccess
   respData["uid"] = cluster.Uid
 
-  respond.Ok(w, respData)
+  respond.Created(w, respData)
 }

@@ -93,5 +93,5 @@ func CreateCompanyHandler(w http.ResponseWriter, req *http.Request) {
   respData := successmsg.CompanyCreationSuccess
   respData["uid"] = company.Uid
 
-  respond.Ok(w, respData)
+  respond.Created(w, respData)
 }

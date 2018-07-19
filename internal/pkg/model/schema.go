@@ -64,7 +64,7 @@ type User struct {
 type Session struct {
   gorm.Model
   User       User
-  UserID     int    `gorm:"default:null;not null;index:session_user_id"`
+  UserID     uint    `gorm:"default:null;not null;index:session_user_id"`
   Token      string `gorm:"type:varchar(240);default:null;unique;not null;index:session_token"`
 }
 
@@ -74,7 +74,7 @@ type Company struct {
   Name        string    `gorm:"type:varchar(240);default:null;not null"`
   Slug        string    `gorm:"type:varchar(240);default:null;unique;not null;index:company_slug"`
   Cluster     Cluster
-  ClusterID   int       `gorm:"default:null;index:company_cluster_id"`
+  ClusterID   uint       `gorm:"default:null;index:company_cluster_id"`
   Projects    []Project
 }
 
@@ -93,7 +93,7 @@ type Project struct {
   Name             string    `gorm:"type:varchar(240);default:null;not null"`
   Slug             string    `gorm:"type:varchar(240);default:null;unique;not null;index:project_slug"`
   Company          Company
-  CompanyID        int       `gorm:"default:null;not null;index:project_company_id"`
+  CompanyID        uint       `gorm:"default:null;not null;index:project_company_id"`
   Datasets         []Dataset
   Envs             []Env
   Commits          []Commit
@@ -112,7 +112,7 @@ type Dataset struct {
   Name                 string  `gorm:"type:varchar(240);default:null;not null"`
   Slug                 string  `gorm:"type:varchar(240);default:null;unique;not null;index:dataset_slug"`
   Project              Project
-  ProjectID            int     `gorm:"default:null;not null;index:dataset_project_id"`
+  ProjectID            uint     `gorm:"default:null;not null;index:dataset_project_id"`
   RetrainStepSize      int     `gorm:"default:0"`
   LastTrainRecordCount int     `gorm:"default:0"`
 }
@@ -121,7 +121,7 @@ type Env struct {
   gorm.Model
   Uid         string  `gorm:"type:varchar(240);default:null;unique;not null;index:env_uid"`
   Project     Project
-  ProjectID   int     `gorm:"default:null;not null;index:env_project_id"`
+  ProjectID   uint     `gorm:"default:null;not null;index:env_project_id"`
   Name        string  `gorm:"type:varchar(240);default:null;not null"`
   Value       string  `gorm:"type:varchar(240);default:null;not null"`
   ClusterRole string  `gorm:"type:varchar(240);default:null;not null"`
@@ -131,7 +131,7 @@ type Env struct {
 type Commit struct {
   gorm.Model
   Project     Project
-  ProjectID   int      `gorm:"default:null;not null;index:commit_project_id"`
+  ProjectID   uint      `gorm:"default:null;not null;index:commit_project_id"`
   Deploys     []Deploy
   Sha         string   `gorm:"type:varchar(240);default:null;unique;not null;index:commit_sha"`
   Branch      string   `gorm:"type:varchar(240);default:null"`
@@ -141,7 +141,7 @@ type Deploy struct {
   gorm.Model
   Uid              string    `gorm:"type:varchar(240);default:null;unique;not null;index:deploy_uid"`
   Commit           Commit
-  CommitID         int       `gorm:"default:null;not null;index:deploy_commit_id"`
+  CommitID         uint       `gorm:"default:null;not null;index:deploy_commit_id"`
   Stage            string    `gorm:"type:varchar(240);default:null"`
   Intent           string    `gorm:"type:varchar(240);default:null"`
   IntentUpdatedAt  time.Time
@@ -181,6 +181,9 @@ func (cluster *Cluster) BeforeCreate(scope *gorm.Scope) error {
 func (project *Project) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("Uid", unique.NewUid())
   scope.SetColumn("Slug", str.Slugify(project.Name))
+  scope.SetColumn("ClientID", unique.NewUid())
+  scope.SetColumn("ClientSecret", unique.FreshSecret())
+  scope.SetColumn("InternalMsgToken", unique.FreshSecret())
   return nil
 }
 
