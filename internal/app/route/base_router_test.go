@@ -11,13 +11,9 @@ import (
 var TestRouter *testutil.Router
 
 func TestMain(m *testing.M) {
-  // Initialize the app.
+  // Initialize the app, start with a teardown, and create the test router.
   app.Init(config.New())
-
-  // Start with a teardown.
   Teardown()
-
-  // Initialize base mux Router.
   InitRouter()
 
   // Create test router wrapping the base router.

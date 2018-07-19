@@ -9,14 +9,30 @@ import (
 )
 
 func TestCreateUserHandler(t *testing.T) {
+  route := UserRoute
+
   testCases := []testutil.RequestCase{
     {
-      Name: "request unauthorized when auth header NOT provided",
-      Request: &testutil.Request{Method: "POST", Route: UserRoute},
+      Name: "unauthorized when auth header NOT provided",
+      Request: &testutil.Request{Method: "POST", Route: route},
       ExpectedStatus: 401,
       ExpectedRespJSON: &enc.JSON{"ok": false, "code": 401, "error": "Unauthorized"},
     },
+    {
+      Name: "bad req data results in invalid payload",
+      Request: &testutil.Request{
+        Method: "POST",
+        Route: route,
+        Data: &enc.JSON{},
+        Authed: true,
+      },
+      ExpectedStatus: 400,
+      ExpectedRespJSON: &enc.JSON{"ok": false, "code": 400, "error": "invalid_input_payload"},
+    },
   }
+
+  // TODO: For the 2nd case above, what you would want to do is stub CreateUserPayload.Validate() to return false, ...
+  // TODO: ...and then check that what you have is returned.
 
   for _, tc := range testCases {
     func () {
