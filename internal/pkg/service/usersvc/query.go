@@ -8,7 +8,10 @@ import (
 )
 
 func FromRequest(req *http.Request) (*model.User, error) {
+  // Get auth token from request header.
   token := req.Header.Get(app.Config.AuthHeaderName)
+
+  // Error to be returned if token or user isn't found.
   e := errors.New(http.StatusText(http.StatusUnauthorized))
 
   // Return error if auth header token not found.
@@ -27,3 +30,4 @@ func FromRequest(req *http.Request) (*model.User, error) {
 
   return &session.User, nil
 }
+
