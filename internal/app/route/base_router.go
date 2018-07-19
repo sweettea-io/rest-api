@@ -19,4 +19,5 @@ func InitRouter() {
   InitUserRouter()
   InitCompanyRouter()
   InitClusterRouter()
+  InitProjectRouter()
 }
