@@ -1,3 +1,4 @@
 # Ignore these files/directories when copying over files during the docker build process
 .git
 pkg/test_utils
+scrap.go
