@@ -101,7 +101,7 @@ func ReadProjectHandler(w http.ResponseWriter, req *http.Request) {
 
 func UpdateProjectHandler(w http.ResponseWriter, req *http.Request) {
   // Find user from request session.
-  user, err := usersvc.FromRequest(req)
+  _, err := usersvc.FromRequest(req)
 
   if err != nil {
     respond.Error(w, errmsg.UserNotFound())
@@ -112,7 +112,7 @@ func UpdateProjectHandler(w http.ResponseWriter, req *http.Request) {
 
 func DeleteProjectHandler(w http.ResponseWriter, req *http.Request) {
   // Find user from request session.
-  user, err := usersvc.FromRequest(req)
+  _, err := usersvc.FromRequest(req)
 
   if err != nil {
     respond.Error(w, errmsg.UserNotFound())
