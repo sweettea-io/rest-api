@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- Retrieve the value of an env variable given app name and env tier --- #
+# --- Retrieve value of an environment variable(s) for specified env tier --- #
 
 # ======== PARSE ARGS ======== #
 
