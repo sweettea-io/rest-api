@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- Run supported application as either a Go binary or Docker image (and potentially as a daemon if Docker image) --- #
+# --- Run application as either a Go file, a Go binary, a or Docker image (and potentially as a daemon if Docker image) --- #
 
 set -e # exit if any child script exits with non-zero status
 

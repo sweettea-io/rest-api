@@ -3,3 +3,4 @@
 .env
 pkg/test_utils
 scrap.go
+bin/
