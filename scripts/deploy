@@ -18,14 +18,14 @@ $this_dir/validate_arg "env" "$deploy_env" "local|dev|staging|prod"
 
 # ======== GET ENVS ======== #
 
-image_owner=$( $this_dir/env_reader "$deploy_env" "IMAGE_OWNER" )
+image_org=$( $this_dir/env_reader "$deploy_env" "DOCKER_REGISTRY_ORG" )
 image_name=$( $this_dir/env_reader "$deploy_env" "${uppercase_app}_IMAGE_NAME" )
 cluster_name=$( $this_dir/env_reader "$deploy_env" "CORE_CLUSTER_NAME" )
 domain=$( $this_dir/env_reader "$deploy_env" "DOMAIN" )
 
 # ======== VALIDATE ENVS ======== #
 
-$this_dir/assert_env "IMAGE_OWNER" "$image_owner"
+$this_dir/assert_env "DOCKER_REGISTRY_ORG" "$image_org"
 $this_dir/assert_env "${uppercase_app}_IMAGE_NAME" "$image_name"
 $this_dir/assert_env "CORE_CLUSTER_NAME" "$cluster_name"
 
@@ -38,7 +38,7 @@ fi
 
 # ======== PUSH IMAGE TO REPOSITORY ======== #
 
-image_repo="$image_owner/$image_name"
+image_repo="$image_org/$image_name"
 image_version="$( docker images $image_repo | sed -n 2p | awk '{print $2}' )"
 
 if [[ ! "$image_version" ]]; then

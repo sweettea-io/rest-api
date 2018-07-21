@@ -26,9 +26,9 @@ $this_dir/validate_arg "format" "$run_type" "image|binary|file"
 # Run app as a Docker image.
 if [[ "$run_type" = "image" ]]; then
 	# Construct Docker image name to run.
-	image_owner=$( $this_dir/env_reader "$run_env" "IMAGE_OWNER" )
+	image_org=$( $this_dir/env_reader "$run_env" "DOCKER_REGISTRY_ORG" )
 	image_name=$( $this_dir/env_reader "$run_env" "${uppercase_app}_IMAGE_NAME" )
-	image_repo="$image_owner/$image_name"
+	image_repo="$image_org/$image_name"
 	image_version="$( docker images $image_repo | sed -n 2p | awk '{print $2}' )"
 
 	if [[ ! "$image_version" ]]; then

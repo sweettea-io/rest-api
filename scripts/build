@@ -34,7 +34,7 @@ if [[ "$build_format" = "image" ]]; then
 		uppercase_app=$( echo "$app_to_build" | tr "[:lower:]" "[:upper:]" )
 
 		# Get the docker image specs for the specified env and app.
-		image_owner=$( $this_dir/env_reader "$build_env" "IMAGE_OWNER" )
+		image_org=$( $this_dir/env_reader "$build_env" "DOCKER_REGISTRY_ORG" )
 		image_name=$( $this_dir/env_reader "$build_env" "${uppercase_app}_IMAGE_NAME" )
 		image_version=$( $this_dir/latest_sha )
 
@@ -49,7 +49,7 @@ if [[ "$build_format" = "image" ]]; then
 		docker build \
 			--build-arg ROLE="$app_to_build" \
 			--build-arg BUILD_ENV="$build_env" \
-			-t "$image_owner/$image_name:$image_version" .
+			-t "$image_org/$image_name:$image_version" .
 	done
 else
 	# Build each app as a Go binary.
