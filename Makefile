@@ -62,7 +62,7 @@ clean: ## Remove all built Go binaries
 	rm ./bin/*
 
 ensure: ## Update dependencies
-	dep ensure -vendor-only
+	./scripts/install_pkgs
 
 test: ## Run all tests
 	./scripts/run_tests
