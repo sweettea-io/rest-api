@@ -1,9 +1,9 @@
 default: unlock
 
-unlock: ## Unlock all scripts
+unlock: ## Unlock all scripts.
 	chmod -R +x ./scripts/*
 
-install: ## Install project dependencies
+install: ## Install project dependencies.
 	./scripts/install
 
 export password
@@ -58,11 +58,11 @@ export with-api=false
 company: ## Create Sweet Tea Company in the database of the specified environment.
 	./scripts/create_company $(env) $(name) $(with-api)
 
-clean: ## Remove all built Go binaries
+clean: ## Remove all built Go binaries.
 	rm ./bin/*
 
-ensure: ## Update dependencies
+ensure: ## Update dependencies.
 	./scripts/install_pkgs
 
-test: ## Run all tests
+test: ## Run all tests.
 	./scripts/run_tests
