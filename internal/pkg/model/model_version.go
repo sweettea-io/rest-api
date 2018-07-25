@@ -14,14 +14,13 @@ import (
   has_many --> Deploys
 */
 type ModelVersion struct {
-  // TODO: ModelVersion should be unique on model_id+version (add a multi-col index too)
   ID        uint       `gorm:"primary_key"`
   CreatedAt time.Time
   UpdatedAt time.Time
   DeletedAt *time.Time `sql:"index"`
   Model     Model
-  ModelID   uint       `gorm:"default:null;not null;index:model_version_model_id"`
-  Version   string     `gorm:"type:varchar(240);default:null;not null;index:model_version_version"`
+  ModelID   uint       `gorm:"default:null;not null;unique_index:model_version_grouped_index"`
+  Version   string     `gorm:"type:varchar(240);default:null;not null;unique_index:model_version_grouped_index"`
   Deploys   []Deploy
 }
 

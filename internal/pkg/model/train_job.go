@@ -11,13 +11,12 @@ import (
   has_one -- ModelVersion
 */
 type TrainJob struct {
-  // TODO: Model should be unique on commit_id+model_version_id (add a multi-col index too)
   gorm.Model
   Uid            string       `gorm:"type:varchar(240);default:null;not null;unique;index:train_job_uid"`
   Commit         Commit
-  CommitID       uint         `gorm:"default:null;not null;index:train_job_commit_id"`
+  CommitID       uint         `gorm:"default:null;not null;unique_index:train_job_grouped_index"`
   ModelVersion   ModelVersion
-  ModelVersionID uint         `gorm:"default:null;not null;index:train_job_model_version_id"`
+  ModelVersionID uint         `gorm:"default:null;not null;unique_index:train_job_grouped_index"`
   Stage          uint         `gorm:"default:0"`
   Failed         bool         `gorm:"default:false"`
 }

@@ -13,15 +13,14 @@ import (
   has_many --> EnvVars
 */
 type Deploy struct {
-  // TODO: Deploy should be unique on commit_id+model_version_id+cluster_id (add a multi-col index)
   gorm.Model
   Uid            string       `gorm:"type:varchar(240);default:null;not null;unique;index:deploy_uid"`
   Commit         Commit
-  CommitID       uint         `gorm:"default:null;not null;index:deploy_commit_id"`
+  CommitID       uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
   ModelVersion   ModelVersion
-  ModelVersionID uint         `gorm:"default:null;not null;index:deploy_model_version_id"`
+  ModelVersionID uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
   Cluster        Cluster
-  ClusterID      uint         `gorm:"default:null;not null;index:deploy_cluster_id"`
+  ClusterID      uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
   Stage          uint         `gorm:"default:0"`
   Failed         bool         `gorm:"default:false"`
   LBHost         string       `gorm:"type:varchar(240);default:null"`

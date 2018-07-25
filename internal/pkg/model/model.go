@@ -11,12 +11,11 @@ import (
   has_many --> ModelVersions
 */
 type Model struct {
-  // TODO: Model should be unique on project_id+slug (add a multi-col index too)
   gorm.Model
   Project       Project
-  ProjectID     uint           `gorm:"default:null;not null;index:model_project_id"`
+  ProjectID     uint           `gorm:"default:null;not null;unique_index:model_grouped_index"`
   Name          string         `gorm:"type:varchar(240);default:null;not null"`
-  Slug          string         `gorm:"type:varchar(240);default:null;not null;index:model_slug"`
+  Slug          string         `gorm:"type:varchar(240);default:null;not null;unique_index:model_grouped_index"`
   FileExt       string         `gorm:"type:varchar(240);default:null"`
   ModelVersions []ModelVersion
 }
