@@ -1,195 +1,178 @@
-// Models:
-//
-//    User
-//    Session
-//    Company
-//    Cluster
-//    Project
-//    Dataset
-//    Env
-//    Commit
-//    Deploy
-//
-// Relationships:
-//
-//    User|Session
-//        User --> has_many --> sessions
-//        Session --> belongs_to --> User
-//
-//    Company|Cluster
-//        Company --> has_one --> Cluster
-//        Cluster --> has_one --> Company
-//
-//    Company|Project
-//        Company --> has_many --> projects
-//        Project --> belongs_to --> Company
-//
-//    Project|Dataset
-//        Project --> has_many --> datasets
-//        Dataset --> belongs_to --> Project
-//
-//    Project|Env
-//        Project --> has_many --> envs
-//        Env --> belongs_to --> Project
-//
-//    Project|Commit
-//        Project --> has_many --> commits
-//        Commit --> belongs_to --> Project
-//
-//    Commit|Deploy
-//        Commit --> has_many --> deploys
-//        Deploy --> belongs_to --> Commit
-//
+/*
+
+SweetTea Database Schema
+
+Models:
+
+    User
+    Session
+    Project
+    ProjectConfig
+    Commit
+    TrainJob
+    Model
+    ModelVersion
+    Deploy
+    Cluster
+    EnvVar
+
+Relationships:
+
+    User|Session
+        User --> has many --> sessions
+        Session --> belongs to --> User
+
+    Project|Commit
+        Project --> has many --> commits
+        Commit --> belongs to --> Project
+
+    Project|ProjectConfig
+        Project --> has one --> ProjectConfig
+        ProjectConfig --> has one --> Project
+
+    Commit|TrainJob
+        Commit --> has many --> trainJobs
+        TrainJob --> belongs to --> Commit
+
+    Commit|Deploy
+        Commit --> has many --> deploys
+        Deploy --> belongs to --> Commit
+
+    Model|ModelVersion
+        Model --> has many --> modelVersions
+        ModelVersion --> belongs to --> Model
+
+    TrainJob|ModelVersion
+        TrainJob --> has one --> ModelVersion
+        ModelVersion --> has one --> TrainJob
+
+    ModelVersion|Deploy
+        ModelVersion --> has many --> deploys
+        Deploy --> belongs to --> ModelVersion
+
+    Cluster|Deploy
+        Cluster --> has many --> deploys
+        Deploy --> belongs to --> Cluster
+
+    Deploy|EnvVar
+        Deploy --> has many --> envVars
+        EnvVar --> belongs to --> Deploy
+
+*/
 package model
 
 import (
   "time"
   "github.com/jinzhu/gorm"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/str"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
 )
-
-type WithUid struct {}
 
 type User struct {
   gorm.Model
-  Uid         string    `gorm:"type:varchar(240);default:null;unique;not null;index:user_uid"`
-  Email       string    `gorm:"type:varchar(240);default:null;unique;not null;index:user_email"`
-  HashedPw    string    `gorm:"type:varchar(240);default:null"`
-  Admin       bool      `gorm:"default:false"`
-  Sessions    []Session
+  Uid        string    `gorm:"type:varchar(240);default:null;not null;unique;index:user_uid"`
+  Email      string    `gorm:"type:varchar(240);default:null;not null;unique;index:user_email"`
+  HashedPw   string    `gorm:"type:varchar(240);default:null"`
+  Admin      bool      `gorm:"default:false"`
+  Sessions   []Session
   WithUid
 }
 
 type Session struct {
   gorm.Model
   User       User
-  UserID     uint    `gorm:"default:null;not null;index:session_user_id"`
-  Token      string `gorm:"type:varchar(240);default:null;unique;not null;index:session_token"`
-}
-
-type Company struct {
-  gorm.Model
-  Uid         string    `gorm:"type:varchar(240);default:null;unique;not null;index:company_uid"`
-  Name        string    `gorm:"type:varchar(240);default:null;not null"`
-  Slug        string    `gorm:"type:varchar(240);default:null;unique;not null;index:company_slug"`
-  Cluster     Cluster
-  ClusterID   uint       `gorm:"default:null;index:company_cluster_id"`
-  Projects    []Project
-}
-
-type Cluster struct {
-  gorm.Model
-  Uid          string `gorm:"type:varchar(240);default:null;unique;not null;index:cluster_uid"`
-  Name         string `gorm:"type:varchar(360);default:null;not null"`
-  Slug         string `gorm:"type:varchar(240);default:null;unique;not null;index:cluster_slug"`
-  Cloud        string `gorm:"type:varchar(240);default:null;not null"`
-  State        string `gorm:"type:varchar(360);default:null"`
+  UserID     uint   `gorm:"default:null;not null;index:session_user_id"`
+  Token      string `gorm:"type:varchar(240);default:null;not null;unique;index:session_token"`
 }
 
 type Project struct {
   gorm.Model
-  Uid              string    `gorm:"type:varchar(240);default:null;unique;not null;index:project_uid"`
-  Name             string    `gorm:"type:varchar(240);default:null;not null"`
-  Slug             string    `gorm:"type:varchar(240);default:null;unique;not null;index:project_slug"`
-  Company          Company
-  CompanyID        uint       `gorm:"default:null;not null;index:project_company_id"`
-  Datasets         []Dataset
-  Envs             []Env
-  Commits          []Commit
-  LBHostName       string    `gorm:"type:varchar(240);default:null"`
-  HostName         string    `gorm:"type:varchar(360);default:null"`
-  DeployName       string    `gorm:"type:varchar(360);default:null"`
-  ClientID         string    `gorm:"type:varchar(240);default:null"`
-  ClientSecret     string    `gorm:"type:varchar(240);default:null"`
-  ModelExt         string    `gorm:"type:varchar(240);default:null"`
-  InternalMsgToken string    `gorm:"type:varchar(240);default:null"`
-}
-
-type Dataset struct {
-  gorm.Model
-  Uid                  string  `gorm:"type:varchar(240);default:null;unique;not null;index:dataset_uid"`
-  Name                 string  `gorm:"type:varchar(240);default:null;not null"`
-  Slug                 string  `gorm:"type:varchar(240);default:null;unique;not null;index:dataset_slug"`
-  Project              Project
-  ProjectID            uint     `gorm:"default:null;not null;index:dataset_project_id"`
-  RetrainStepSize      int     `gorm:"default:0"`
-  LastTrainRecordCount int     `gorm:"default:0"`
-}
-
-type Env struct {
-  gorm.Model
-  Uid         string  `gorm:"type:varchar(240);default:null;unique;not null;index:env_uid"`
-  Project     Project
-  ProjectID   uint     `gorm:"default:null;not null;index:env_project_id"`
-  Name        string  `gorm:"type:varchar(240);default:null;not null"`
-  Value       string  `gorm:"type:varchar(240);default:null;not null"`
-  ClusterRole string  `gorm:"type:varchar(240);default:null;not null"`
+  Uid             string        `gorm:"type:varchar(240);default:null;not null;unique;index:project_uid"`
+  Host            string        `gorm:"type:varchar(240);default:null;not null"`
+  Nsp             string        `gorm:"type:varchar(360);default:null;not null;index:project_nsp"`
+  ProjectConfig   ProjectConfig
+  ProjectConfigID uint          `gorm:"default:null;not null;index:project_config_id"`
+  Commits         []Commit
   WithUid
+}
+
+type ProjectConfig struct {
+  gorm.Model
 }
 
 type Commit struct {
   gorm.Model
-  Project     Project
-  ProjectID   uint      `gorm:"default:null;not null;index:commit_project_id"`
-  Deploys     []Deploy
-  Sha         string   `gorm:"type:varchar(240);default:null;unique;not null;index:commit_sha"`
-  Branch      string   `gorm:"type:varchar(240);default:null"`
+  Project    Project
+  ProjectID  uint       `gorm:"default:null;not null;index:commit_project_id"`
+  Sha        string     `gorm:"type:varchar(240);default:null;not null;unique;index:commit_sha"`
+  Branch     string     `gorm:"type:varchar(240);default:null"`
+  TrainJobs  []TrainJob
+  Deploys    []Deploy
+}
+
+type TrainJob struct {
+  gorm.Model
+  Uid            string       `gorm:"type:varchar(240);default:null;not null;unique;index:train_job_uid"`
+  Commit         Commit
+  CommitID       uint         `gorm:"default:null;not null;index:train_job_commit_id"`
+  ModelVersion   ModelVersion
+  ModelVersionID uint         `gorm:"default:null;not null;index:train_job_model_version_id"`
+  Stage          uint         `gorm:"default:0"`
+  Failed         bool         `gorm:"default:false"`
+  WithUid
+}
+
+type Model struct {
+  gorm.Model
+  Uid           string         `gorm:"type:varchar(240);default:null;not null;unique;index:model_uid"`
+  Name          string         `gorm:"type:varchar(240);default:null;not null"`
+  Slug          string         `gorm:"type:varchar(240);default:null;not null"`
+  FileExt       string         `gorm:"type:varchar(240);default:null"`
+  ModelVersions []ModelVersion
+}
+
+type ModelVersion struct {
+  ID        uint       `gorm:"primary_key"`
+  CreatedAt time.Time
+  UpdatedAt time.Time
+  DeletedAt *time.Time `sql:"index"`
+  Model     Model
+  ModelID   uint       `gorm:"default:null;not null;index:model_version_model_id"`
+  Version   string     `gorm:"type:varchar(240);default:null;not null;unique;index:model_version_version"`
+  Deploys   []Deploy
 }
 
 type Deploy struct {
   gorm.Model
-  Uid              string    `gorm:"type:varchar(240);default:null;unique;not null;index:deploy_uid"`
-  Commit           Commit
-  CommitID         uint       `gorm:"default:null;not null;index:deploy_commit_id"`
-  Stage            string    `gorm:"type:varchar(240);default:null"`
-  Intent           string    `gorm:"type:varchar(240);default:null"`
-  IntentUpdatedAt  time.Time
-  Failed           bool      `gorm:"default:false"`
+  Uid            string       `gorm:"type:varchar(240);default:null;not null;unique;index:deploy_uid"`
+  Commit         Commit
+  CommitID       uint         `gorm:"default:null;not null;index:deploy_commit_id"`
+  ModelVersion   ModelVersion
+  ModelVersionID uint         `gorm:"default:null;not null;index:deploy_model_version_id"`
+  Cluster        Cluster
+  ClusterID      uint         `gorm:"default:null;not null;index:deploy_cluster_id"`
+  Stage          uint         `gorm:"default:0"`
+  Failed         bool         `gorm:"default:false"`
+  LBHost         string       `gorm:"type:varchar(240);default:null"`
+  ClientID       string       `gorm:"type:varchar(240);default:null;not null"`
+  ClientSecret   string       `gorm:"type:varchar(240);default:null;not null"`
+  EnvVars        []EnvVar
+}
+
+type Cluster struct {
+  gorm.Model
+  Uid        string   `gorm:"type:varchar(240);default:null;not null;unique;index:cluster_uid"`
+  Name       string   `gorm:"type:varchar(360);default:null;not null"`
+  Slug       string   `gorm:"type:varchar(360);default:null;not null;unique;index:cluster_slug"`
+  Cloud      string   `gorm:"type:varchar(240);default:null;not null"`
+  State      string   `gorm:"type:varchar(360);default:null"`
+  Deploys    []Deploy
+}
+
+type EnvVar struct {
+  gorm.Model
+  Uid        string `gorm:"type:varchar(240);default:null;not null;unique;index:env_var_uid"`
+  Deploy     Deploy
+  DeployID   uint   `gorm:"default:null;not null;index:env_var_deploy_id"`
+  Key        string `gorm:"type:varchar(360);default:null;not null"`
+  Val        string `gorm:"type:varchar(360);default:null"`
   WithUid
-}
-
-// -------- Model Creation-related Hooks ----------
-
-// Assign Uid to model before creation.
-func (w *WithUid) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Uid", unique.NewUid())
-  return nil
-}
-
-// Assign newly minted secret to Session token before creation.
-func (session *Session) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Token", unique.FreshSecret())
-  return nil
-}
-
-// Assign Uid & Slug to Company before creation.
-func (company *Company) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Uid", unique.NewUid())
-  scope.SetColumn("Slug", str.Slugify(company.Name))
-  return nil
-}
-
-// Assign Uid & Slug to Cluster before creation.
-func (cluster *Cluster) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Uid", unique.NewUid())
-  scope.SetColumn("Slug", str.Slugify(cluster.Name))
-  return nil
-}
-
-// Assign Uid & Slug to Project before creation.
-func (project *Project) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Uid", unique.NewUid())
-  scope.SetColumn("Slug", str.Slugify(project.Name))
-  scope.SetColumn("ClientID", unique.NewUid())
-  scope.SetColumn("ClientSecret", unique.FreshSecret())
-  scope.SetColumn("InternalMsgToken", unique.FreshSecret())
-  return nil
-}
-
-// Assign Uid & Slug to Dataset before creation.
-func (dataset *Dataset) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Uid", unique.NewUid())
-  scope.SetColumn("Slug", str.Slugify(dataset.Name))
-  return nil
 }
