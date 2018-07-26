@@ -29,10 +29,10 @@ func FromRequest(req *http.Request) (*model.User, error) {
     return nil, e
   }
 
-  return &session.User, nil
+  return session.User, nil
 }
 
-func ByEmail(email string) (*model.User, error) {
+func FromEmail(email string) (*model.User, error) {
   // Find User by email.
   var user model.User
   result := app.DB.Where(&model.User{Email: email}).Find(&user)

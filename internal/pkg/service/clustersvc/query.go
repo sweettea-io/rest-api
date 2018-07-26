@@ -27,3 +27,9 @@ func Create(name string, cloudName string, state string) (*model.Cluster, error)
 
   return &cluster, nil
 }
+
+func All() []model.Cluster {
+  clusters := []model.Cluster{}
+  app.DB.Find(&clusters)
+  return clusters
+}

@@ -63,7 +63,7 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   // If not using USER_CREATION_HASH for auth, verify executor exists using email/pw.
   if !usingUserCreationPw {
     // Get executor user by email.
-    executorUser, err := usersvc.ByEmail(pl.ExecutorEmail)
+    executorUser, err := usersvc.FromEmail(pl.ExecutorEmail)
 
     if err != nil {
       app.Log.Error(err.Error())
@@ -137,7 +137,7 @@ func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Get user by email.
-  user, err := usersvc.ByEmail(pl.Email)
+  user, err := usersvc.FromEmail(pl.Email)
 
   if err != nil {
     app.Log.Error(err.Error())

@@ -13,6 +13,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/env"
   "github.com/sweettea-io/rest-api/internal/pkg/util/crypt"
   "github.com/sweettea-io/rest-api/internal/pkg/service/clustersvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -26,6 +27,7 @@ func InitClusterRouter() {
 
   // Attach route handlers.
   ClusterRouter.HandleFunc("", CreateClusterHandler).Methods("POST")
+  ClusterRouter.HandleFunc("", GetClustersHandler).Methods("GET")
 }
 
 // ----------- ROUTE HANDLERS -----------
@@ -58,7 +60,7 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Get executor user by email.
-  executorUser, err := usersvc.ByEmail(pl.ExecutorEmail)
+  executorUser, err := usersvc.FromEmail(pl.ExecutorEmail)
 
   if err != nil {
     app.Log.Error(err.Error())
@@ -100,4 +102,38 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   respData["slug"] = cluster.Slug
 
   respond.Created(w, respData)
+}
+
+/*
+  Get Clusters by query criteria
+
+  Method:  GET
+  Route:   /clusters
+*/
+func GetClustersHandler(w http.ResponseWriter, req *http.Request) {
+  // Auth request from Session token.
+  _, err := usersvc.FromRequest(req)
+
+  if err != nil {
+    respond.Error(w, errmsg.Unauthorized())
+    return
+  }
+
+  // Fetch all Cluster records.
+  clusters := clustersvc.All()
+
+  // Format clusters for response payload.
+  var fmtClusters []enc.JSON
+
+  for _, cluster := range clusters {
+    fmtClusters = append(fmtClusters, cluster.AsJSON())
+  }
+
+  // Create response payload.
+  respData := enc.JSON{
+    "ok": true,
+    "clusters": fmtClusters,
+  }
+
+  respond.Ok(w, respData)
 }

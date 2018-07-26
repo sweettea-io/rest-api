@@ -3,6 +3,7 @@ package model
 import (
   "github.com/jinzhu/gorm"
   "github.com/sweettea-io/rest-api/internal/pkg/util/str"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
 )
 
 /*
@@ -21,4 +22,13 @@ type Cluster struct {
 func (cluster *Cluster) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("Slug", str.Slugify(cluster.Name))
   return nil
+}
+
+func (cluster *Cluster) AsJSON() enc.JSON {
+  return enc.JSON{
+    "name": cluster.Name,
+    "slug": cluster.Slug,
+    "cloud": cluster.Cloud,
+    "state": cluster.State,
+  }
 }
