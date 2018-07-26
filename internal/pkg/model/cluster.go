@@ -19,7 +19,7 @@ type Cluster struct {
 }
 
 // Assign Slug to Cluster before creation.
-func (cluster *Cluster) BeforeCreate(scope *gorm.Scope) error {
+func (cluster *Cluster) BeforeSave(scope *gorm.Scope) error {
   scope.SetColumn("Slug", str.Slugify(cluster.Name))
   return nil
 }

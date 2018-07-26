@@ -184,13 +184,7 @@ func UpdateClusterHandler(w http.ResponseWriter, req *http.Request) {
     respond.Error(w, errmsg.ClusterNotFound())
   }
 
-  // Add changes to Cluster.
-  clustersvc.SetName(cluster, pl.Name)
-  clustersvc.SetCloud(cluster, pl.Cloud)
-  clustersvc.SetState(cluster, pl.State)
-
-  // Save Cluster changes.
-  if err := app.DB.Save(&cluster).Error; err != nil {
+  if err := clustersvc.Update(cluster, pl.GetUpdates()); err != nil {
     app.Log.Errorf(err.Error())
     respond.Error(w, errmsg.ClusterUpdateFailed())
     return

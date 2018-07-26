@@ -21,7 +21,7 @@ type Model struct {
 }
 
 // Assign Slug to Model before creation.
-func (model *Model) BeforeCreate(scope *gorm.Scope) error {
+func (model *Model) BeforeSave(scope *gorm.Scope) error {
   scope.SetColumn("Slug", str.Slugify(model.Name))
   return nil
 }
