@@ -3,8 +3,8 @@ package db
 import (
   "fmt"
   "github.com/jinzhu/gorm"
-  "github.com/sweettea-io/rest-api/internal/pkg/model"
   _ "github.com/jinzhu/gorm/dialects/postgres"
+  "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
 
@@ -26,12 +26,14 @@ func Migrate(database *gorm.DB) {
   database.AutoMigrate(
     &model.User{},
     &model.Session{},
-    &model.Company{},
-    &model.Cluster{},
     &model.Project{},
-    &model.Dataset{},
-    &model.Env{},
+    &model.ProjectConfig{},
     &model.Commit{},
+    &model.TrainJob{},
+    &model.Model{},
+    &model.ModelVersion{},
     &model.Deploy{},
+    &model.Cluster{},
+    &model.EnvVar{},
   )
 }

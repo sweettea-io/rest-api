@@ -11,7 +11,6 @@ import (
 type CreateClusterPayload struct {
   ExecutorEmail    string `json:"executor_email" validate:"nonzero"`
   ExecutorPassword string `json:"executor_password" validate:"nonzero"`
-  CompanyName      string `json:"company_name" validate:"nonzero"`
   Name             string `json:"name" validate:"nonzero"`
   Cloud            string `json:"cloud" validate:"nonzero"`
   State            string `json:"state"`
