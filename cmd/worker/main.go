@@ -15,7 +15,12 @@ func main() {
   app.Init(config.New())
 
   // Initialize the worker.
-  worker.Init(app.Log, app.JobQueue)
+  worker.Init(
+    app.Config,
+    app.JobQueue,
+    app.DB,
+    app.Log,
+  )
 
   // Create new worker pool with job context.
   workerPool := work.NewWorkerPool(
