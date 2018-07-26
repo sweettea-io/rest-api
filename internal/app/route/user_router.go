@@ -35,10 +35,10 @@ func InitUserRouter() {
   Method:  POST
   Route:   /user
   Payload:
-    executor_email    string (required unless using user-creation password for 'executor_password' param)
-    executor_password string (required)
-    new_email         string (required)
-    new_password      string (required)
+    executorEmail     string (required unless using user-creation password for 'executorPassword' param)
+    executorPassword  string (required)
+    newEmail          string (required)
+    newPassword       string (required)
     admin             bool   (optional, default:false)
 */
 func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
@@ -124,8 +124,8 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   Method:  POST
   Route:   /user/auth
   Payload:
-    email    string (required)
-    password string (required)
+    email     string (required)
+    password  string (required)
 */
 func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
   // Parse & validate payload.

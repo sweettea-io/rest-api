@@ -2,7 +2,6 @@ package model
 
 import (
   "github.com/jinzhu/gorm"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
 )
 
 /*
@@ -19,10 +18,4 @@ type TrainJob struct {
   ModelVersionID uint         `gorm:"default:null;not null;unique_index:train_job_grouped_index"`
   Stage          uint         `gorm:"default:0"`
   Failed         bool         `gorm:"default:false"`
-}
-
-// Assign Uid to TrainJob before creation.
-func (tj *TrainJob) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Uid", unique.NewUid())
-  return nil
 }

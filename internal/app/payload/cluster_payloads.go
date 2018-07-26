@@ -11,8 +11,8 @@ import (
 // ----------- POST /cluster -----------
 
 type CreateClusterPayload struct {
-  ExecutorEmail    string `json:"executor_email" validate:"nonzero"`
-  ExecutorPassword string `json:"executor_password" validate:"nonzero"`
+  ExecutorEmail    string `json:"executorEmail" validate:"nonzero"`
+  ExecutorPassword string `json:"executorPassword" validate:"nonzero"`
   Name             string `json:"name" validate:"nonzero"`
   Cloud            string `json:"cloud" validate:"nonzero"`
   State            string `json:"state"`
@@ -42,8 +42,8 @@ func (p *CreateClusterPayload) Validate(req *http.Request) bool {
 // ----------- PUT /cluster -----------
 
 type UpdateClusterPayload struct {
-  ExecutorEmail    string `json:"executor_email" validate:"nonzero"`
-  ExecutorPassword string `json:"executor_password" validate:"nonzero"`
+  ExecutorEmail    string `json:"executorEmail" validate:"nonzero"`
+  ExecutorPassword string `json:"executorPassword" validate:"nonzero"`
   Slug             string `json:"slug" validate:"nonzero"`
   Updates struct {
     Name  *string `json:"name"`
@@ -102,8 +102,8 @@ func (p *UpdateClusterPayload) GetUpdates() *map[string]interface{} {
 // ----------- DELETE /cluster -----------
 
 type DeleteClusterPayload struct {
-  ExecutorEmail    string `json:"executor_email" validate:"nonzero"`
-  ExecutorPassword string `json:"executor_password" validate:"nonzero"`
+  ExecutorEmail    string `json:"executorEmail" validate:"nonzero"`
+  ExecutorPassword string `json:"executorPassword" validate:"nonzero"`
   Slug             string `json:"slug" validate:"nonzero"`
 }
 

@@ -38,8 +38,8 @@ func InitClusterRouter() {
   Method:  POST
   Route:   /cluster
   Payload:
-    executor_email    string (required)
-    executor_password string (required)
+    executorEmail     string (required)
+    executorPassword  string (required)
     name              string (required)
     cloud             string (required)
     state             string (required on all environments except 'local')
@@ -135,8 +135,8 @@ func GetClustersHandler(w http.ResponseWriter, req *http.Request) {
   Method:  PUT
   Route:   /cluster
   Payload:
-    executor_email    string (required)
-    executor_password string (required)
+    executorEmail     string (required)
+    executorPassword  string (required)
     slug              string (required)
     updates:          struct (optional)
       name            string (optional)
@@ -205,8 +205,8 @@ func UpdateClusterHandler(w http.ResponseWriter, req *http.Request) {
   Method:  DELETE
   Route:   /cluster
   Payload:
-    executor_email    string (required)
-    executor_password string (required)
+    executorEmail     string (required)
+    executorPassword  string (required)
     slug              string (required)
 */
 func DeleteClusterHandler(w http.ResponseWriter, req *http.Request) {

@@ -72,6 +72,12 @@ func (cfg *Config) OnProd() bool {
   return cfg.Env == env.Prod
 }
 
+// TrainClusterConfigured returns if the SweetTea Train cluster
+// is configured for the current environment.
+func (cfg *Config) TrainClusterConfigured() bool {
+  return cfg.TrainClusterName != "" && cfg.TrainClusterState != ""
+}
+
 // New creates and returns a new Config struct instance populated from environment variables.
 func New() *Config {
   // Unmarshal values into a config struct.
