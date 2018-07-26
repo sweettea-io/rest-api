@@ -25,6 +25,7 @@ func InitProjectRouter() {
 
   // Attach route handlers.
   projectRouter.HandleFunc("", UpsertProjectHandler).Methods("POST")
+  projectRouter.HandleFunc("", GetProjectsHandler).Methods("GET")
 }
 
 // ----------- ROUTE HANDLERS -----------
@@ -62,4 +63,25 @@ func UpsertProjectHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   respond.Created(w, enc.JSON{"project": project.AsJSON()})
+}
+
+
+/*
+  Get Projects by query criteria
+
+  Method:  GET
+  Route:   /project
+*/
+func GetProjectsHandler(w http.ResponseWriter, req *http.Request) {
+  // Fetch all Project records.
+  projects := projectsvc.All()
+
+  // Format clusters for response payload.
+  var fmtProjects []enc.JSON
+
+  for _, project := range projects {
+    fmtProjects = append(fmtProjects, project.AsJSON())
+  }
+
+  respond.Ok(w, enc.JSON{"projects": fmtProjects})
 }

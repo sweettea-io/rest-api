@@ -6,6 +6,12 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
+func All() []model.Project {
+  projects := []model.Project{}
+  app.DB.Find(&projects)
+  return projects
+}
+
 // UpsertByNsp upserts a Project by nsp.
 func UpsertByNsp(nsp string) (*model.Project, bool, error) {
   isNewProj := false
