@@ -18,4 +18,5 @@ func InitRouter() {
   // Initialize sub routers.
   InitUserRouter()
   InitClusterRouter()
+  InitProjectRouter()
 }

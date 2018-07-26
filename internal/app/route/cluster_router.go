@@ -138,9 +138,10 @@ func GetClustersHandler(w http.ResponseWriter, req *http.Request) {
     executor_email    string (required)
     executor_password string (required)
     slug              string (required)
-    name              string (required)
-    cloud             string (required)
-    state             string (required on all environments except 'local')
+    updates:          struct (optional)
+      name            string (optional)
+      cloud           string (optional)
+      state           string (optional)
 */
 func UpdateClusterHandler(w http.ResponseWriter, req *http.Request) {
   // Validate internal token.

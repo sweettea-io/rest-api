@@ -9,7 +9,7 @@ import (
 // ----------- POST /project -----------
 
 type CreateProjectPayload struct {
-  Name    string `json:"name" validate:"nonzero"`
+  Nsp string `json:"nsp" validate:"nonzero"`
 }
 
 func (p *CreateProjectPayload) Validate(req *http.Request) bool {

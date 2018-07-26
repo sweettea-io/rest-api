@@ -2,10 +2,10 @@ package errmsg
 
 import "net/http"
 
-func ProjectNotAvailable() (*Error) {
-  return ApiError(http.StatusInternalServerError, 3001, "project_not_available")
+func ProjectNspUnavailable() (*Error) {
+  return ApiError(http.StatusInternalServerError, 3001, "project_namespace_unavailable")
 }
 
-func ProjectCreationFailed() (*Error) {
-  return ApiError(http.StatusInternalServerError, 3002, "project_creation_failed")
+func ProjectUpsertionFailed() (*Error) {
+  return ApiError(http.StatusInternalServerError, 3002, "project_upsertion_failed")
 }
