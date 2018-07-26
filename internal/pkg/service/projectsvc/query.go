@@ -6,10 +6,16 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
-// All returns all Project records ordered by nsp
+// All returns all Project records ordered by nsp.
 func All() []model.Project {
   projects := []model.Project{}
-  app.DB.Order("nsp desc").Find(&projects)
+
+  // Find Projects and eager-load ProjectConfig.
+  app.DB.
+    Preload("ProjectConfig").
+    Order("nsp desc").
+    Find(&projects)
+
   return projects
 }
 

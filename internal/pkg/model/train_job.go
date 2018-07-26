@@ -2,6 +2,7 @@ package model
 
 import (
   "github.com/jinzhu/gorm"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
 )
 
 /*
@@ -18,4 +19,28 @@ type TrainJob struct {
   ModelVersionID uint         `gorm:"default:null;not null;unique_index:train_job_grouped_index"`
   Stage          uint         `gorm:"default:0"`
   Failed         bool         `gorm:"default:false"`
+}
+
+// TODO: implement this.
+func (tj *TrainJob) ReadableStage() string {
+  return "<train_job_stage>"
+}
+
+// TODO: implement this.
+func (tj *TrainJob) ReadableCreatedAt() string {
+  return "<train_job_created_at>"
+}
+
+func (tj *TrainJob) AsJSON() enc.JSON {
+  return enc.JSON{
+    "uid": tj.Uid,
+    "commit": tj.Commit.Sha,
+    "stage": tj.ReadableStage(),
+    "failed": tj.Failed,
+    "createdAt": tj.ReadableCreatedAt(),
+    "model": enc.JSON{
+      "name": tj.ModelVersion.Model.Slug,
+      "version": tj.ModelVersion.Version,
+    },
+  }
 }

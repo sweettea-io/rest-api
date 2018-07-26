@@ -12,6 +12,8 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/app/worker/jobs"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -28,6 +30,7 @@ func InitTrainJobRouter() {
 
   // Attach route handlers.
   trainJobRouter.HandleFunc("", CreateTrainJobHandler).Methods("POST")
+  trainJobRouter.HandleFunc("", GetTrainJobsHandler).Methods("GET")
 }
 
 // ----------- ROUTE HANDLERS -----------
@@ -42,7 +45,6 @@ func InitTrainJobRouter() {
     projectNsp  string (required)
     modelName   string (required)
 */
-
 func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
   // Parse & validate payload.
   var pl payload.CreateTrainJobPayload
@@ -84,4 +86,24 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // TODO: stream training logs as response.
+}
+
+/*
+  Get TrainJobs by query criteria
+
+  Method:  GET
+  Route:   /train_job
+*/
+func GetTrainJobsHandler(w http.ResponseWriter, req *http.Request) {
+  // Fetch all TrainJob records.
+  trainJobs := trainjobsvc.All()
+
+  // Format TrainJobs for response payload.
+  var fmtTrainJobs []enc.JSON
+
+  for _, tj := range trainJobs {
+    fmtTrainJobs = append(fmtTrainJobs, tj.AsJSON())
+  }
+
+  respond.Ok(w, enc.JSON{"trainJobs": fmtTrainJobs})
 }
