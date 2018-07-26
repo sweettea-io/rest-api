@@ -26,7 +26,6 @@ type ModelVersion struct {
 
 // Assign Version to ModelVersion before creation.
 func (mv *ModelVersion) BeforeCreate(scope *gorm.Scope) error {
-  // TODO: Shorten version to 7 chars
-  scope.SetColumn("Version", unique.NewUid())
+  scope.SetColumn("Version", unique.NewUid()[:8])
   return nil
 }
