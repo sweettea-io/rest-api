@@ -6,12 +6,15 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
+// All returns all Cluster records ordered by slug.
 func All() []model.Cluster {
   clusters := []model.Cluster{}
-  app.DB.Find(&clusters)
+  app.DB.Order("slug desc").Find(&clusters)
   return clusters
 }
 
+// FromSlug attempts to find a Cluster record for the given slug.
+// Will return an error if no record is found.
 func FromSlug(slug string) (*model.Cluster, error) {
   // Find Cluster by slug.
   var cluster model.Cluster

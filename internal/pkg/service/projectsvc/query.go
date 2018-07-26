@@ -6,13 +6,15 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
+// All returns all Project records ordered by nsp
 func All() []model.Project {
   projects := []model.Project{}
-  app.DB.Find(&projects)
+  app.DB.Order("nsp desc").Find(&projects)
   return projects
 }
 
 // UpsertByNsp upserts a Project by nsp.
+// Return values are the project, if a new project was created, and any error that occurred, respectively.
 func UpsertByNsp(nsp string) (*model.Project, bool, error) {
   isNewProj := false
 
