@@ -6,7 +6,7 @@ import (
   "gopkg.in/validator.v2"
 )
 
-// ----------- POST /users -----------
+// ----------- POST /user -----------
 
 type CreateUserPayload struct {
   ExecutorEmail    string `json:"executor_email"`
@@ -20,7 +20,7 @@ func (p *CreateUserPayload) Validate(req *http.Request) bool {
   return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }
 
-// ----------- POST /users/auth -----------
+// ----------- POST /user/auth -----------
 
 type UserAuthPayload struct {
   Email    string `json:"email" validate:"nonzero"`

@@ -47,6 +47,26 @@ func (cfg *Config) BaseRoute() string {
   return fmt.Sprintf("/%s", cfg.APIVersion)
 }
 
+func (cfg *Config) OnTest() bool {
+  return cfg.Env == env.Test
+}
+
+func (cfg *Config) OnLocal() bool {
+  return cfg.Env == env.Local
+}
+
+func (cfg *Config) OnDev() bool {
+  return cfg.Env == env.Dev
+}
+
+func (cfg *Config) OnStaging() bool {
+  return cfg.Env == env.Staging
+}
+
+func (cfg *Config) OnProd() bool {
+  return cfg.Env == env.Prod
+}
+
 // New creates and returns a new Config struct instance populated from environment variables.
 func New() *Config {
   // Unmarshal values into a config struct.

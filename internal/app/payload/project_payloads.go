@@ -6,7 +6,7 @@ import (
   "gopkg.in/validator.v2"
 )
 
-// ----------- POST /projects -----------
+// ----------- POST /project -----------
 
 type CreateProjectPayload struct {
   Name    string `json:"name" validate:"nonzero"`

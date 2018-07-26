@@ -16,7 +16,7 @@ import (
 // ----------- ROUTER SETUP ------------
 
 // Prefix for all routes in this file
-const UserRoute = "/users"
+const UserRoute = "/user"
 
 func InitUserRouter() {
   // Create user router.
@@ -33,7 +33,7 @@ func InitUserRouter() {
   Create a new User (INTERNAL)
 
   Method:  POST
-  Route:   /users
+  Route:   /user
   Payload:
     executor_email    string (required unless using user-creation password for 'executor_password' param)
     executor_password string (required)
@@ -122,7 +122,7 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   If successful, returns newly minted session token inside header.
 
   Method:  POST
-  Route:   /users/auth
+  Route:   /user/auth
   Payload:
     email    string (required)
     password string (required)
