@@ -10,7 +10,7 @@ import (
 */
 type Session struct {
   gorm.Model
-  User       User
+  User       *User
   UserID     uint   `gorm:"default:null;not null;index:session_user_id"`
   Token      string `gorm:"type:varchar(240);default:null;not null;unique;index:session_token"`
 }

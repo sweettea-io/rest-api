@@ -5,6 +5,7 @@ import (
   "net/http"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
+  "fmt"
 )
 
 func FromRequest(req *http.Request) (*model.User, error) {
@@ -31,3 +32,31 @@ func FromRequest(req *http.Request) (*model.User, error) {
   return &session.User, nil
 }
 
+func ByEmail(email string) (*model.User, error) {
+  // Find User by email.
+  var user model.User
+  result := app.DB.Where(&model.User{Email: email}).Find(&user)
+
+  // Return error if not found.
+  if result.RecordNotFound() {
+    return nil, fmt.Errorf("User(email=%s) not found.\n", email)
+  }
+
+  return &user, nil
+}
+
+func Create(email string, hashedPw string, admin bool) (*model.User, error) {
+  // Create User model.
+  user := model.User{
+    Email: email,
+    HashedPw: hashedPw,
+    Admin: admin,
+  }
+
+  // Create record.
+  if err := app.DB.Create(&user).Error; err != nil {
+    return nil, fmt.Errorf("error creating User: %s", err.Error())
+  }
+
+  return &user, nil
+}

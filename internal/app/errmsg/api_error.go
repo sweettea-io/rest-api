@@ -19,3 +19,4 @@ func ApiError(status int, code int, msg string) (*Error) {
     },
   }
 }
+

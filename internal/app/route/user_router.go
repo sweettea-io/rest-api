@@ -8,8 +8,9 @@ import (
   "github.com/sweettea-io/rest-api/internal/app/errmsg"
   "github.com/sweettea-io/rest-api/internal/pkg/util/crypt"
   "github.com/sweettea-io/rest-api/internal/app/payload"
-  "github.com/sweettea-io/rest-api/internal/pkg/model"
   "github.com/sweettea-io/rest-api/internal/app/successmsg"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/usersvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/sessionsvc"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -42,9 +43,7 @@ func InitUserRouter() {
 */
 func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   // Validate internal token.
-  internalToken := req.Header.Get(app.Config.AuthHeaderName)
-
-  if internalToken != app.Config.RestApiToken {
+  if internalToken := req.Header.Get(app.Config.AuthHeaderName); internalToken != app.Config.RestApiToken {
     respond.Error(w, errmsg.Unauthorized())
     return
   }
@@ -64,23 +63,24 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   // If not using USER_CREATION_HASH for auth, verify executor exists using email/pw.
   if !usingUserCreationPw {
     // Get executor user by email.
-    var executorUser model.User
-    result := app.DB.Where(&model.User{Email: pl.ExecutorEmail}).Find(&executorUser)
+    executorUser, err := usersvc.ByEmail(pl.ExecutorEmail)
 
-    if result.RecordNotFound() {
+    if err != nil {
+      app.Log.Error(err.Error())
       respond.Error(w, errmsg.UserNotFound())
       return
     }
 
     // Ensure executor user's password is correct.
     if !crypt.VerifyBcrypt(pl.ExecutorPassword, executorUser.HashedPw) {
+      app.Log.Errorln("error creating new User: invalid executorUser password")
       respond.Error(w, errmsg.Unauthorized())
       return
     }
 
     // Only admin users can create other users.
     if !executorUser.Admin {
-      app.Log.Errorf("Error creating new user: executor user %s is not an admin.\n", executorUser.Email)
+      app.Log.Errorln("error creating new User: executor User must be an admin an admin")
       respond.Error(w, errmsg.Unauthorized())
       return
     }
@@ -90,20 +90,16 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   hashedPw, err := crypt.BcryptHash(pl.NewPassword)
 
   if err != nil {
-    app.Log.Errorf("Error hashing password during new user creation: %s\n", err.Error())
+    app.Log.Errorf("error creating new User: bcrypt password hash failed with %s\n", err.Error())
     respond.Error(w, errmsg.ISE())
     return
   }
 
   // Create new User.
-  newUser := model.User{
-    Email: pl.NewEmail,
-    HashedPw: hashedPw,
-    Admin: pl.Admin,
-  }
+  newUser, err := usersvc.Create(pl.NewEmail, hashedPw, pl.Admin)
 
-  if err := app.DB.Create(&newUser).Error; err != nil {
-    app.Log.Errorf("Error creating new user: %s\n", err.Error())
+  if err != nil {
+    app.Log.Errorf(err.Error())
 
     if err.(*pq.Error).Code.Name() == "unique_violation" {
       respond.Error(w, errmsg.EmailNotAvailable())
@@ -141,27 +137,27 @@ func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Get user by email.
-  var user model.User
-  result := app.DB.Where(&model.User{Email: pl.Email}).First(&user)
+  user, err := usersvc.ByEmail(pl.Email)
 
-  // Ensure user exists.
-  if result.RecordNotFound() {
+  if err != nil {
+    app.Log.Error(err.Error())
     respond.Error(w, errmsg.UserNotFound())
     return
   }
 
   // Ensure passwords match.
   if !crypt.VerifyBcrypt(pl.Password, user.HashedPw) {
+    app.Log.Errorln("error authing User: invalid password")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
 
   // Create new session for user.
-  session := model.Session{User: user}
+  session, err := sessionsvc.Create(user)
 
-  if err := app.DB.Create(&session).Error; err != nil {
+  if err != nil {
+    app.Log.Errorf(err.Error())
     respond.Error(w, errmsg.SessionCreationFailed())
-    app.Log.Errorf("Session creation failed for User(id=%v): %s\n", user.ID, err.Error())
     return
   }
 
