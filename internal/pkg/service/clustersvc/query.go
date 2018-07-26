@@ -1,9 +1,9 @@
 package clustersvc
 
 import (
-  "github.com/sweettea-io/rest-api/internal/pkg/model"
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
+  "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
 func All() []model.Cluster {

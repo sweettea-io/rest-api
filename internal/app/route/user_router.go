@@ -4,13 +4,13 @@ import (
   "net/http"
   "github.com/lib/pq"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/app/respond"
   "github.com/sweettea-io/rest-api/internal/app/errmsg"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/crypt"
   "github.com/sweettea-io/rest-api/internal/app/payload"
+  "github.com/sweettea-io/rest-api/internal/app/respond"
   "github.com/sweettea-io/rest-api/internal/app/successmsg"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/usersvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/sessionsvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/usersvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/crypt"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -66,21 +66,21 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
     executorUser, err := usersvc.FromEmail(pl.ExecutorEmail)
 
     if err != nil {
-      app.Log.Error(err.Error())
+      app.Log.Errorln(err.Error())
       respond.Error(w, errmsg.UserNotFound())
       return
     }
 
     // Ensure executor user's password is correct.
     if !crypt.VerifyBcrypt(pl.ExecutorPassword, executorUser.HashedPw) {
-      app.Log.Errorln("error creating new User: invalid executorUser password")
+      app.Log.Errorln("error creating new User: invalid executor user password")
       respond.Error(w, errmsg.Unauthorized())
       return
     }
 
     // Only admin users can create other users.
     if !executorUser.Admin {
-      app.Log.Errorln("error creating new User: executor User must be an admin an admin")
+      app.Log.Errorln("error creating new User: executor user must be an admin")
       respond.Error(w, errmsg.Unauthorized())
       return
     }
@@ -99,7 +99,7 @@ func CreateUserHandler(w http.ResponseWriter, req *http.Request) {
   newUser, err := usersvc.Create(pl.NewEmail, hashedPw, pl.Admin)
 
   if err != nil {
-    app.Log.Errorf(err.Error())
+    app.Log.Errorln(err.Error())
 
     if err.(*pq.Error).Code.Name() == "unique_violation" {
       respond.Error(w, errmsg.EmailNotAvailable())
@@ -140,7 +140,7 @@ func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
   user, err := usersvc.FromEmail(pl.Email)
 
   if err != nil {
-    app.Log.Error(err.Error())
+    app.Log.Errorln(err.Error())
     respond.Error(w, errmsg.UserNotFound())
     return
   }
@@ -156,7 +156,7 @@ func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
   session, err := sessionsvc.Create(user)
 
   if err != nil {
-    app.Log.Errorf(err.Error())
+    app.Log.Errorln(err.Error())
     respond.Error(w, errmsg.SessionCreationFailed())
     return
   }

@@ -98,3 +98,15 @@ func (p *UpdateClusterPayload) GetUpdates() *map[string]interface{} {
 
   return &updates
 }
+
+// ----------- DELETE /cluster -----------
+
+type DeleteClusterPayload struct {
+  ExecutorEmail    string `json:"executor_email" validate:"nonzero"`
+  ExecutorPassword string `json:"executor_password" validate:"nonzero"`
+  Slug             string `json:"slug" validate:"nonzero"`
+}
+
+func (p *DeleteClusterPayload) Validate(req *http.Request) bool {
+  return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
+}

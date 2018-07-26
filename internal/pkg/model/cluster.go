@@ -2,8 +2,8 @@ package model
 
 import (
   "github.com/jinzhu/gorm"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/str"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/str"
 )
 
 /*

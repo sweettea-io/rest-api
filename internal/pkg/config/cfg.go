@@ -47,22 +47,27 @@ func (cfg *Config) BaseRoute() string {
   return fmt.Sprintf("/%s", cfg.APIVersion)
 }
 
+// OnTest checks if currently on a test environment.
 func (cfg *Config) OnTest() bool {
   return cfg.Env == env.Test
 }
 
+// OnLocal checks if currently on a local environment.
 func (cfg *Config) OnLocal() bool {
   return cfg.Env == env.Local
 }
 
+// OnDev checks if currently on a dev environment.
 func (cfg *Config) OnDev() bool {
   return cfg.Env == env.Dev
 }
 
+// OnStaging checks if currently on a staging environment.
 func (cfg *Config) OnStaging() bool {
   return cfg.Env == env.Staging
 }
 
+// OnProd checks if currently on a production environment.
 func (cfg *Config) OnProd() bool {
   return cfg.Env == env.Prod
 }

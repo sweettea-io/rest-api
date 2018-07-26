@@ -17,3 +17,7 @@ func ClusterNotFound() (*Error) {
 func ClusterUpdateFailed() (*Error) {
   return ApiError(http.StatusInternalServerError, 10004, "cluster_update_failed")
 }
+
+func ClusterDeletionFailed() (*Error) {
+  return ApiError(http.StatusInternalServerError, 10005, "cluster_deletion_failed")
+}

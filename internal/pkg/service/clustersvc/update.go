@@ -7,7 +7,7 @@ import (
 )
 
 func Update(cluster *model.Cluster, updates *map[string]interface{}) error {
-  if err := app.DB.Model(&cluster).Updates(*updates).Error; err != nil {
+  if err := app.DB.Model(cluster).Updates(*updates).Error; err != nil {
     return fmt.Errorf("error updating Cluster: %s", err.Error())
   }
 

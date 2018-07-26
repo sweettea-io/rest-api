@@ -2,10 +2,10 @@ package usersvc
 
 import (
   "errors"
+  "fmt"
   "net/http"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
-  "fmt"
 )
 
 func FromRequest(req *http.Request) (*model.User, error) {

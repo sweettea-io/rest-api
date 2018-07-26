@@ -7,9 +7,10 @@ import (
   "github.com/sweettea-io/rest-api/internal/app/errmsg"
   "github.com/sweettea-io/rest-api/internal/app/payload"
   "github.com/sweettea-io/rest-api/internal/app/respond"
+  "github.com/sweettea-io/rest-api/internal/app/successmsg"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/clustersvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/usersvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/crypt"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/clustersvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
 )
 
@@ -26,6 +27,7 @@ func InitClusterRouter() {
   ClusterRouter.HandleFunc("", CreateClusterHandler).Methods("POST")
   ClusterRouter.HandleFunc("", GetClustersHandler).Methods("GET")
   ClusterRouter.HandleFunc("", UpdateClusterHandler).Methods("PUT")
+  ClusterRouter.HandleFunc("", DeleteClusterHandler).Methods("DELETE")
 }
 
 // ----------- ROUTE HANDLERS -----------
@@ -61,21 +63,21 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   executorUser, err := usersvc.FromEmail(pl.ExecutorEmail)
 
   if err != nil {
-    app.Log.Error(err.Error())
+    app.Log.Errorln(err.Error())
     respond.Error(w, errmsg.UserNotFound())
     return
   }
 
   // Ensure executor user's password is correct.
   if !crypt.VerifyBcrypt(pl.ExecutorPassword, executorUser.HashedPw) {
-    app.Log.Errorln("error creating new Cluster: invalid executor User password")
+    app.Log.Errorln("error creating Cluster: invalid executor user password")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
 
   // Only admin users can create clusters.
   if !executorUser.Admin {
-    app.Log.Errorln("error creating new Cluster: executor User must be an admin an admin")
+    app.Log.Errorln("error creating Cluster: executor user must be an admin")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
@@ -84,7 +86,7 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   cluster, err := clustersvc.Create(pl.Name, pl.Cloud, pl.State)
 
   if err != nil {
-    app.Log.Errorf(err.Error())
+    app.Log.Errorln(err.Error())
 
     if err.(*pq.Error).Code.Name() == "unique_violation" {
       respond.Error(w, errmsg.ClusterAlreadyExists())
@@ -159,21 +161,21 @@ func UpdateClusterHandler(w http.ResponseWriter, req *http.Request) {
   executorUser, err := usersvc.FromEmail(pl.ExecutorEmail)
 
   if err != nil {
-    app.Log.Error(err.Error())
+    app.Log.Errorln(err.Error())
     respond.Error(w, errmsg.UserNotFound())
     return
   }
 
   // Ensure executor user's password is correct.
   if !crypt.VerifyBcrypt(pl.ExecutorPassword, executorUser.HashedPw) {
-    app.Log.Errorln("error creating new Cluster: invalid executor User password")
+    app.Log.Errorln("error updating Cluster: invalid executor user password")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
 
   // Only admin users can update clusters.
   if !executorUser.Admin {
-    app.Log.Errorln("error creating new Cluster: executor User must be an admin an admin")
+    app.Log.Errorln("error updating Cluster: executor user must be an admin")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
@@ -182,15 +184,82 @@ func UpdateClusterHandler(w http.ResponseWriter, req *http.Request) {
   cluster, err := clustersvc.FromSlug(pl.Slug)
 
   if err != nil {
-    app.Log.Error(err.Error())
+    app.Log.Errorln(err.Error())
     respond.Error(w, errmsg.ClusterNotFound())
   }
 
+  // Update the cluster.
   if err := clustersvc.Update(cluster, pl.GetUpdates()); err != nil {
-    app.Log.Errorf(err.Error())
+    app.Log.Errorln(err.Error())
     respond.Error(w, errmsg.ClusterUpdateFailed())
     return
   }
 
   respond.Ok(w, enc.JSON{"cluster": cluster.AsJSON()})
+}
+
+/*
+  Delete a Cluster (INTERNAL)
+
+  Method:  DELETE
+  Route:   /cluster
+  Payload:
+    executor_email    string (required)
+    executor_password string (required)
+    slug              string (required)
+*/
+func DeleteClusterHandler(w http.ResponseWriter, req *http.Request) {
+  // Validate internal token.
+  if internalToken := req.Header.Get(app.Config.AuthHeaderName); internalToken != app.Config.RestApiToken {
+    respond.Error(w, errmsg.Unauthorized())
+    return
+  }
+
+  // Parse & validate payload.
+  var pl payload.DeleteClusterPayload
+
+  if !pl.Validate(req) {
+    respond.Error(w, errmsg.InvalidPayload())
+    return
+  }
+
+  // Get executor user by email.
+  executorUser, err := usersvc.FromEmail(pl.ExecutorEmail)
+
+  if err != nil {
+    app.Log.Errorln(err.Error())
+    respond.Error(w, errmsg.UserNotFound())
+    return
+  }
+
+  // Ensure executor user's password is correct.
+  if !crypt.VerifyBcrypt(pl.ExecutorPassword, executorUser.HashedPw) {
+    app.Log.Errorln("error deleting Cluster: invalid executor user password")
+    respond.Error(w, errmsg.Unauthorized())
+    return
+  }
+
+  // Only admin users can delete clusters.
+  if !executorUser.Admin {
+    app.Log.Errorln("error deleting Cluster: executor user must be an admin")
+    respond.Error(w, errmsg.Unauthorized())
+    return
+  }
+
+  // Find Cluster by slug.
+  cluster, err := clustersvc.FromSlug(pl.Slug)
+
+  if err != nil {
+    app.Log.Errorln(err.Error())
+    respond.Error(w, errmsg.ClusterNotFound())
+  }
+
+  // Delete the Cluster.
+  if err := clustersvc.Delete(cluster); err != nil {
+    app.Log.Errorln(err.Error())
+    respond.Error(w, errmsg.ClusterDeletionFailed())
+    return
+  }
+
+  respond.Ok(w, successmsg.ClusterDeletionSuccess)
 }
