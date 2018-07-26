@@ -6,6 +6,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/projecthost"
   "fmt"
+  "strings"
 )
 
 /*
@@ -27,6 +28,10 @@ type Project struct {
 
 // Assign Host to Project before saving.
 func (project *Project) BeforeSave(scope *gorm.Scope) error {
+  // Downcase project namespace.
+  scope.SetColumn("Nsp", strings.ToLower(project.Nsp))
+
+  // Get supported host for namespace.
   host := projecthost.FromNsp(project.Nsp)
 
   if host == "" {
