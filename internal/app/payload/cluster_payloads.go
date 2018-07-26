@@ -44,7 +44,7 @@ func (p *CreateClusterPayload) Validate(req *http.Request) bool {
 type UpdateClusterPayload struct {
   ExecutorEmail    string `json:"executor_email" validate:"nonzero"`
   ExecutorPassword string `json:"executor_password" validate:"nonzero"`
-  Slug             string `json:"name" validate:"nonzero"`
+  Slug             string `json:"slug" validate:"nonzero"`
   Updates struct {
     Name  *string `json:"name"`
     Cloud *string `json:"cloud"`
@@ -61,6 +61,11 @@ func (p *UpdateClusterPayload) Validate(req *http.Request) bool {
     return false
   }
 
+  // Validate name value
+  if p.Updates.Name != nil && *p.Updates.Name == "" {
+    return false
+  }
+
   // Validate state value.
   if p.Updates.State != nil && // if state was provided...
     *p.Updates.State == "" &&  // and it was provided as an empty string...
@@ -69,7 +74,7 @@ func (p *UpdateClusterPayload) Validate(req *http.Request) bool {
   }
 
   // Validate cloud value.
-  if !cloud.IsValidCloud(*p.Updates.Cloud) {
+  if p.Updates.Cloud != nil && !cloud.IsValidCloud(*p.Updates.Cloud) {
     return false
   }
 
@@ -80,15 +85,15 @@ func (p *UpdateClusterPayload) GetUpdates() *map[string]interface{} {
   updates := make(map[string]interface{})
 
   if p.Updates.Name != nil {
-    updates["name"] = *p.Updates.Name
+   updates["name"] = *p.Updates.Name
   }
 
   if p.Updates.Cloud != nil {
-    updates["cloud"] = *p.Updates.Cloud
+   updates["cloud"] = *p.Updates.Cloud
   }
 
   if p.Updates.State != nil {
-    updates["state"] = *p.Updates.State
+   updates["state"] = *p.Updates.State
   }
 
   return &updates

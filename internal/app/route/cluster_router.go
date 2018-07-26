@@ -54,6 +54,7 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
 
   if !pl.Validate(req) {
     respond.Error(w, errmsg.InvalidPayload())
+    return
   }
 
   // Get executor user by email.
@@ -151,6 +152,7 @@ func UpdateClusterHandler(w http.ResponseWriter, req *http.Request) {
 
   if !pl.Validate(req) {
     respond.Error(w, errmsg.InvalidPayload())
+    return
   }
 
   // Get executor user by email.
