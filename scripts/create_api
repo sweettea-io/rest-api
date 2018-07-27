@@ -9,14 +9,12 @@ set -e # exit if any child script exits with non-zero status
 this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 provider="$1"
 name="$2"
-company="$3"
-env="$4"
+env="$3"
 
 # ======== VALIDATE ARGS ======== #
 
 $this_dir/validate_arg "provider" "$provider" "aws"
 $this_dir/validate_arg "name" "$name"
-$this_dir/validate_arg "company" "$company"
 $this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
 
 # ======== GET ENV VALS ======== #
@@ -111,9 +109,8 @@ done
 # ======== REGISTER NEW API CLUSTER WITH CORE CLUSTER FOR THIS ENV ======== #
 
 payload="{
-	\"executor_email\": \"$executor_email\",
-	\"executor_password\": \"$executor_password\",
-	\"company_name\": \"$company\",
+	\"executorEmail\": \"$executor_email\",
+	\"executorPassword\": \"$executor_password\",
 	\"name\": \"$name\",
 	\"cloud\": \"$provider\",
 	\"state\": \"$state\"
@@ -121,7 +118,7 @@ payload="{
 
 printf "\Registering API cluster...\n"
 
-$this_dir/core_api_call "$env" "POST" "/clusters" "$payload"
+$this_dir/core_api_call "$env" "POST" "/cluster" "$payload"
 
 # ======== RE-BUILD & DEPLOY TO CORE CLUSTER FOR THIS ENV ======== #
 

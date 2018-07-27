@@ -59,13 +59,13 @@ fi
 # ======== PERFORM API CALL ======== #
 
 payload="{
-	\"executor_email\": \"$executor_email\",
-	\"executor_password\": \"$executor_password\",
-	\"new_email\": \"$email\",
-	\"new_password\": \"$password\",
+	\"executorEmail\": \"$executor_email\",
+	\"executorPassword\": \"$executor_password\",
+	\"newEmail\": \"$email\",
+	\"newPassword\": \"$password\",
 	\"admin\": $admin
 }"
 
 printf "\nCreating user...\n"
 
-$this_dir/core_api_call "$env" "POST" "/users" "$payload"
+$this_dir/core_api_call "$env" "POST" "/user" "$payload"
