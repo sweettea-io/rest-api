@@ -1,12 +1,12 @@
 package model
 
 import (
-  "github.com/jinzhu/gorm"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/projecthost"
   "fmt"
   "strings"
+  "github.com/jinzhu/gorm"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/projecthost"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
 )
 
 /*
@@ -57,15 +57,15 @@ func (project *Project) AsJSON() enc.JSON {
   }
 }
 
-func (project *Project) GetHost() projecthost.Host {
+func (project *Project) GetHost(token string) projecthost.Host {
   var host projecthost.Host
 
   switch project.Host {
   case projecthost.GitHubName:
-    return &projecthost.GitHub{Project: project}
+    host = &projecthost.GitHub{}
   }
 
-  host.Configure()
+  host.Configure(token)
   return host
 }
 

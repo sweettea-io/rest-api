@@ -21,6 +21,7 @@
     "DOCKER_REGISTRY_PASSWORD": "",
     "DOMAIN": "",
     "ENV": "",
+    "GITHUB_ACCESS_TOKEN": "",
     "HOSTED_ZONE_ID": "",
     "JOB_QUEUE_NSP": "rest_api_job_queue",
     "K8S_VERSION": "1.7.10",
