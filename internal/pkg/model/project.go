@@ -32,7 +32,7 @@ func (project *Project) BeforeSave(scope *gorm.Scope) error {
   scope.SetColumn("Nsp", strings.ToLower(project.Nsp))
 
   // Get supported host for namespace.
-  host := projecthost.FromNsp(project.Nsp)
+  host := hostNameForNsp(project.Nsp)
 
   if host == "" {
     return fmt.Errorf("invalid project namespace \"%s\" -- no recognizable host", project.Nsp)
@@ -55,4 +55,20 @@ func (project *Project) AsJSON() enc.JSON {
     "nsp": project.Nsp,
     "config": project.ProjectConfig.AsJSON(),
   }
+}
+
+func (project *Project) GetHost() *projecthost.Host {
+  host := projecthost.FromName(project.Host)
+  return &host
+}
+
+func hostNameForNsp(nsp string) string {
+  host := ""
+
+  switch true {
+  case strings.HasPrefix(nsp, projecthost.GH_DOMAIN):
+    host = projecthost.GH
+  }
+
+  return host
 }

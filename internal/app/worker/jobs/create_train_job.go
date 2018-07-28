@@ -40,7 +40,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   }
 
   // Get latest commit sha for project.
-  sha, err := projectsvc.LatestSha()
+  sha, err := project.GetHost().LatestSha()
 
   if err != nil {
     c.Log.Errorln(err.Error())
