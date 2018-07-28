@@ -17,7 +17,7 @@ type GitHub struct {
 }
 
 func (gh *GitHub) Configure(token string) {
-  // Initialize http client background context.
+  // Initialize http client and background context.
   var httpClient *http.Client
   gh.Ctx = context.Background()
 
