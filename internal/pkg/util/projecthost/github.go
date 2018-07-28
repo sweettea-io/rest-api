@@ -37,12 +37,7 @@ func (gh *GitHub) LatestSha(owner, repo string) (string, error) {
   commitListOpts.PerPage = 1
 
   // Get commits for repo.
-  commits, _, err := gh.Client.Repositories.ListCommits(
-    gh.Ctx,
-    owner,
-    repo,
-    &commitListOpts,
-  )
+  commits, _, err := gh.Client.Repositories.ListCommits(gh.Ctx, owner, repo, &commitListOpts)
 
   if err != nil {
     return "", fmt.Errorf("error listing commits for GitHub project: %s/%s", owner, repo)
