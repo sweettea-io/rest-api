@@ -5,6 +5,7 @@ import (
   "fmt"
   "github.com/google/go-github/github"
   "golang.org/x/oauth2"
+  "net/http"
 )
 
 const GitHubName = "github"
@@ -16,18 +17,17 @@ type GitHub struct {
 }
 
 func (gh *GitHub) Configure(token string) {
-  // Initialize background context.
+  // Initialize http client background context.
+  var httpClient *http.Client
   gh.Ctx = context.Background()
 
-  // Initialize GitHub API client based on whether or not it needs to be authed.
-  if token == "" {
-    gh.Client = github.NewClient(nil)
-  } else {
-    gh.Client = github.NewClient(oauth2.NewClient(
-      gh.Ctx,
-      oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})),
-    )
+  // Set http client as OAuth2 client if GH access token exists.
+  if token != "" {
+    tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
+    httpClient = oauth2.NewClient(gh.Ctx, tokenSource)
   }
+
+  gh.Client = github.NewClient(httpClient)
 }
 
 func (gh *GitHub) LatestSha(owner, repo string) (string, error) {
