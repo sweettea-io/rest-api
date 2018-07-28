@@ -24,6 +24,7 @@ type Config struct {
   DockerRegistryPassword string `env:"DOCKER_REGISTRY_PASSWORD,required,ignore_on_envs=test"`
   Domain                 string `env:"DOMAIN,required,ignore_on_envs=test"`
   Env                    string `env:"ENV,required"`
+  GitHubAccessToken      string `env:"GITHUB_ACCESS_TOKEN"`
   HostedZoneId           string `env:"HOSTED_ZONE_ID,ignore_on_envs=test|local"`
   JobQueueNsp            string `env:"JOB_QUEUE_NSP,required"`
   KubeConfig             string `env:"KUBECONFIG,required"`
