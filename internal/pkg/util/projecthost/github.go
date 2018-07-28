@@ -3,9 +3,9 @@ package projecthost
 import (
   "context"
   "fmt"
+  "net/http"
   "github.com/google/go-github/github"
   "golang.org/x/oauth2"
-  "net/http"
 )
 
 const GitHubName = "github"
