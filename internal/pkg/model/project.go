@@ -58,7 +58,12 @@ func (project *Project) AsJSON() enc.JSON {
 }
 
 func (project *Project) GetHost() projecthost.Host {
-  return projecthost.FromName(project.Host)
+  switch project.Host {
+  case projecthost.GitHubName:
+    return &projecthost.GitHub{Project: project}
+  default:
+    return nil
+  }
 }
 
 func hostNameForNsp(nsp string) string {

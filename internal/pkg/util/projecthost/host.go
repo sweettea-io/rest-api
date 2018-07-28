@@ -4,12 +4,3 @@ package projecthost
 type Host interface {
   LatestSha() (string, error)
 }
-
-func FromName(name string) Host {
-  switch name {
-  case GH:
-    return &GitHub{}
-  default:
-    return nil
-  }
-}
