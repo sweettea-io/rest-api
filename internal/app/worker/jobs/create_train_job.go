@@ -21,6 +21,13 @@ import (
     modelSlug   (string) slug of Model associated with this TrainJob
 */
 func (c *Context) CreateTrainJob(job *work.Job) error {
+  // Ensure Train cluster exists first.
+  if !app.Config.TrainClusterConfigured() {
+    err := fmt.Errorf("train cluster not configured -- leaving CreateTrainJob")
+    app.Log.Errorln(err.Error())
+    return err
+  }
+
   // Extract args from job.
   trainJobUid := job.ArgString("trainJobUid")
   projectID := uint(job.ArgInt64("projectID"))
