@@ -57,17 +57,16 @@ func (project *Project) AsJSON() enc.JSON {
   }
 }
 
-func (project *Project) GetHost() *projecthost.Host {
-  host := projecthost.FromName(project.Host)
-  return &host
+func (project *Project) GetHost() projecthost.Host {
+  return projecthost.FromName(project.Host)
 }
 
 func hostNameForNsp(nsp string) string {
   host := ""
 
   switch true {
-  case strings.HasPrefix(nsp, projecthost.GH_DOMAIN):
-    host = projecthost.GH
+  case strings.HasPrefix(nsp, projecthost.GitHubDomain):
+    host = projecthost.GitHubName
   }
 
   return host
