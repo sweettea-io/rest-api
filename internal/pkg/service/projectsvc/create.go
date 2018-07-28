@@ -6,6 +6,11 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
+func TestApp() {
+  fmt.Println("Project:")
+  fmt.Println(app.DB)
+}
+
 // UpsertByNsp upserts a Project by nsp.
 // Return values are the project, if a new project was created, and any error that occurred, respectively.
 func UpsertByNsp(nsp string) (*model.Project, bool, error) {

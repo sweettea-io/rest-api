@@ -4,7 +4,6 @@ import (
   "os"
   "os/signal"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/app/worker"
   "github.com/sweettea-io/rest-api/internal/app/worker/jobs"
   "github.com/sweettea-io/rest-api/internal/pkg/config"
   "github.com/sweettea-io/work"
@@ -14,17 +13,9 @@ func main() {
   // Initialize the app.
   app.Init(config.New())
 
-  // Initialize the worker.
-  worker.Init(
-    app.Config,
-    app.JobQueue,
-    app.DB,
-    app.Log,
-  )
-
-  // Create new worker pool with job context.
+  // Create new worker pool with empty job context.
   workerPool := work.NewWorkerPool(
-    worker.JobContext,
+    jobs.Context{},
     app.Config.WorkerCount,
     app.Config.JobQueueNsp,
     app.Redis,
@@ -33,8 +24,11 @@ func main() {
   // Add job middleware.
   workerPool.Middleware((*jobs.Context).LogJobStart)
 
+  // Create job options that specify no retries for jobs that fail.
+  noRetry := work.JobOptions{MaxFails: 1}
+
   // Assign handler functions to different jobs.
-  workerPool.Job(jobs.Names.CreateTrainJob, (*jobs.Context).CreateTrainJob)
+  workerPool.JobWithOptions(jobs.Names.CreateTrainJob, noRetry, (*jobs.Context).CreateTrainJob)
 
   // Start processing jobs.
   workerPool.Start()

@@ -2,12 +2,13 @@ package jobs
 
 import (
   "fmt"
-  "github.com/sweettea-io/work"
+  "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/service/commitsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/modelsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/modelversionsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/projectsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
+  "github.com/sweettea-io/work"
 )
 
 /*
@@ -19,15 +20,14 @@ import (
     projectID   (uint)   ID of project associated with this TrainJob
     modelSlug   (string) slug of Model associated with this TrainJob
 */
-// TODO: Figure out if you need to re-initialize app in order to be able to use the svc's that reference app.Stuff.
 func (c *Context) CreateTrainJob(job *work.Job) error {
   // Extract args from job.
   trainJobUid := job.ArgString("trainJobUid")
-  projectID := uint(job.ArgInt64("modelID"))
+  projectID := uint(job.ArgInt64("projectID"))
   modelSlug := job.ArgString("modelSlug")
 
   if err := job.ArgError(); err != nil {
-    c.Log.Errorln(err.Error())
+    app.Log.Errorln(err.Error())
     return err
   }
 
@@ -35,18 +35,18 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   project, err := projectsvc.FromID(projectID)
 
   if err != nil {
-    c.Log.Errorln(err.Error())
+    app.Log.Errorln(err.Error())
     return err
   }
 
   // Get host for this project.
-  host := project.GetHost(c.Config.GitHubAccessToken)
+  host := project.GetHost(app.Config.GitHubAccessToken)
 
   // Get latest commit sha for project.
   sha, err := host.LatestSha(project.Owner(), project.Repo())
 
   if err != nil {
-    c.Log.Errorln(err.Error())
+    app.Log.Errorln(err.Error())
     return err
   }
 
@@ -54,7 +54,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   commit, err := commitsvc.Upsert(project.ID, sha)
 
   if err != nil {
-    c.Log.Errorln(err.Error())
+    app.Log.Errorln(err.Error())
     return err
   }
 
@@ -62,7 +62,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   model, err := modelsvc.Upsert(project.ID, modelSlug)
 
   if err != nil {
-    c.Log.Errorln(err.Error())
+    app.Log.Errorln(err.Error())
     return err
   }
 
@@ -70,7 +70,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   modelVersion, err := modelversionsvc.Create(model.ID)
 
   if err != nil {
-    c.Log.Errorln(err.Error())
+    app.Log.Errorln(err.Error())
     return err
   }
 
@@ -78,14 +78,14 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   trainJob, err := trainjobsvc.Create(trainJobUid, commit.ID, modelVersion.ID)
 
   if err != nil {
-    c.Log.Errorln(err.Error())
+    app.Log.Errorln(err.Error())
     return err
   }
 
   // Enqueue TrainDeploy job.
-  if _, err := c.JobQueue.Enqueue(Names.TrainDeploy, work.Q{"trainJobID": trainJob.ID}); err != nil {
+  if _, err := app.JobQueue.Enqueue(Names.TrainDeploy, work.Q{"trainJobID": trainJob.ID}); err != nil {
     err = fmt.Errorf("error scheduling TrainDeploy job: %s", err.Error())
-    c.Log.Errorln(err.Error())
+    app.Log.Errorln(err.Error())
     return err
   }
   
