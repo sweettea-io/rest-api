@@ -80,7 +80,7 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
 
   // Enqueue CreateTrainJob job.
   if _, err := app.JobQueue.Enqueue(jobs.Names.CreateTrainJob, jobArgs); err != nil {
-    app.Log.Errorf("Error enqueueing CreateTrainJob: %s", err.Error())
+    app.Log.Errorf("error scheduling CreateTrainJob job: %s", err.Error())
     respond.Error(w, errmsg.CreateTrainJobSchedulingFailed())
     return
   }
