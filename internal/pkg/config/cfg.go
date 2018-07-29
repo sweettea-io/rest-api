@@ -86,7 +86,14 @@ func (cfg *Config) TrainClusterConfigured() bool {
 }
 
 func (cfg *Config) BuildpackEnvs() map[string]string {
-  return map[string]string{}
+  return map[string]string{
+    "PYTHON_JSON_API_BUILDPACK_ACCESS_TOKEN": cfg.PythonJsonApiBuildpackAccessToken,
+    "PYTHON_JSON_API_BUILDPACK_SHA": cfg.PythonJsonApiBuildpackSha,
+    "PYTHON_JSON_API_BUILDPACK_URL": cfg.PythonJsonApiBuildpackUrl,
+    "PYTHON_TRAIN_BUILDPACK_ACCESS_TOKEN": cfg.PythonTrainBuildpackAccessToken,
+    "PYTHON_TRAIN_BUILDPACK_SHA": cfg.PythonTrainBuildpackSha,
+    "PYTHON_TRAIN_BUILDPACK_URL": cfg.PythonTrainBuildpackUrl,
+  }
 }
 
 // New creates and returns a new Config struct instance populated from environment variables.
