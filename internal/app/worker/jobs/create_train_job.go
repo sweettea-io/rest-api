@@ -48,7 +48,8 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   }
 
   // Get host for this project.
-  host := project.GetHost(app.Config.GitHubAccessToken)
+  host := project.GetHost()
+  host.Configure()
 
   // Get latest commit sha for project.
   sha, err := host.LatestSha(project.Owner(), project.Repo())

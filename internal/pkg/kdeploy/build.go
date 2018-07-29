@@ -11,7 +11,6 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/image"
   "github.com/sweettea-io/rest-api/internal/pkg/util/typeconvert"
   corev1 "k8s.io/api/core/v1"
-  metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
@@ -126,21 +125,22 @@ func (b *Build) makeClient() error {
 }
 
 func (b *Build) makeVolumeMounts() {
-  b.VolumeMounts = []corev1.VolumeMount{{
-    Name: "dockersock",
-    MountPath: "/var/run",
-  }}
+  b.VolumeMounts = VolumeMounts([]map[string]string{{
+    "name": "dockersock",
+    "path": "/var/run",
+  }})
 }
 
 func (b *Build) makeVolumes() {
-  b.Volumes = []corev1.Volume{
-    CoreV1Volume("dockersock", "/var/run"),
-  }
+  b.Volumes = Volumes([]map[string]string{{
+    "name": "dockersock",
+    "path": "/var/run",
+  }})
 }
 
 func (b *Build) makeEnvs() {
   envs := map[string]string{
-    "BUILD_TARGET_ACCESS_TOKEN": "", // TODO: Figure out best way to address this.
+    "BUILD_TARGET_ACCESS_TOKEN": b.Project.GetHost().GetToken(),
     "BUILD_TARGET_SHA": b.Buildable.GetCommit().Sha,
     "BUILD_TARGET_UID": b.Project.Uid,
     "BUILD_TARGET_URL": b.Project.Url(),
@@ -158,29 +158,23 @@ func (b *Build) makeEnvs() {
 
   // Add env info for all buildpacks.
 
-  b.Envs = CoreV1EnvVars(envs)
+  b.Envs = EnvVars(envs)
 }
 
 func (b *Build) makeContainers() {
-  b.Containers = []corev1.Container{{
-    Name: b.ContainerName,
-    Image: b.Image,
-    Env: b.Envs,
-    VolumeMounts: b.VolumeMounts,
-  }}
+  b.Containers = Containers([]map[string]interface{}{{
+    "name":         b.ContainerName,
+    "image":        b.Image,
+    "envs":         b.Envs,
+    "volumeMounts": b.VolumeMounts,
+  }})
 }
 
 func (b *Build) makePod() {
-  b.Pod = &corev1.Pod{
-    ObjectMeta: metav1.ObjectMeta{
-      Labels: map[string]string{
-        "app": b.DeployName,
-      },
-    },
-    Spec: corev1.PodSpec{
-      Containers: b.Containers,
-      Volumes: b.Volumes,
-      RestartPolicy: "Never",
-    },
-  }
+  b.Pod = Pod(map[string]interface{}{
+    "label": b.DeployName,
+    "containers": b.Containers,
+    "volumes": b.Volumes,
+    "restart": corev1.RestartPolicyNever,
+  })
 }

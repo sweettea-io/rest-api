@@ -57,15 +57,15 @@ func (project *Project) AsJSON() enc.JSON {
   }
 }
 
-func (project *Project) GetHost(token string) projecthost.Host {
+func (project *Project) GetHost() projecthost.Host {
   var host projecthost.Host
 
   switch project.Host {
   case projecthost.GitHubName:
     host = &projecthost.GitHub{}
+    host.Init()
   }
 
-  host.Configure(token)
   return host
 }
 
