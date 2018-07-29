@@ -29,15 +29,5 @@ func (c *Context) TrainDeploy(job *work.Job) error {
     return err
   }
 
-  // Find TrainJob by ID.
-  trainJob, err := trainjobsvc.FromID(trainJobID)
-
-  if err != nil {
-    app.Log.Errorln(err.Error())
-    return err
-  }
-
-
-
   return nil
 }
