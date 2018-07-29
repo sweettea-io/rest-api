@@ -8,6 +8,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/modelversionsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/projectsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/stcluster"
   "github.com/sweettea-io/work"
 )
 
@@ -89,9 +90,15 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
     return err
   }
 
-  // Enqueue TrainDeploy job.
-  if _, err := app.JobQueue.Enqueue(Names.TrainDeploy, work.Q{"trainJobID": trainJob.ID}); err != nil {
-    err = fmt.Errorf("error scheduling TrainDeploy job: %s", err.Error())
+  // Enqueue new job to build this Project for the Train Cluster.
+  jobArgs := work.Q{
+    "resourceID": trainJob.ID,
+    "projectID": projectID,
+    "targetCluster": stcluster.Train,
+  }
+
+  if _, err := app.JobQueue.Enqueue(Names.BuildDeploy, jobArgs); err != nil {
+    err = fmt.Errorf("error scheduling BuildDeploy job: %s", err.Error())
     app.Log.Errorln(err.Error())
     return err
   }

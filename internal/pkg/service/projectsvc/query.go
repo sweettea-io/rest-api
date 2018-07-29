@@ -37,7 +37,7 @@ func FromNsp(nsp string) (*model.Project, error) {
 // FromID attempts to find a Project record by the provided id.
 // Will return an error if no record is found.
 func FromID(id uint) (*model.Project, error) {
-  // Find Project by nsp.
+  // Find Project by ID.
   var project model.Project
   result := app.DB.First(&project, id)
 
