@@ -33,7 +33,7 @@ func Migrate(database *gorm.DB) {
     &model.Model{},
     &model.ModelVersion{},
     &model.Deploy{},
-    &model.Cluster{},
+    &model.ApiCluster{},
     &model.EnvVar{},
   )
 }

@@ -8,9 +8,9 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/cloud"
 )
 
-// ----------- POST /cluster -----------
+// ----------- POST /api_cluster -----------
 
-type CreateClusterPayload struct {
+type CreateApiClusterPayload struct {
   ExecutorEmail    string `json:"executorEmail" validate:"nonzero"`
   ExecutorPassword string `json:"executorPassword" validate:"nonzero"`
   Name             string `json:"name" validate:"nonzero"`
@@ -18,7 +18,7 @@ type CreateClusterPayload struct {
   State            string `json:"state"`
 }
 
-func (p *CreateClusterPayload) Validate(req *http.Request) bool {
+func (p *CreateApiClusterPayload) Validate(req *http.Request) bool {
   if err := json.NewDecoder(req.Body).Decode(p); err != nil {
     return false
   }
@@ -39,9 +39,9 @@ func (p *CreateClusterPayload) Validate(req *http.Request) bool {
   return true
 }
 
-// ----------- PUT /cluster -----------
+// ----------- PUT /api_cluster -----------
 
-type UpdateClusterPayload struct {
+type UpdateApiClusterPayload struct {
   ExecutorEmail    string `json:"executorEmail" validate:"nonzero"`
   ExecutorPassword string `json:"executorPassword" validate:"nonzero"`
   Slug             string `json:"slug" validate:"nonzero"`
@@ -52,7 +52,7 @@ type UpdateClusterPayload struct {
   } `json:"updates"`
 }
 
-func (p *UpdateClusterPayload) Validate(req *http.Request) bool {
+func (p *UpdateApiClusterPayload) Validate(req *http.Request) bool {
   if err := json.NewDecoder(req.Body).Decode(p); err != nil {
     return false
   }
@@ -81,7 +81,7 @@ func (p *UpdateClusterPayload) Validate(req *http.Request) bool {
   return true
 }
 
-func (p *UpdateClusterPayload) GetUpdates() *map[string]interface{} {
+func (p *UpdateApiClusterPayload) GetUpdates() *map[string]interface{} {
   updates := make(map[string]interface{})
 
   if p.Updates.Name != nil {
@@ -99,14 +99,14 @@ func (p *UpdateClusterPayload) GetUpdates() *map[string]interface{} {
   return &updates
 }
 
-// ----------- DELETE /cluster -----------
+// ----------- DELETE /api_cluster -----------
 
-type DeleteClusterPayload struct {
+type DeleteApiClusterPayload struct {
   ExecutorEmail    string `json:"executorEmail" validate:"nonzero"`
   ExecutorPassword string `json:"executorPassword" validate:"nonzero"`
   Slug             string `json:"slug" validate:"nonzero"`
 }
 
-func (p *DeleteClusterPayload) Validate(req *http.Request) bool {
+func (p *DeleteApiClusterPayload) Validate(req *http.Request) bool {
   return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }

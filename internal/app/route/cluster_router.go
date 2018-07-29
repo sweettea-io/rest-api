@@ -8,7 +8,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/app/payload"
   "github.com/sweettea-io/rest-api/internal/app/respond"
   "github.com/sweettea-io/rest-api/internal/app/successmsg"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/clustersvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/apiclustersvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/usersvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/crypt"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
@@ -17,26 +17,26 @@ import (
 // ----------- ROUTER SETUP ------------
 
 // Prefix for all routes in this file
-const ClusterRoute = "/cluster"
+const ApiClusterRoute = "/api_cluster"
 
-func InitClusterRouter() {
-  // Create Cluster router.
-  ClusterRouter := Router.PathPrefix(ClusterRoute).Subrouter()
+func InitApiClusterRouter() {
+  // Create ApiCluster router.
+  ApiClusterRouter := Router.PathPrefix(ApiClusterRoute).Subrouter()
 
   // Attach route handlers.
-  ClusterRouter.HandleFunc("", CreateClusterHandler).Methods("POST")
-  ClusterRouter.HandleFunc("", GetClustersHandler).Methods("GET")
-  ClusterRouter.HandleFunc("", UpdateClusterHandler).Methods("PUT")
-  ClusterRouter.HandleFunc("", DeleteClusterHandler).Methods("DELETE")
+  ApiClusterRouter.HandleFunc("", CreateApiClusterHandler).Methods("POST")
+  ApiClusterRouter.HandleFunc("", GetApiClustersHandler).Methods("GET")
+  ApiClusterRouter.HandleFunc("", UpdateApiClusterHandler).Methods("PUT")
+  ApiClusterRouter.HandleFunc("", DeleteApiClusterHandler).Methods("DELETE")
 }
 
 // ----------- ROUTE HANDLERS -----------
 
 /*
-  Create a new Cluster (INTERNAL)
+  Create a new ApiCluster (INTERNAL)
 
   Method:  POST
-  Route:   /cluster
+  Route:   /api_cluster
   Payload:
     executorEmail     string (required)
     executorPassword  string (required)
@@ -44,7 +44,7 @@ func InitClusterRouter() {
     cloud             string (required)
     state             string (required on all environments except 'local')
 */
-func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
+func CreateApiClusterHandler(w http.ResponseWriter, req *http.Request) {
   // Validate internal token.
   if internalToken := req.Header.Get(app.Config.AuthHeaderName); internalToken != app.Config.RestApiToken {
     respond.Error(w, errmsg.Unauthorized())
@@ -52,7 +52,7 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Parse & validate payload.
-  var pl payload.CreateClusterPayload
+  var pl payload.CreateApiClusterPayload
 
   if !pl.Validate(req) {
     respond.Error(w, errmsg.InvalidPayload())
@@ -70,44 +70,44 @@ func CreateClusterHandler(w http.ResponseWriter, req *http.Request) {
 
   // Ensure executor user's password is correct.
   if !crypt.VerifyBcrypt(pl.ExecutorPassword, executorUser.HashedPw) {
-    app.Log.Errorln("error creating Cluster: invalid executor user password")
+    app.Log.Errorln("error creating ApiCluster: invalid executor user password")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
 
-  // Only admin users can create clusters.
+  // Only admin users can create api clusters.
   if !executorUser.Admin {
-    app.Log.Errorln("error creating Cluster: executor user must be an admin")
+    app.Log.Errorln("error creating ApiCluster: executor user must be an admin")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
 
-  // Create new cluster.
-  cluster, err := clustersvc.Create(pl.Name, pl.Cloud, pl.State)
+  // Create new ApiCluster.
+  apiCluster, err := apiclustersvc.Create(pl.Name, pl.Cloud, pl.State)
 
   if err != nil {
     app.Log.Errorln(err.Error())
 
     if err.(*pq.Error).Code.Name() == "unique_violation" {
-      respond.Error(w, errmsg.ClusterAlreadyExists())
+      respond.Error(w, errmsg.ApiClusterAlreadyExists())
     } else {
-      respond.Error(w, errmsg.ClusterCreationFailed())
+      respond.Error(w, errmsg.ApiClusterCreationFailed())
     }
 
     return
   }
 
-  respond.Created(w, enc.JSON{"cluster": cluster.AsJSON()})
+  respond.Created(w, enc.JSON{"apiCluster": apiCluster.AsJSON()})
 }
 
 /*
-  Get Clusters by query criteria
+  Get ApiClusters by query criteria
 
   Method:  GET
-  Route:   /cluster
+  Route:   /api_cluster
 */
-// TODO: Add support for query params to narrow down returned clusters.
-func GetClustersHandler(w http.ResponseWriter, req *http.Request) {
+// TODO: Add support for query params to narrow down returned api clusters.
+func GetApiClustersHandler(w http.ResponseWriter, req *http.Request) {
   // Auth request from Session token.
   _, err := usersvc.FromRequest(req)
 
@@ -116,24 +116,23 @@ func GetClustersHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  // Fetch all Cluster records.
-  clusters := clustersvc.All()
+  // Fetch all ApiCluster records.
+  apiClusters := apiclustersvc.All()
 
-  // Format clusters for response payload.
-  var fmtClusters []enc.JSON
-
-  for _, cluster := range clusters {
-    fmtClusters = append(fmtClusters, cluster.AsJSON())
+  // Format api clusters for response payload.
+  var fmtApiClusters []enc.JSON
+  for _, ac := range apiClusters {
+    fmtApiClusters = append(fmtApiClusters, ac.AsJSON())
   }
 
-  respond.Ok(w, enc.JSON{"clusters": fmtClusters})
+  respond.Ok(w, enc.JSON{"apiClusters": fmtApiClusters})
 }
 
 /*
-  Update a Cluster (INTERNAL)
+  Update a ApiCluster (INTERNAL)
 
   Method:  PUT
-  Route:   /cluster
+  Route:   /api_cluster
   Payload:
     executorEmail     string (required)
     executorPassword  string (required)
@@ -143,7 +142,7 @@ func GetClustersHandler(w http.ResponseWriter, req *http.Request) {
       cloud           string (optional)
       state           string (optional)
 */
-func UpdateClusterHandler(w http.ResponseWriter, req *http.Request) {
+func UpdateApiClusterHandler(w http.ResponseWriter, req *http.Request) {
   // Validate internal token.
   if internalToken := req.Header.Get(app.Config.AuthHeaderName); internalToken != app.Config.RestApiToken {
     respond.Error(w, errmsg.Unauthorized())
@@ -151,7 +150,7 @@ func UpdateClusterHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Parse & validate payload.
-  var pl payload.UpdateClusterPayload
+  var pl payload.UpdateApiClusterPayload
 
   if !pl.Validate(req) {
     respond.Error(w, errmsg.InvalidPayload())
@@ -169,47 +168,47 @@ func UpdateClusterHandler(w http.ResponseWriter, req *http.Request) {
 
   // Ensure executor user's password is correct.
   if !crypt.VerifyBcrypt(pl.ExecutorPassword, executorUser.HashedPw) {
-    app.Log.Errorln("error updating Cluster: invalid executor user password")
+    app.Log.Errorln("error updating ApiCluster: invalid executor user password")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
 
-  // Only admin users can update clusters.
+  // Only admin users can update api clusters.
   if !executorUser.Admin {
-    app.Log.Errorln("error updating Cluster: executor user must be an admin")
+    app.Log.Errorln("error updating ApiCluster: executor user must be an admin")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
 
-  // Find Cluster by slug.
-  cluster, err := clustersvc.FromSlug(pl.Slug)
+  // Find ApiCluster from slug.
+  apiCluster, err := apiclustersvc.FromSlug(pl.Slug)
 
   if err != nil {
     app.Log.Errorln(err.Error())
-    respond.Error(w, errmsg.ClusterNotFound())
+    respond.Error(w, errmsg.ApiClusterNotFound())
   }
 
   // Update the cluster.
-  if err := clustersvc.Update(cluster, pl.GetUpdates()); err != nil {
+  if err := apiclustersvc.Update(apiCluster, pl.GetUpdates()); err != nil {
     app.Log.Errorln(err.Error())
-    respond.Error(w, errmsg.ClusterUpdateFailed())
+    respond.Error(w, errmsg.ApiClusterUpdateFailed())
     return
   }
 
-  respond.Ok(w, enc.JSON{"cluster": cluster.AsJSON()})
+  respond.Ok(w, enc.JSON{"apiCluster": apiCluster.AsJSON()})
 }
 
 /*
-  Delete a Cluster (INTERNAL)
+  Delete a ApiCluster (INTERNAL)
 
   Method:  DELETE
-  Route:   /cluster
+  Route:   /api_cluster
   Payload:
     executorEmail     string (required)
     executorPassword  string (required)
     slug              string (required)
 */
-func DeleteClusterHandler(w http.ResponseWriter, req *http.Request) {
+func DeleteApiClusterHandler(w http.ResponseWriter, req *http.Request) {
   // Validate internal token.
   if internalToken := req.Header.Get(app.Config.AuthHeaderName); internalToken != app.Config.RestApiToken {
     respond.Error(w, errmsg.Unauthorized())
@@ -217,7 +216,7 @@ func DeleteClusterHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Parse & validate payload.
-  var pl payload.DeleteClusterPayload
+  var pl payload.DeleteApiClusterPayload
 
   if !pl.Validate(req) {
     respond.Error(w, errmsg.InvalidPayload())
@@ -235,32 +234,32 @@ func DeleteClusterHandler(w http.ResponseWriter, req *http.Request) {
 
   // Ensure executor user's password is correct.
   if !crypt.VerifyBcrypt(pl.ExecutorPassword, executorUser.HashedPw) {
-    app.Log.Errorln("error deleting Cluster: invalid executor user password")
+    app.Log.Errorln("error deleting ApiCluster: invalid executor user password")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
 
-  // Only admin users can delete clusters.
+  // Only admin users can delete api clusters.
   if !executorUser.Admin {
-    app.Log.Errorln("error deleting Cluster: executor user must be an admin")
+    app.Log.Errorln("error deleting ApiCluster: executor user must be an admin")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
 
-  // Find Cluster by slug.
-  cluster, err := clustersvc.FromSlug(pl.Slug)
+  // Find ApiCluster by slug.
+  apiCluster, err := apiclustersvc.FromSlug(pl.Slug)
 
   if err != nil {
     app.Log.Errorln(err.Error())
-    respond.Error(w, errmsg.ClusterNotFound())
+    respond.Error(w, errmsg.ApiClusterNotFound())
   }
 
-  // Delete the Cluster.
-  if err := clustersvc.Delete(cluster); err != nil {
+  // Delete the ApiCluster.
+  if err := apiclustersvc.Delete(apiCluster); err != nil {
     app.Log.Errorln(err.Error())
-    respond.Error(w, errmsg.ClusterDeletionFailed())
+    respond.Error(w, errmsg.ApiClusterDeletionFailed())
     return
   }
 
-  respond.Ok(w, successmsg.ClusterDeletionSuccess)
+  respond.Ok(w, successmsg.ApiClusterDeletionSuccess)
 }

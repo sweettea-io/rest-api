@@ -8,7 +8,7 @@ import (
 /*
   Commit       <-- belongs_to
   ModelVersion <-- belongs_to
-  Cluster      <-- belongs_to
+  ApiCluster   <-- belongs_to
 
   has_many --> EnvVars
 */
@@ -19,8 +19,8 @@ type Deploy struct {
   CommitID       uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
   ModelVersion   ModelVersion
   ModelVersionID uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
-  Cluster        Cluster
-  ClusterID      uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
+  ApiCluster     ApiCluster
+  ApiClusterID   uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
   Stage          uint         `gorm:"default:0"`
   Failed         bool         `gorm:"default:false"`
   LBHost         string       `gorm:"type:varchar(240);default:null"`

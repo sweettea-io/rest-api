@@ -1,4 +1,4 @@
-package clustersvc
+package apiclustersvc
 
 import (
   "fmt"
@@ -6,9 +6,9 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
-func Delete(cluster *model.Cluster) error {
-  if err := app.DB.Delete(cluster).Error; err != nil {
-    return fmt.Errorf("error deleting Cluster: %s", err.Error())
+func Delete(apiCluster *model.ApiCluster) error {
+  if err := app.DB.Delete(apiCluster).Error; err != nil {
+    return fmt.Errorf("error deleting ApiCluster: %s", err.Error())
   }
 
   // TODO: Figure out best way to soft delete relationships as well.

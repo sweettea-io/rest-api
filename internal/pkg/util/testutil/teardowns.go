@@ -13,7 +13,7 @@ func ClearTables(db *gorm.DB, originalLogMode bool) {
   db.Unscoped().Delete(&model.User{})
   db.Unscoped().Delete(&model.Session{})
   db.Unscoped().Delete(&model.Company{})
-  db.Unscoped().Delete(&model.Cluster{})
+  db.Unscoped().Delete(&model.ApiCluster{})
   db.Unscoped().Delete(&model.Project{})
   db.Unscoped().Delete(&model.Dataset{})
   db.Unscoped().Delete(&model.Env{})

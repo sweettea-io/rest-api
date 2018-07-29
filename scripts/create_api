@@ -118,7 +118,7 @@ payload="{
 
 printf "\Registering API cluster...\n"
 
-$this_dir/core_api_call "$env" "POST" "/cluster" "$payload"
+$this_dir/core_api_call "$env" "POST" "/api_cluster" "$payload"
 
 # ======== RE-BUILD & DEPLOY TO CORE CLUSTER FOR THIS ENV ======== #
 
