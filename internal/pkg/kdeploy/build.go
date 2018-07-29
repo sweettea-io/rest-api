@@ -12,6 +12,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/typeconvert"
   corev1 "k8s.io/api/core/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/timeutil"
 )
 
 type Build struct {
@@ -60,8 +61,7 @@ func (b *Build) Init(args map[string]interface{}) error {
   b.Buildable = resource
   b.ClusterName = app.Config.BuildClusterName
   b.ContainerName = fmt.Sprintf("%s-%s-%s", b.TargetCluster, cluster.Build, project.Uid)
-  // TODO: Instead of "1" below, use the current ms-since-epoch.
-  b.DeployName = fmt.Sprintf("%s-%v", b.ContainerName, 1)
+  b.DeployName = fmt.Sprintf("%s-%v", b.ContainerName, timeutil.MSSinceEpoch())
   b.Image = fmt.Sprintf("%s/%s", app.Config.DockerRegistryOrg, image.BuildServer)
 
   return nil
