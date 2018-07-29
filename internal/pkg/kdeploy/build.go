@@ -9,10 +9,11 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/projectsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/rest-api/internal/pkg/util/image"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/maputil"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/timeutil"
   "github.com/sweettea-io/rest-api/internal/pkg/util/typeconvert"
   corev1 "k8s.io/api/core/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/timeutil"
 )
 
 type Build struct {
@@ -157,6 +158,7 @@ func (b *Build) makeEnvs() {
   }
 
   // Add env info for all buildpacks.
+  envs = maputil.MergeMaps(envs, app.Config.BuildpackEnvs())
 
   b.Envs = EnvVars(envs)
 }
