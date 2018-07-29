@@ -3,7 +3,7 @@ package jobs
 import (
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/stcluster"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "fmt"
 )
 
@@ -19,7 +19,7 @@ func (c *Context) BuildDeploy(job *work.Job) error {
   }
 
   // Validate target cluster.
-  if targetCluster != stcluster.Train && targetCluster != stcluster.Api {
+  if targetCluster != cluster.Train && targetCluster != cluster.Api {
     err := fmt.Errorf("build deploy error: target cluster \"%s\" unsupported", targetCluster)
     app.Log.Errorln(err.Error())
     return err

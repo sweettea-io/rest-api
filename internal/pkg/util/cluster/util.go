@@ -1,4 +1,4 @@
-package stcluster
+package cluster
 
 const (
   Core = "core"
