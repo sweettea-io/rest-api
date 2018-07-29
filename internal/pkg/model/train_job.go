@@ -44,3 +44,11 @@ func (tj *TrainJob) AsJSON() enc.JSON {
     },
   }
 }
+
+func (tj *TrainJob) GetCommit() *Commit {
+  return &tj.Commit
+}
+
+func (tj *TrainJob) GetUid() string {
+  return tj.Uid
+}

@@ -36,3 +36,11 @@ func (deploy *Deploy) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("ClientSecret", unique.FreshSecret())
   return nil
 }
+
+func (deploy *Deploy) GetCommit() *Commit {
+  return &deploy.Commit
+}
+
+func (deploy *Deploy) GetUid() string {
+  return deploy.Uid
+}

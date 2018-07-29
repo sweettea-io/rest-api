@@ -11,7 +11,7 @@ import (
 func FromID(id uint) (*model.Deploy, error) {
   // Find Deploy by ID.
   var deploy model.Deploy
-  result := app.DB.First(&deploy, id)
+  result := app.DB.Preload("Commit").First(&deploy, id)
 
   // Return error if not found.
   if result.RecordNotFound() {

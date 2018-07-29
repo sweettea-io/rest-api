@@ -81,6 +81,10 @@ func (project *Project) Repo() string {
   return project.SplitNsp()[2]
 }
 
+func (project *Project) Url() string {
+  return fmt.Sprintf("https://%s", project.Nsp)
+}
+
 func hostNameForNsp(nsp string) string {
   host := ""
 
