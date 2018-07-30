@@ -120,49 +120,9 @@ func (b *Build) Watch() {
 
   // Start watching for events.
   for event := range ch {
-    if result := b.checkForResult(event); result != nil {
-      b.ResultChannel <- result
+    if result := b.checkEventForResult(event); result != nil {
+      b.ResultChannel <- *result
       return
-    }
-
-
-    switch event.Type {
-    case watch.Error:
-      // Error out during a pod error.
-      err := fmt.Errorf("Job %s encountered pod error.", b.DeployName)
-      app.Log.Errorf(err.Error())
-      b.ResultChannel <- Result{Ok: false, Error: err}
-      return
-    case watch.Added:
-      // Log when pod is added.
-      app.Log.Infof("Job %s started.", b.DeployName)
-    case watch.Modified:
-      // When pod is modified, check its status and report result when success or failure.
-      pod, ok := event.Object.(*corev1.Pod)
-
-      if !ok {
-        err := fmt.Errorf("Job %s encountered unexpected event object type.", b.DeployName)
-        app.Log.Errorf(err.Error())
-        b.ResultChannel <- Result{Ok: false, Error: err}
-        return
-      }
-
-      // Check for pod success/failure.
-      switch pod.Status.Phase {
-      case corev1.PodSucceeded:
-        app.Log.Infoln("Successfully built image.")
-        b.ResultChannel <- Result{Ok: true}
-      case corev1.PodFailed:
-        err := fmt.Errorf("Job %s failed with error: -- %s.", b.DeployName, pod.Status.Message)
-        app.Log.Errorf(err.Error())
-        b.ResultChannel <- Result{Ok: false, Error: err}
-        return
-      case corev1.PodUnknown:
-        err := fmt.Errorf("Job %s encountered unknown pod status error: %s.", b.DeployName, pod.Status.Message)
-        app.Log.Errorf(err.Error())
-        b.ResultChannel <- Result{Ok: false, Error: err}
-        return
-      }
     }
   }
 }
@@ -251,6 +211,56 @@ func (b *Build) makePod() {
   })
 }
 
-func (b *Build) checkForResult() {
+func (b *Build) checkEventForResult(event watch.Event) *Result {
+  switch event.Type {
 
+  case watch.Added:
+    // Log when pod is added.
+    app.Log.Infof("Job %s started.", b.DeployName)
+    return nil
+
+  case watch.Modified:
+    // When pod is modified, check its status and report result when success or failure.
+    pod, ok := event.Object.(*corev1.Pod)
+
+    if !ok {
+      err := fmt.Errorf("Job %s encountered unexpected event object type.", b.DeployName)
+      app.Log.Errorf(err.Error())
+      return &Result{Ok: false, Error: err}
+    }
+    
+    // Check for pod success/failure.
+    return b.checkPodStatus(pod.Status)
+
+  case watch.Error:
+    // Error out during a pod error.
+    err := fmt.Errorf("Job %s encountered pod error.", b.DeployName)
+    app.Log.Errorf(err.Error())
+    return &Result{Ok: false, Error: err}
+
+  default:
+    return nil
+  }
+}
+
+func (b *Build) checkPodStatus(podStatus corev1.PodStatus) *Result {
+  switch podStatus.Phase {
+
+  case corev1.PodSucceeded:
+    app.Log.Infoln("Successfully built image.")
+    return &Result{Ok: true}
+
+  case corev1.PodFailed:
+    err := fmt.Errorf("Job %s failed with error: -- %s.", b.DeployName, podStatus.Message)
+    app.Log.Errorf(err.Error())
+    return &Result{Ok: false, Error: err}
+
+  case corev1.PodUnknown:
+    err := fmt.Errorf("Job %s encountered unknown pod status error: %s.", b.DeployName, podStatus.Message)
+    app.Log.Errorf(err.Error())
+    return &Result{Ok: false, Error: err}
+
+  default:
+    return nil
+  }
 }
