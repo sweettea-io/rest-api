@@ -12,6 +12,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/maputil"
   "github.com/sweettea-io/rest-api/internal/pkg/util/timeutil"
   "github.com/sweettea-io/rest-api/internal/pkg/util/typeconvert"
+  "k8s.io/apimachinery/pkg/watch"
   corev1 "k8s.io/api/core/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
@@ -28,6 +29,7 @@ type Build struct {
   DeployName    string
   Image         string
   ContainerName string
+  ResultChannel <-chan Result
 
   // K8S resources
   Namespace     string
@@ -58,12 +60,22 @@ func (b *Build) Init(args map[string]interface{}) error {
     return err
   }
 
+  // Set project and builable resource.
   b.Project = project
   b.Buildable = resource
+
+  // Cluster name is the SweetTea Build Cluster name.
   b.ClusterName = app.Config.BuildClusterName
+
+  // Create unique container and deploy names.
   b.ContainerName = fmt.Sprintf("%s-%s-%s", b.TargetCluster, cluster.Build, project.Uid)
   b.DeployName = fmt.Sprintf("%s-%v", b.ContainerName, timeutil.MSSinceEpoch())
+
+  // Set image to the SweetTea Build Server image.
   b.Image = fmt.Sprintf("%s/%s", app.Config.DockerRegistryOrg, image.BuildServer)
+
+  // Initialize the result channel.
+  b.ResultChannel = make(chan Result)
 
   return nil
 }
@@ -93,8 +105,66 @@ func (b *Build) Perform() error {
   return nil
 }
 
-func (b *Build) Watch() {
+func (b *Build) GetResultChannel() <-chan Result {
+  return b.ResultChannel
+}
 
+func (b *Build) Watch() {
+  // Get a namespaced pod-watcher channel.
+  ch, err := PodWatcherChannel(b.Client, b.Namespace, b.DeployName)
+
+  if err != nil {
+    b.ResultChannel <- Result{Ok: false, Error: err}
+    return
+  }
+
+  // Start watching for events.
+  for event := range ch {
+    if result := b.checkForResult(event); result != nil {
+      b.ResultChannel <- result
+      return
+    }
+
+
+    switch event.Type {
+    case watch.Error:
+      // Error out during a pod error.
+      err := fmt.Errorf("Job %s encountered pod error.", b.DeployName)
+      app.Log.Errorf(err.Error())
+      b.ResultChannel <- Result{Ok: false, Error: err}
+      return
+    case watch.Added:
+      // Log when pod is added.
+      app.Log.Infof("Job %s started.", b.DeployName)
+    case watch.Modified:
+      // When pod is modified, check its status and report result when success or failure.
+      pod, ok := event.Object.(*corev1.Pod)
+
+      if !ok {
+        err := fmt.Errorf("Job %s encountered unexpected event object type.", b.DeployName)
+        app.Log.Errorf(err.Error())
+        b.ResultChannel <- Result{Ok: false, Error: err}
+        return
+      }
+
+      // Check for pod success/failure.
+      switch pod.Status.Phase {
+      case corev1.PodSucceeded:
+        app.Log.Infoln("Successfully built image.")
+        b.ResultChannel <- Result{Ok: true}
+      case corev1.PodFailed:
+        err := fmt.Errorf("Job %s failed with error: -- %s.", b.DeployName, pod.Status.Message)
+        app.Log.Errorf(err.Error())
+        b.ResultChannel <- Result{Ok: false, Error: err}
+        return
+      case corev1.PodUnknown:
+        err := fmt.Errorf("Job %s encountered unknown pod status error: %s.", b.DeployName, pod.Status.Message)
+        app.Log.Errorf(err.Error())
+        b.ResultChannel <- Result{Ok: false, Error: err}
+        return
+      }
+    }
+  }
 }
 
 // FollowOnDeploy returns the KDeploy instance responsible for
@@ -179,4 +249,8 @@ func (b *Build) makePod() {
     "volumes": b.Volumes,
     "restart": corev1.RestartPolicyNever,
   })
+}
+
+func (b *Build) checkForResult() {
+
 }

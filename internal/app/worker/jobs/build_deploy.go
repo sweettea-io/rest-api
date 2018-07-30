@@ -48,13 +48,24 @@ func (c *Context) BuildDeploy(job *work.Job) error {
   }
 
   // Deploy to build cluster.
-  if err := buildDeploy.Deploy(); err != nil {
+  if err := buildDeploy.Perform(); err != nil {
     app.Log.Errorln(err.Error())
     return err
   }
 
-  // TODO: Watch deploy and follow up with target cluster deploy.
-  buildDeploy.Watch()
+  // Get channel to watch for deploy result.
+  resultCh := buildDeploy.GetResultChannel()
+
+  // Watch deploy until success/failure occurs.
+  go buildDeploy.Watch()
+
+  deployResult := <-resultCh
+
+  // Error out if deploy failed.
+  if !deployResult.Ok {
+    app.Log.Errorf(deployResult.Error.Error())
+    return deployResult.Error
+  }
 
   targetDeploy := buildDeploy.FollowOnDeploy()
 

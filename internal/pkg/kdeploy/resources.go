@@ -4,6 +4,7 @@ import (
   "fmt"
   "k8s.io/client-go/rest"
   "k8s.io/client-go/tools/clientcmd"
+  "k8s.io/apimachinery/pkg/watch"
   corev1 "k8s.io/api/core/v1"
   metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -169,4 +170,21 @@ func Pod(args map[string]interface{}) *corev1.Pod {
     },
     Spec: podSpec,
   }
+}
+
+func PodWatcherChannel(client *typedcorev1.CoreV1Client, nsp string, deployName string) (<-chan watch.Event, error) {
+  // Define selector options to only find the pod we just deployed.
+  watchOpts := metav1.ListOptions{
+    LabelSelector: fmt.Sprintf("app=%s", deployName),
+  }
+
+  // Get a namespaced pod watcher object.
+  watcher, err := client.Pods(nsp).Watch(watchOpts)
+
+  if err != nil {
+    return nil, fmt.Errorf("error creating pod watcher for deploy(%s): %s", deployName, err.Error())
+  }
+
+  // Return the watcher's channel.
+  return watcher.ResultChan(), nil
 }
