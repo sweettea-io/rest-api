@@ -15,6 +15,7 @@ import (
   "k8s.io/apimachinery/pkg/watch"
   corev1 "k8s.io/api/core/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+  "github.com/sweettea-io/rest-api/internal/app/worker/jobs"
 )
 
 type Build struct {
@@ -129,14 +130,14 @@ func (b *Build) Watch() {
 
 // FollowOnDeploy returns the KDeploy instance responsible for
 // deploying to the target cluster of the Build deploy.
-func (b *Build) FollowOnDeploy() KDeploy {
+func (b *Build) NextDeployJob() string {
   switch b.TargetCluster {
   case cluster.Train:
-    return &Train{}
+    return jobs.Names.TrainDeploy
   case cluster.Api:
-    return &Api{}
+    return jobs.Names.ApiDeploy
   default:
-    return nil
+    return ""
   }
 }
 

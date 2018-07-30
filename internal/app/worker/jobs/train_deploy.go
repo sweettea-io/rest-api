@@ -11,7 +11,7 @@ import (
   TrainDeploy deploys a TrainJob to the SweetTea Train Cluster for model training.
 
   Args:
-    trainJobID (uint) ID of the TrainJob to deploy
+    resourceID (uint) ID of the TrainJob to deploy
 */
 func (c *Context) TrainDeploy(job *work.Job) error {
   // Ensure Train cluster exists first.
@@ -22,7 +22,7 @@ func (c *Context) TrainDeploy(job *work.Job) error {
   }
 
   // Extract args from job.
-  trainJobID := uint(job.ArgInt64("trainJobID"))
+  trainJobID := uint(job.ArgInt64("resourceID"))
 
   if err := job.ArgError(); err != nil {
     app.Log.Errorln(err.Error())

@@ -67,27 +67,13 @@ func (c *Context) BuildDeploy(job *work.Job) error {
     return deployResult.Error
   }
 
-  targetDeploy := buildDeploy.FollowOnDeploy()
+  // Get name and args for the follow-on deploy to the target cluster.
+  targetDeployJob := buildDeploy.NextDeployJob()
+  targetDeployArgs := work.Q{"resourceID": resourceID}
 
-  tdArgs := map[string]interface{}{
-    "resourceID": resourceID,
-  }
-
-  // Initialize deploy to target cluster.
-  if err := targetDeploy.Init(tdArgs); err != nil {
-    app.Log.Errorln(err.Error())
-    return err
-  }
-
-  // Create deploy resources.
-  if err := targetDeploy.Configure(); err != nil {
-    app.Log.Errorln(err.Error())
-    return err
-  }
-
-  // Deploy to target cluster.
-  if err := targetDeploy.Deploy(); err != nil {
-    app.Log.Errorln(err.Error())
+  // Schedule deploy to target cluster.
+  if _, err := app.JobQueue.Enqueue(targetDeployJob, targetDeployArgs); err != nil {
+    app.Log.Errorf("error scheduling %s job: %s", targetDeployJob, err.Error())
     return err
   }
 
