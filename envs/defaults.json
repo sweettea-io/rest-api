@@ -30,6 +30,7 @@
     "MIGRATE_IMAGE_NAME": "rest-api-migrate",
     "MIGRATE_REPLICAS": "1",
     "MIGRATE_RESTART_POLICY": "Never",
+    "MODEL_STORAGE_URL": "",
     "NODE_COUNT": "2",
     "NODE_SIZE": "t2.micro",
     "REDIS_POOL_MAX_ACTIVE": "1000",

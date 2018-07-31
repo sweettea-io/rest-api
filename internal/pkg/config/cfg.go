@@ -28,6 +28,7 @@ type Config struct {
   HostedZoneId                      string `env:"HOSTED_ZONE_ID,ignore_on_envs=test|local"`
   JobQueueNsp                       string `env:"JOB_QUEUE_NSP,required"`
   KubeConfig                        string `env:"KUBECONFIG,required"`
+  ModelStorageUrl                   string `env:"MODEL_STORAGE_URL,required"`
   PythonJsonApiBuildpackAccessToken string `env:"PYTHON_JSON_API_BUILDPACK_ACCESS_TOKEN"`
   PythonJsonApiBuildpackSha         string `env:"PYTHON_JSON_API_BUILDPACK_SHA,required"`
   PythonJsonApiBuildpackUrl         string `env:"PYTHON_JSON_API_BUILDPACK_URL,required"`
