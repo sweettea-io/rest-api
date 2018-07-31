@@ -28,7 +28,9 @@ func FromID(id uint) (*model.TrainJob, error) {
   var trainJob model.TrainJob
   result := app.DB.
     Preload("Commit").
+    Preload("Commit.Project").
     Preload("ModelVersion").
+    Preload("ModelVersion.Model").
     First(&trainJob, id)
 
   // Return error if not found.

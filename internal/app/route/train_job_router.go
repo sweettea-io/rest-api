@@ -2,18 +2,18 @@ package route
 
 import (
   "net/http"
+  "strings"
   "github.com/sweettea-io/rest-api/internal/app/middleware"
   "github.com/sweettea-io/rest-api/internal/app/payload"
   "github.com/sweettea-io/rest-api/internal/app/respond"
   "github.com/sweettea-io/rest-api/internal/app/errmsg"
   "github.com/sweettea-io/rest-api/internal/pkg/service/projectsvc"
-  "strings"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
-  "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/app/worker/jobs"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
+  "github.com/sweettea-io/work"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -44,6 +44,7 @@ func InitTrainJobRouter() {
   Payload:
     projectNsp  string (required)
     modelName   string (required)
+    envs        string (optional)
 */
 func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
   // Parse & validate payload.
@@ -76,6 +77,7 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
     "trainJobUid": trainJobUid,
     "projectID": project.ID,
     "modelSlug": pl.ModelSlug(),
+    "envs": pl.Envs,
   }
 
   // Enqueue CreateTrainJob job.

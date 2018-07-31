@@ -20,6 +20,7 @@ import (
     trainJobUid (string) Uid to assign to TrainJob during creation
     projectID   (uint)   ID of project associated with this TrainJob
     modelSlug   (string) slug of Model associated with this TrainJob
+    envs        (string) env vars to use with this TrainJob's Train Cluster deploy (json string)
 */
 func (c *Context) CreateTrainJob(job *work.Job) error {
   // Ensure Train cluster exists first.
@@ -33,6 +34,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   trainJobUid := job.ArgString("trainJobUid")
   projectID := uint(job.ArgInt64("projectID"))
   modelSlug := job.ArgString("modelSlug")
+  envs := job.ArgString("envs")
 
   if err := job.ArgError(); err != nil {
     app.Log.Errorln(err.Error())
@@ -96,6 +98,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
     "resourceID": trainJob.ID,
     "projectID": projectID,
     "targetCluster": cluster.Train,
+    "envs": envs,
   }
 
   if _, err := app.JobQueue.Enqueue(Names.BuildDeploy, jobArgs); err != nil {

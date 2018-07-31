@@ -11,7 +11,7 @@ Models:
     Model
     ModelVersion
     Deploy
-    Cluster
+    ApiCluster
     EnvVar
 
 Relationships:
@@ -52,8 +52,8 @@ Relationships:
         ModelVersion --> has many --> Deploys
         Deploy --> belongs to --> ModelVersion
 
-    Cluster|Deploy
-        Cluster --> has many --> Deploys
+    ApiCluster|Deploy
+        ApiCluster --> has many --> Deploys
         Deploy --> belongs to --> Cluster
 
     Deploy|EnvVar

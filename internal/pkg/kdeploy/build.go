@@ -22,6 +22,7 @@ type Build struct {
   // Args
   ResourceID    uint
   TargetCluster string
+  TargetDeployEnvs string
 
   // Establish on Init
   Project       *model.Project
@@ -42,10 +43,16 @@ type Build struct {
   Pod           *corev1.Pod
 }
 
+type Result struct {
+  Ok    bool
+  Error error
+}
+
 func (b *Build) Init(args map[string]interface{}) error {
   // Decode/assign args to struct keys.
   b.ResourceID = args["resourceID"].(uint)
   b.TargetCluster = args["targetCluster"].(string)
+  b.TargetDeployEnvs = args["envs"].(string)
 
   // Find Project by ID.
   project, err := projectsvc.FromID(args["projectID"].(uint))
@@ -97,13 +104,9 @@ func (b *Build) Configure() error {
   return nil
 }
 
+// Perform deploys the configured pod to the Build Cluster.
 func (b *Build) Perform() error {
-  // Deploy the configured pod.
-  if _, err := b.Client.Pods(b.Namespace).Create(b.Pod); err != nil {
-    return fmt.Errorf("error performing build deploy: %s", err.Error())
-  }
-
-  return nil
+  return DeployPod(b.Client, b.Namespace, b.Pod, cluster.Build)
 }
 
 func (b *Build) GetResultChannel() <-chan Result {
@@ -130,14 +133,19 @@ func (b *Build) Watch() {
 
 // FollowOnDeploy returns the KDeploy instance responsible for
 // deploying to the target cluster of the Build deploy.
-func (b *Build) NextDeployJob() string {
+func (b *Build) NextDeploy() (string, map[string]interface{}) {
   switch b.TargetCluster {
   case cluster.Train:
-    return jobs.Names.TrainDeploy
+    return jobs.Names.TrainDeploy, map[string]interface{}{
+      "trainJobID": b.ResourceID,
+      "envs": b.TargetDeployEnvs,
+    }
   case cluster.Api:
-    return jobs.Names.ApiDeploy
+    return jobs.Names.ApiDeploy, map[string]interface{}{
+      "deployID": b.ResourceID,
+    }
   default:
-    return ""
+    return "", nil
   }
 }
 

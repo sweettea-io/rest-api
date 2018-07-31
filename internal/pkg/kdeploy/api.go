@@ -11,7 +11,7 @@ type Api struct {
 
 func (api *Api) Init(args map[string]interface{}) error {
   // Find Deploy by ID.
-  deploy, err := deploysvc.FromID(args["resourceID"].(uint))
+  deploy, err := deploysvc.FromID(args["deployID"].(uint))
 
   if err != nil {
     return err
@@ -27,8 +27,4 @@ func (api *Api) Configure() error {
 
 func (api *Api) Perform() error {
   return nil
-}
-
-func (api *Api) Watch() {
-
 }

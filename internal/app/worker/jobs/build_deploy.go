@@ -13,6 +13,7 @@ func (c *Context) BuildDeploy(job *work.Job) error {
   resourceID := job.ArgString("resourceID")
   projectID := uint(job.ArgInt64("projectID"))
   targetCluster := job.ArgString("targetCluster")
+  envs := job.ArgString("envs")
 
   if err := job.ArgError(); err != nil {
     app.Log.Errorln(err.Error())
@@ -33,6 +34,7 @@ func (c *Context) BuildDeploy(job *work.Job) error {
     "resourceID": resourceID,
     "projectID": projectID,
     "targetCluster": targetCluster,
+    "envs": envs,
   }
 
   // Initialize build deploy.
@@ -58,7 +60,6 @@ func (c *Context) BuildDeploy(job *work.Job) error {
 
   // Watch deploy until success/failure occurs.
   go buildDeploy.Watch()
-
   deployResult := <-resultCh
 
   // Error out if deploy failed.
@@ -67,11 +68,9 @@ func (c *Context) BuildDeploy(job *work.Job) error {
     return deployResult.Error
   }
 
-  // Get name and args for the follow-on deploy to the target cluster.
-  targetDeployJob := buildDeploy.NextDeployJob()
-  targetDeployArgs := work.Q{"resourceID": resourceID}
-
   // Schedule deploy to target cluster.
+  targetDeployJob, targetDeployArgs := buildDeploy.NextDeploy()
+
   if _, err := app.JobQueue.Enqueue(targetDeployJob, targetDeployArgs); err != nil {
     app.Log.Errorf("error scheduling %s job: %s", targetDeployJob, err.Error())
     return err

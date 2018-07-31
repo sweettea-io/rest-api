@@ -12,6 +12,7 @@ import (
 type CreateTrainJobPayload struct {
   ProjectNsp string `json:"projectNsp" validate:"nonzero"`
   ModelName  string `json:"modelName" validate:"nonzero"`
+  Envs       string `json:"envs"`
 }
 
 func (p *CreateTrainJobPayload) ModelSlug() string {

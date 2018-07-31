@@ -188,3 +188,11 @@ func PodWatcherChannel(client *typedcorev1.CoreV1Client, nsp string, deployName 
   // Return the watcher's channel.
   return watcher.ResultChan(), nil
 }
+
+func DeployPod(client *typedcorev1.CoreV1Client, nsp string, pod *corev1.Pod, targetCluster string) error {
+  if _, err := client.Pods(nsp).Create(pod); err != nil {
+    return fmt.Errorf("error performing %s deploy: %s", targetCluster, err.Error())
+  }
+
+  return nil
+}
