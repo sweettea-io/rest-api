@@ -15,11 +15,14 @@ local-clusters: ## Create the core, train, and build clusters for the local envi
 	./scripts/create_cluster '' train local
 	./scripts/create_cluster '' build local
 
-export provider=aws
+export cloud=aws
 export role
 export env=local
 cluster: ## Create the core, train, or build cluster for a specific environment.
-	./scripts/create_cluster $(provider) $(role) $(env)
+	./scripts/create_cluster $(cloud) $(role) $(env)
+
+model-storage:
+	./scripts/
 
 export target
 export env=local
@@ -38,11 +41,11 @@ export env=local
 deploy: ## Deploy the latest Docker image of an application to a specific environment.
 	./scripts/deploy $(target) $(env)
 
-export provider=aws
+export cloud=aws
 export name
 export env=local
 api: ## Create a new API cluster for a specific environment.
-	./scripts/create_api $(provider) $(name) $(env)
+	./scripts/create_api $(cloud) $(name) $(env)
 
 export env=local
 export email
