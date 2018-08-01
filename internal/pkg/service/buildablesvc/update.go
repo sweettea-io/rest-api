@@ -17,3 +17,14 @@ func UpdateStage(buildableID uint, stage string, targetCluster string) error {
     return fmt.Errorf("couldn't update buildable(id=%v) stage for target cluster %s", buildableID, targetCluster)
   }
 }
+
+func Fail(buildableID uint, targetCluster string) error {
+  switch targetCluster {
+  case cluster.Train:
+    return trainjobsvc.FailByID(buildableID)
+  case cluster.Api:
+    return deploysvc.FailByID(buildableID)
+  default:
+    return fmt.Errorf("couldn't update buildable(id=%v) stage for target cluster %s", buildableID, targetCluster)
+  }
+}

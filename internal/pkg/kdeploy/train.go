@@ -10,6 +10,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/timeutil"
   corev1 "k8s.io/api/core/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
 )
 
 type Train struct {
@@ -43,8 +44,12 @@ func (t *Train) Init(args map[string]interface{}) error {
 
   // Find TrainJob by ID.
   trainJob, err := trainjobsvc.FromID(args["trainJobID"].(uint))
-
   if err != nil {
+    return err
+  }
+
+  // Update TrainJob to Deploying.
+  if err := trainjobsvc.UpdateStage(trainJob, buildable.Deploying); err != nil {
     return err
   }
 

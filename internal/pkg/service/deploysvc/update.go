@@ -18,3 +18,17 @@ func UpdateStageByID(id uint, stage string) error {
 
   return nil
 }
+
+func Fail(deploy *model.Deploy) error {
+  if err := app.DB.Model(deploy).Updates(map[string]interface{}{"failed": true}).Error; err != nil {
+    return fmt.Errorf("error failing Deploy: %s", err.Error())
+  }
+
+  return nil
+}
+
+func FailByID(id uint) error {
+  deploy := model.Deploy{}
+  deploy.ID = id
+  return Fail(&deploy)
+}

@@ -6,6 +6,8 @@ import (
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
   "encoding/json"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
 )
 
 /*
@@ -16,18 +18,20 @@ import (
     envs       (string) json string representation of the custom env vars to use with this Train Cluster deploy
 */
 func (c *Context) TrainDeploy(job *work.Job) error {
-  // Ensure Train cluster exists first.
-  if !app.Config.TrainClusterConfigured() {
-    err := fmt.Errorf("train cluster not configured -- leaving CreateTrainJob")
-    app.Log.Errorln(err.Error())
-    return err
-  }
-
   // Extract args from job.
   trainJobID := uint(job.ArgInt64("trainJobID"))
   envs := job.ArgString("envs")
 
   if err := job.ArgError(); err != nil {
+    trainjobsvc.FailByID(trainJobID)
+    app.Log.Errorln(err.Error())
+    return err
+  }
+
+  // Ensure Train cluster exists first.
+  if !app.Config.TrainClusterConfigured() {
+    err := fmt.Errorf("train cluster not configured -- leaving CreateTrainJob")
+    trainjobsvc.FailByID(trainJobID)
     app.Log.Errorln(err.Error())
     return err
   }
@@ -36,6 +40,7 @@ func (c *Context) TrainDeploy(job *work.Job) error {
   var envsMap map[string]string
   if err := json.Unmarshal([]byte(envs), &envsMap); err != nil {
     err = fmt.Errorf("error converting custom train envs into map[string]string: %s", err.Error())
+    trainjobsvc.FailByID(trainJobID)
     app.Log.Errorln(err.Error())
     return err
   }
@@ -50,18 +55,28 @@ func (c *Context) TrainDeploy(job *work.Job) error {
 
   // Initialize train deploy.
   if err := trainDeploy.Init(trainDeployArgs); err != nil {
+    trainjobsvc.FailByID(trainJobID)
     app.Log.Errorln(err.Error())
     return err
   }
 
   // Create deploy resources.
   if err := trainDeploy.Configure(); err != nil {
+    trainjobsvc.FailByID(trainJobID)
     app.Log.Errorln(err.Error())
     return err
   }
 
   // Deploy to train cluster.
   if err := trainDeploy.Perform(); err != nil {
+    trainjobsvc.FailByID(trainJobID)
+    app.Log.Errorln(err.Error())
+    return err
+  }
+
+  // Update TrainJob stage to Deployed.
+  if err := trainjobsvc.UpdateStageByID(trainJobID, buildable.Deployed); err != nil {
+    trainjobsvc.FailByID(trainJobID)
     app.Log.Errorln(err.Error())
     return err
   }

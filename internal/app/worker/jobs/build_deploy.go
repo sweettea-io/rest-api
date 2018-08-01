@@ -6,6 +6,8 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/work"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
 )
 
 /*
@@ -21,12 +23,13 @@ import (
 */
 func (c *Context) BuildDeploy(job *work.Job) error {
   // Extract args from job.
-  resourceID := job.ArgString("resourceID")
+  resourceID := uint(job.ArgInt64("resourceID"))
   projectID := uint(job.ArgInt64("projectID"))
   targetCluster := job.ArgString("targetCluster")
   envs := job.ArgString("envs")
 
   if err := job.ArgError(); err != nil {
+    buildablesvc.Fail(resourceID, targetCluster)
     app.Log.Errorln(err.Error())
     return err
   }
@@ -34,6 +37,7 @@ func (c *Context) BuildDeploy(job *work.Job) error {
   // Validate we're building for either the Train or Build Cluster.
   if targetCluster != cluster.Train && targetCluster != cluster.Api {
     err := fmt.Errorf("build deploy error: target cluster \"%s\" unsupported", targetCluster)
+    buildablesvc.Fail(resourceID, targetCluster)
     app.Log.Errorln(err.Error())
     return err
   }
@@ -50,31 +54,42 @@ func (c *Context) BuildDeploy(job *work.Job) error {
 
   // Initialize build deploy.
   if err := buildDeploy.Init(bdArgs); err != nil {
+    buildablesvc.Fail(resourceID, targetCluster)
     app.Log.Errorln(err.Error())
     return err
   }
 
   // Create deploy resources.
   if err := buildDeploy.Configure(); err != nil {
+    buildablesvc.Fail(resourceID, targetCluster)
     app.Log.Errorln(err.Error())
     return err
   }
 
   // Deploy to build cluster.
   if err := buildDeploy.Perform(); err != nil {
+    buildablesvc.Fail(resourceID, targetCluster)
     app.Log.Errorln(err.Error())
     return err
   }
 
-  // Get channel to watch for deploy result.
+  // Update buildable stage to Building.
+  if err := buildablesvc.UpdateStage(resourceID, buildable.Building, targetCluster); err != nil {
+    buildablesvc.Fail(resourceID, targetCluster)
+    app.Log.Errorln(err.Error())
+    return err
+  }
+
+  // Get channel to watch for build result.
   resultCh := buildDeploy.GetResultChannel()
 
-  // Watch deploy until success/failure occurs.
+  // Watch build until success/failure occurs.
   go buildDeploy.Watch()
   deployResult := <-resultCh
 
-  // Error out if deploy failed.
+  // Error out if build failed.
   if !deployResult.Ok {
+    buildablesvc.Fail(resourceID, targetCluster)
     app.Log.Errorf(deployResult.Error.Error())
     return deployResult.Error
   }
@@ -84,6 +99,13 @@ func (c *Context) BuildDeploy(job *work.Job) error {
 
   if _, err := app.JobQueue.Enqueue(targetDeployJob, targetDeployArgs); err != nil {
     app.Log.Errorf("error scheduling %s job: %s", targetDeployJob, err.Error())
+    return err
+  }
+
+  // Update buildable stage to DeployScheduled.
+  if err := buildablesvc.UpdateStage(resourceID, buildable.DeployScheduled, targetCluster); err != nil {
+    buildablesvc.Fail(resourceID, targetCluster)
+    app.Log.Errorln(err.Error())
     return err
   }
 

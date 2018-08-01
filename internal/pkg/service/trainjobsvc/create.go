@@ -1,9 +1,9 @@
 package trainjobsvc
 
 import (
-  "github.com/sweettea-io/rest-api/internal/pkg/model"
-  "github.com/sweettea-io/rest-api/internal/app"
   "fmt"
+  "github.com/sweettea-io/rest-api/internal/app"
+  "github.com/sweettea-io/rest-api/internal/pkg/model"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
 )
 

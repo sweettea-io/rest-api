@@ -3,6 +3,7 @@ package model
 import (
   "github.com/jinzhu/gorm"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
+  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
 )
 
 /*
@@ -17,8 +18,14 @@ type TrainJob struct {
   CommitID       uint         `gorm:"default:null;not null;unique_index:train_job_grouped_index"`
   ModelVersion   ModelVersion
   ModelVersionID uint         `gorm:"default:null;not null;unique_index:train_job_grouped_index"`
-  Stage          uint         `gorm:"default:0"`
-  Failed         bool         `gorm:"default:false"`
+  Stage          string       `gorm:"default:null;not null"`
+  Failed         bool         `gorm:"default:fslse"`
+}
+
+// Assign initial stage before creation.
+func (tj *TrainJob) BeforeCreate(scope *gorm.Scope) error {
+  scope.SetColumn("Stage", buildable.Created)
+  return nil
 }
 
 // TODO: implement this.

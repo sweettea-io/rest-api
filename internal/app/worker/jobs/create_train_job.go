@@ -10,6 +10,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/work"
+  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
 )
 
 /*
@@ -103,6 +104,14 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
 
   if _, err := app.JobQueue.Enqueue(Names.BuildDeploy, jobArgs); err != nil {
     err = fmt.Errorf("error scheduling BuildDeploy job: %s", err.Error())
+    trainjobsvc.Fail(trainJob)
+    app.Log.Errorln(err.Error())
+    return err
+  }
+
+  // Update trainJob stage to BuildScheduled.
+  if err := trainjobsvc.UpdateStage(trainJob, buildable.BuildScheduled); err != nil {
+    trainjobsvc.Fail(trainJob)
     app.Log.Errorln(err.Error())
     return err
   }
