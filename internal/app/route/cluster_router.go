@@ -87,8 +87,9 @@ func CreateApiClusterHandler(w http.ResponseWriter, req *http.Request) {
 
   if err != nil {
     app.Log.Errorln(err.Error())
+    pqError, ok := err.(*pq.Error)
 
-    if err.(*pq.Error).Code.Name() == "unique_violation" {
+    if ok && pqError.Code.Name() == "unique_violation" {
       respond.Error(w, errmsg.ApiClusterAlreadyExists())
     } else {
       respond.Error(w, errmsg.ApiClusterCreationFailed())
