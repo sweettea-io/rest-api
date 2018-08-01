@@ -30,9 +30,8 @@ type Deploy struct {
   EnvVars        []EnvVar
 }
 
-// Assign Uid, initial Stage, ClientID, & ClientSecret to Deploy before creation.
+// Assign initial Stage, ClientID, & ClientSecret to Deploy before creation.
 func (deploy *Deploy) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Uid", unique.NewUid())
   scope.SetColumn("Stage", buildable.Created)
   scope.SetColumn("ClientID", unique.NewUid())
   scope.SetColumn("ClientSecret", unique.FreshSecret())

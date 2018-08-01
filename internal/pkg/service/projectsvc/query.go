@@ -21,10 +21,15 @@ func All() []model.Project {
 
 // FromNsp attempts to find a Project record for the given nsp.
 // Will return an error if no record is found.
-func FromNsp(nsp string) (*model.Project, error) {
-  // Find Project by nsp.
+func FromNsp(nsp string, preloads ...string) (*model.Project, error) {
   var project model.Project
-  result := app.DB.Where(&model.Project{Nsp: nsp}).Find(&project)
+  result := app.DB
+
+  for _, rel := range preloads {
+    result = result.Preload(rel)
+  }
+
+  result = result.Where(&model.Project{Nsp: nsp}).Find(&project)
 
   // Return error if not found.
   if result.RecordNotFound() {

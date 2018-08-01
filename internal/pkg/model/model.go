@@ -20,6 +20,8 @@ type Model struct {
   ModelVersions []ModelVersion
 }
 
+const DefaultModelSlug = "default"
+
 // Assign Slug to Model before creation.
 func (model *Model) BeforeSave(scope *gorm.Scope) error {
   scope.SetColumn("Slug", str.Slugify(model.Name))

@@ -7,11 +7,11 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/str"
 )
 
-// ----------- POST /project -----------
+// ----------- POST /train_job -----------
 
 type CreateTrainJobPayload struct {
   ProjectNsp string `json:"projectNsp" validate:"nonzero"`
-  ModelName  string `json:"modelName" validate:"nonzero"`
+  ModelName  string `json:"modelName" default:"default"`
   Envs       string `json:"envs"`
 }
 

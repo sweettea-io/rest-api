@@ -13,7 +13,7 @@ func All() []model.ApiCluster {
   return apiClusters
 }
 
-// FromSlug attempts to find a ApiCluster record for the given slug.
+// FromSlug attempts to find an ApiCluster record for the given slug.
 // Will return an error if no record is found.
 func FromSlug(slug string) (*model.ApiCluster, error) {
   // Find ApiCluster by slug.
@@ -23,6 +23,21 @@ func FromSlug(slug string) (*model.ApiCluster, error) {
   // Return error if not found.
   if result.RecordNotFound() {
     return nil, fmt.Errorf("ApiCluster(slug=%s) not found.\n", slug)
+  }
+
+  return &apiCluster, nil
+}
+
+// FromID attempts to find an ApiCluster record by the provided id.
+// Will return an error if no record is found.
+func FromID(id uint) (*model.ApiCluster, error) {
+  // Find ApiCluster by ID.
+  var apiCluster model.ApiCluster
+  result := app.DB.First(&apiCluster, id)
+
+  // Return error if not found.
+  if result.RecordNotFound() {
+    return nil, fmt.Errorf("ApiCluster(ID=%v) not found.\n", id)
   }
 
   return &apiCluster, nil

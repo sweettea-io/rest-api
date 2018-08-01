@@ -6,6 +6,14 @@ import (
   "fmt"
 )
 
+func UpdateStage(deploy *model.Deploy, stage string) error {
+  if err := app.DB.Model(deploy).Updates(map[string]interface{}{"stage": stage}).Error; err != nil {
+    return fmt.Errorf("error updating Deploy stage: %s", err.Error())
+  }
+
+  return nil
+}
+
 func UpdateStageByID(id uint, stage string) error {
   // Prep Deploy model for ID.
   deploy := model.Deploy{}
