@@ -8,17 +8,17 @@ import (
 // ----------- ROUTER SETUP ------------
 
 // Prefix for all routes in this file.
-const ModelVersionRouter = "/model_version"
+const ModelVersionRoute = "/model_version"
 
 func InitModelVersionRouter() {
   // Create modelVersion router.
-  modelVersion := Router.PathPrefix(ModelVersionRouter).Subrouter()
+  modelVersionRouter := Router.PathPrefix(ModelVersionRoute).Subrouter()
 
   // Attach Session-based auth middleware to all request handlers on this router.
-  modelVersion.Use(middleware.SessionAuth)
+  modelVersionRouter.Use(middleware.SessionAuth)
 
   // Attach route handlers.
-  modelVersion.HandleFunc("", CreateModelVersionHandler).Methods("POST")
+  modelVersionRouter.HandleFunc("", CreateModelVersionHandler).Methods("POST")
 }
 
 // ----------- ROUTE HANDLERS -----------

@@ -20,14 +20,14 @@ import (
 const ApiClusterRoute = "/api_cluster"
 
 func InitApiClusterRouter() {
-  // Create ApiCluster router.
-  ApiClusterRouter := Router.PathPrefix(ApiClusterRoute).Subrouter()
+  // Create apiCluster router.
+  apiClusterRouter := Router.PathPrefix(ApiClusterRoute).Subrouter()
 
   // Attach route handlers.
-  ApiClusterRouter.HandleFunc("", CreateApiClusterHandler).Methods("POST")
-  ApiClusterRouter.HandleFunc("", GetApiClustersHandler).Methods("GET")
-  ApiClusterRouter.HandleFunc("", UpdateApiClusterHandler).Methods("PUT")
-  ApiClusterRouter.HandleFunc("", DeleteApiClusterHandler).Methods("DELETE")
+  apiClusterRouter.HandleFunc("", CreateApiClusterHandler).Methods("POST")
+  apiClusterRouter.HandleFunc("", GetApiClustersHandler).Methods("GET")
+  apiClusterRouter.HandleFunc("", UpdateApiClusterHandler).Methods("PUT")
+  apiClusterRouter.HandleFunc("", DeleteApiClusterHandler).Methods("DELETE")
 }
 
 // ----------- ROUTE HANDLERS -----------
