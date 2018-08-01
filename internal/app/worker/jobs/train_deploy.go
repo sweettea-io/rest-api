@@ -2,10 +2,10 @@ package jobs
 
 import (
   "fmt"
+  "encoding/json"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
-  "encoding/json"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
 )
@@ -28,7 +28,7 @@ func (c *Context) TrainDeploy(job *work.Job) error {
     return err
   }
 
-  // Ensure Train cluster exists first.
+  // Ensure Train Cluster exists first.
   if !app.Config.TrainClusterConfigured() {
     err := fmt.Errorf("train cluster not configured -- leaving CreateTrainJob")
     trainjobsvc.FailByID(trainJobID)
