@@ -19,5 +19,6 @@ func InitRouter() {
   InitUserRouter()
   InitProjectRouter()
   InitTrainJobRouter()
+  InitModelVersionRouter()
   InitApiClusterRouter()
 }
