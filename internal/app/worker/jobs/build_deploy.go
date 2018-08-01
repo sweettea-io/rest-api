@@ -8,6 +8,17 @@ import (
   "github.com/sweettea-io/work"
 )
 
+/*
+  BuildDeploy deploys the SweetTea build server to the SweetTea Build Cluster
+  with instructions for building an image from a Project and ready-ing it for
+  its own deploy to either the Train Cluster or an API Cluster
+
+  Args:
+    resourceID     (uint)   ID of the buildable model (TrainJob or Deploy -- based on the targetCluster)
+    projectID      (uint)   ID of the project to build
+    targetCluster  (string) which cluster the project is being built for ('train' or 'api')
+    envs           (string) json string representation of the custom env vars to use with the final target cluster deploy
+*/
 func (c *Context) BuildDeploy(job *work.Job) error {
   // Extract args from job.
   resourceID := job.ArgString("resourceID")
@@ -27,7 +38,7 @@ func (c *Context) BuildDeploy(job *work.Job) error {
     return err
   }
 
-  // Create K8S build deploy object.
+  // Create K8S build deploy object and args.
   buildDeploy := kdeploy.Build{}
 
   bdArgs := map[string]interface{}{
