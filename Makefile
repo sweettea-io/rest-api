@@ -21,8 +21,10 @@ export env=local
 cluster: ## Create the core, train, or build cluster for a specific environment.
 	./scripts/create_cluster $(cloud) $(role) $(env)
 
-model-storage:
-	./scripts/
+export cloud=aws
+export env=local
+model-storage: ## Create a new model storage instance to use with a specific environment.
+	./scripts/create_model_storage $(cloud) $(env)
 
 export target
 export env=local

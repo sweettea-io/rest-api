@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e # exit if any child script exits with non-zero status
+
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+env="$1"
+model_storage_name="$2"
+
+# Create S3 bucket.
+$this_dir/create_bucket "$model_storage_name"
+
+# Tell user to update their env vars.
+echo "Set your MODEL_STORAGE_URL environment variable to s3://$model_storage_name for the $env environment."

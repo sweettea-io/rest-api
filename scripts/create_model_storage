@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# --- Create a new model storage instance to use with a specific environment --- #
+
+set -e # exit if any child script exits with non-zero status
+
+# ======== PARSE ARGS ======== #
+
+this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cloud="$1"
+env="$2"
+
+# ======== VALIDATIONS ======== #
+
+# Validate arg values.
+$this_dir/validate_arg "cloud" "$cloud" "aws"
+$this_dir/validate_arg "env" "$env" "local|dev|staging|prod"
+
+# Check to make sure MODEL_STORAGE_URL env var hasn't already been set for this env.
+model_storage_url=$( $this_dir/env_reader "$env" "MODEL_STORAGE_URL" )
+
+if [[ "$model_storage_url" ]]; then
+	echo "MODEL_STORAGE_URL environment variable already has a value for the $env environment."
+	exit 1
+fi
+
+# ======== CREATE MODEL STORAGE INSTANCE ======== #
+
+# Create unique name.
+uuid=$( uuidgen | tr "[:upper:]" "[:lower:]" )
+model_storage_name="st-models-$env-${uuid:0:8}"
+
+# Create model storage instance on specified cloud.
+$this_dir/$cloud/create_model_storage "$env" "$model_storage_name"

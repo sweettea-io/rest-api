@@ -49,8 +49,6 @@ if [[ ! "$state" ]]; then
 
 	# Give state a value using new bucket name.
 	state="s3://$bucket_name"
-
-	echo "Created S3 bucket, $bucket_name."
 fi
 
 # Upsert hosted zone.
