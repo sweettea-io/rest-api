@@ -1,13 +1,13 @@
 package jobs
 
 import (
-  "fmt"
   "encoding/json"
+  "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
+  "github.com/sweettea-io/work"
 )
 
 /*
@@ -79,6 +79,22 @@ func (c *Context) TrainDeploy(job *work.Job) error {
     trainjobsvc.FailByID(trainJobID)
     app.Log.Errorln(err.Error())
     return err
+  }
+
+  // TODO: Stream message back successfully disconnecting client.
+
+  // Get channel to watch train deploy.
+  resultCh := trainDeploy.GetResultChannel()
+
+  // Watch train deploy until the pod has successfully been added.
+  go trainDeploy.Watch()
+  deployResult := <-resultCh
+
+  // Error out if pod failed to be added.
+  if !deployResult.Ok {
+    trainjobsvc.FailByID(trainJobID)
+    app.Log.Errorf(deployResult.Error.Error())
+    return deployResult.Error
   }
 
   return nil

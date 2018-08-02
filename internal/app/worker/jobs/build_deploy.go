@@ -4,10 +4,10 @@ import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
+  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/work"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
 )
 
 /*

@@ -3,6 +3,7 @@ package jobs
 import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
+  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/commitsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/modelsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/modelversionsvc"
@@ -10,7 +11,6 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/work"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
 )
 
 /*

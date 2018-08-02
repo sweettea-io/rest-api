@@ -2,17 +2,17 @@ package route
 
 import (
   "net/http"
+  "github.com/sweettea-io/rest-api/internal/app"
+  "github.com/sweettea-io/rest-api/internal/app/errmsg"
   "github.com/sweettea-io/rest-api/internal/app/middleware"
   "github.com/sweettea-io/rest-api/internal/app/payload"
   "github.com/sweettea-io/rest-api/internal/app/respond"
-  "github.com/sweettea-io/rest-api/internal/app/errmsg"
+  "github.com/sweettea-io/rest-api/internal/app/worker/jobs"
+  "github.com/sweettea-io/rest-api/internal/pkg/model"
   "github.com/sweettea-io/rest-api/internal/pkg/service/apiclustersvc"
-  "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/projectsvc"
-  "strings"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/modelversionsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
   "github.com/sweettea-io/work"
-  "github.com/sweettea-io/rest-api/internal/app/worker/jobs"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -28,7 +28,7 @@ func InitDeployRouter() {
   deployRouter.Use(middleware.SessionAuth)
 
   // Attach route handlers.
-  deployRouter.HandleFunc("", CreateModelVersionHandler).Methods("POST")
+  deployRouter.HandleFunc("", CreateDeployHandler).Methods("POST")
 }
 
 // ----------- ROUTE HANDLERS -----------
@@ -62,33 +62,24 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
     respond.Error(w, errmsg.ApiClusterNotFound())
   }
 
-  // TODO: Query this backwards --> ModelVersion --> Model --> Project
+  // Find ModelVersion --> Model --> Project.
+  var modelVersion *model.ModelVersion
+  var mvError error
 
-  // Find project by namespace.
-  project, err := projectsvc.FromNsp(strings.ToLower(pl.ProjectNsp), "Models", "Models.ModelVersions")
+  // Use model slug and version to find ModelVersion.
+  modelSlug, version := pl.ModelBreakdown()
 
-  if err != nil {
+  if version != "" {
+    // If version provided, query by that.
+    modelVersion, mvError = modelversionsvc.PreloadFromVersion(version, modelSlug, pl.ProjectNsp)
+  } else {
+    // Otherwise, take the most recently created one.
+    modelVersion, mvError = modelversionsvc.PreloadLatest(modelSlug, pl.ProjectNsp)
+  }
+
+  if mvError != nil {
     app.Log.Errorln(err.Error())
-    respond.Error(w, errmsg.ProjectNotFound())
-    return
-  }
-
-  // Split provided model string into its components (<slug>:<version>)
-  modelSlug, modelVersionVersion := pl.ModelBreakdown()
-
-  // Validate model exists.
-  modelExists := false
-  for _, model := range project.Models {
-    if model.Slug == modelSlug {
-      modelExists = true
-      break
-    }
-  }
-
-  if !modelExists {
-    app.Log.Errorf("Model(slug=%s, ProjectID=%v) not found.\n", modelSlug, project.ID)
-    respond.Error(w, errmsg.ModelNotFound())
-    return
+    respond.Error(w, errmsg.ModelVersionNotFound())
   }
 
   // Create Uid for Deploy manually so that its available as the log stream key.
@@ -97,8 +88,8 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
   // Create args for CreateDeploy job.
   jobArgs := work.Q{
     "deployUid": deployUid,
-    "apiClusterID": apiCluster,
-    "modelVersionID": "TODO",
+    "apiClusterID": apiCluster.ID,
+    "modelVersionID": modelVersion.ID,
     "sha": pl.Sha,
     "envs": pl.Envs,
   }

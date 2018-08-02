@@ -4,13 +4,14 @@ import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
+  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/rest-api/internal/pkg/util/maputil"
   "github.com/sweettea-io/rest-api/internal/pkg/util/timeutil"
+  "k8s.io/apimachinery/pkg/watch"
   corev1 "k8s.io/api/core/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
 )
 
 type Train struct {
@@ -25,6 +26,7 @@ type Train struct {
   DeployName    string
   Image         string
   ContainerName string
+  ResultChannel <-chan Result
 
   // K8S resources
   Namespace     string
@@ -32,7 +34,6 @@ type Train struct {
   Envs          []corev1.EnvVar
   Containers    []corev1.Container
   Pod           *corev1.Pod
-
 }
 
 func (t *Train) Init(args map[string]interface{}) error {
@@ -53,6 +54,7 @@ func (t *Train) Init(args map[string]interface{}) error {
     return err
   }
 
+  // Store refs to models.
   t.CustomEnvs = customEnvs
   t.TrainJob = trainJob
   t.Commit = &trainJob.Commit
@@ -69,6 +71,9 @@ func (t *Train) Init(args map[string]interface{}) error {
 
   // Ex: sweetteaprod/train-<project_uid>:<commit_sha>
   t.Image = fmt.Sprintf("%s/%s:%s", app.Config.DockerRegistryOrg, t.ContainerName, t.Commit.Sha)
+
+  // Initialize the result channel.
+  t.ResultChannel = make(chan Result)
 
   return nil
 }
@@ -89,7 +94,30 @@ func (t *Train) Configure() error {
 
 // Perform deploys the configured pod to the Train Cluster.
 func (t *Train) Perform() error {
-  return DeployPod(t.Client, t.Namespace, t.Pod, cluster.Train)
+  return CreatePod(t.Client, t.Namespace, t.Pod, cluster.Train)
+}
+
+
+func (t *Train) GetResultChannel() <-chan Result {
+  return t.ResultChannel
+}
+
+func (t *Train) Watch() {
+  // Get a namespaced pod-watcher channel.
+  ch, err := PodWatcherChannel(t.Client, t.Namespace, t.DeployName)
+
+  if err != nil {
+    t.ResultChannel <- Result{Ok: false, Error: err}
+    return
+  }
+
+  // Start watching for events.
+  for event := range ch {
+    if result := t.checkEventForResult(event); result != nil {
+      t.ResultChannel <- *result
+      return
+    }
+  }
 }
 
 func (t *Train) makeClient() error {
@@ -100,7 +128,7 @@ func (t *Train) makeClient() error {
     return err
   }
 
-  // Store client and namespace on build object.
+  // Store refs to client and namespace.
   t.Client = client
   t.Namespace = nsp
 
@@ -137,4 +165,23 @@ func (t *Train) makePod() {
     "containers": t.Containers,
     "restart": corev1.RestartPolicyNever,
   })
+}
+
+func (t *Train) checkEventForResult(event watch.Event) *Result {
+  switch event.Type {
+
+  // Log & return with success when Training pod has been added.
+  case watch.Added:
+    app.Log.Infof("Job %s started.", t.DeployName)
+    return &Result{Ok: true}
+
+  // Return with error if watch error occurs before pod has been added.
+  case watch.Error:
+    err := fmt.Errorf("Job %s encountered pod error.", t.DeployName)
+    app.Log.Errorf(err.Error())
+    return &Result{Ok: false, Error: err}
+
+  default:
+    return nil
+  }
 }

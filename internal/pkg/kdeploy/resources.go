@@ -2,12 +2,14 @@ package kdeploy
 
 import (
   "fmt"
+  "k8s.io/apimachinery/pkg/watch"
+  "k8s.io/api/extensions/v1beta1"
   "k8s.io/client-go/rest"
   "k8s.io/client-go/tools/clientcmd"
-  "k8s.io/apimachinery/pkg/watch"
   corev1 "k8s.io/api/core/v1"
   metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+  typedv1beta1 "k8s.io/client-go/kubernetes/typed/extensions/v1beta1"
 )
 
 func GetRestConfig(ctx string) (*rest.Config, string, error) {
@@ -54,6 +56,24 @@ func ConfigureCoreV1(context string) (*typedcorev1.CoreV1Client, string, error) 
   return coreV1Client, nsp, nil
 }
 
+func ConfigureV1Beta1(context string) (*typedv1beta1.ExtensionsV1beta1Client, string, error) {
+  // Configure k8s rest client for provided context.
+  restConfig, nsp, err := GetRestConfig(context)
+
+  if err != nil {
+    return nil, "", err
+  }
+
+  // Create V1Beta1 client from rest client.
+  v1beta1Client, err := typedv1beta1.NewForConfig(restConfig)
+
+  if err != nil {
+    return nil, "", fmt.Errorf("error creating New ExtensionsV1beta1Client: %s", err.Error())
+  }
+
+  return v1beta1Client, nsp, nil
+}
+
 func VolumeMounts(vms []map[string]string) []corev1.VolumeMount {
   volumeMounts := []corev1.VolumeMount{}
 
@@ -97,6 +117,16 @@ func EnvVars(envVars map[string]string) []corev1.EnvVar {
   }
 
   return envs
+}
+
+func Ports(ports []int32) []corev1.ContainerPort {
+  cPorts := []corev1.ContainerPort{}
+
+  for _, p := range ports {
+    cPorts = append(cPorts, corev1.ContainerPort{ContainerPort: p})
+  }
+
+  return cPorts
 }
 
 func Containers(conts []map[string]interface{}) []corev1.Container {
@@ -172,6 +202,73 @@ func Pod(args map[string]interface{}) *corev1.Pod {
   }
 }
 
+func PodTemplateSpec(args map[string]interface{}) *corev1.PodTemplateSpec {
+  // Parse args.
+  label := args["label"].(string)
+  containers := args["containers"].([]corev1.Container)
+  restart := args["restart"].(corev1.RestartPolicy)
+  vols, volsProvided := args["volumes"]
+
+  // Create PodSpec.
+  podSpec := corev1.PodSpec{
+    Containers: containers,
+    RestartPolicy: restart,
+  }
+
+  // Add volumes to PodSpec if provided.
+  if volsProvided {
+    podSpec.Volumes = vols.([]corev1.Volume)
+  }
+
+  // Create and return PodTemplateSpec.
+  return &corev1.PodTemplateSpec{
+    ObjectMeta: metav1.ObjectMeta{
+      Labels: map[string]string{
+        "app": label,
+      },
+    },
+    Spec: podSpec,
+  }
+}
+
+func DeploymentSpec(podTemplateSpec *corev1.PodTemplateSpec, replicas int32) *v1beta1.DeploymentSpec {
+  return &v1beta1.DeploymentSpec{
+    Template: *podTemplateSpec,
+    Replicas: &replicas,
+  }
+}
+
+func Deployment(deploymentSpec *v1beta1.DeploymentSpec, name string) *v1beta1.Deployment {
+  return &v1beta1.Deployment{
+    TypeMeta: metav1.TypeMeta{
+      APIVersion: "extensions/v1beta1",
+      Kind: "Deployment",
+    },
+    ObjectMeta: metav1.ObjectMeta{
+      Labels: map[string]string{
+        "name": name,
+      },
+    },
+    Spec: *deploymentSpec,
+  }
+}
+
+func CreatePod(client *typedcorev1.CoreV1Client, nsp string, pod *corev1.Pod, targetCluster string) error {
+  if _, err := client.Pods(nsp).Create(pod); err != nil {
+    return fmt.Errorf("error creating pod during %s deploy: %s", targetCluster, err.Error())
+  }
+
+  return nil
+}
+
+func CreateDeployment(client *typedv1beta1.ExtensionsV1beta1Client, nsp string, deployment *v1beta1.Deployment) error {
+  if _, err := client.Deployments(nsp).Create(deployment); err != nil {
+    return fmt.Errorf("error creating deployment during API deploy: %s", err.Error())
+  }
+
+  return nil
+}
+
 func PodWatcherChannel(client *typedcorev1.CoreV1Client, nsp string, deployName string) (<-chan watch.Event, error) {
   // Define selector options to only find the pod we just deployed.
   watchOpts := metav1.ListOptions{
@@ -189,10 +286,19 @@ func PodWatcherChannel(client *typedcorev1.CoreV1Client, nsp string, deployName 
   return watcher.ResultChan(), nil
 }
 
-func DeployPod(client *typedcorev1.CoreV1Client, nsp string, pod *corev1.Pod, targetCluster string) error {
-  if _, err := client.Pods(nsp).Create(pod); err != nil {
-    return fmt.Errorf("error performing %s deploy: %s", targetCluster, err.Error())
+func DeploymentWatcherChannel(client *typedv1beta1.ExtensionsV1beta1Client, nsp string, deployName string) (<-chan watch.Event, error) {
+  // Define selector options to only find the pod we just deployed.
+  watchOpts := metav1.ListOptions{
+    LabelSelector: fmt.Sprintf("app=%s", deployName),
   }
 
-  return nil
+  // Get a namespaced deployment watcher object.
+  watcher, err := client.Deployments(nsp).Watch(watchOpts)
+
+  if err != nil {
+    return nil, fmt.Errorf("error creating deployment watcher for deploy(%s): %s", deployName, err.Error())
+  }
+
+  // Return the watcher's channel.
+  return watcher.ResultChan(), nil
 }

@@ -19,6 +19,7 @@ type Config struct {
   CloudProvider                     string `env:"CLOUD_PROVIDER,required,ignore_on_envs=test|local"`
   DatabaseUrl                       string `env:"DATABASE_URL,required"`
   Debug                             bool   `env:"DEBUG,required"`
+  DeployReplicasCount               int32  `env:"DEPLOY_REPLICAS_COUNT,required,ignore_on_envs=test"`
   DockerRegistryOrg                 string `env:"DOCKER_REGISTRY_ORG,required,ignore_on_envs=test"`
   DockerRegistryUsername            string `env:"DOCKER_REGISTRY_USERNAME,required,ignore_on_envs=test"`
   DockerRegistryPassword            string `env:"DOCKER_REGISTRY_PASSWORD,required,ignore_on_envs=test"`

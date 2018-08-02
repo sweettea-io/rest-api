@@ -1,18 +1,18 @@
 package jobs
 
 import (
-  "fmt"
   "encoding/json"
+  "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/apiclustersvc"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/modelversionsvc"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/commitsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
-  "github.com/sweettea-io/work"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/apiclustersvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/commitsvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/envvarsvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/modelversionsvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
+  "github.com/sweettea-io/work"
 )
 
 /*
@@ -56,11 +56,10 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   }
 
   project := modelVersion.Model.Project
+  var commit *model.Commit
 
   // If sha provided, find Commit by that value.
   // Otherwise, fetch the latest commit from the project's repo host.
-  var commit *model.Commit
-
   if sha != "" {
     var err error
     commit, err = commitsvc.FromSha(sha)
@@ -136,7 +135,7 @@ func (c *Context) CreateDeploy(job *work.Job) error {
     "envs": envs,
   }
 
-  // Enqueue new job to build this Project for an API Cluster.
+  // Enqueue new job to build this Project for the ApiCluster.
   if _, err := app.JobQueue.Enqueue(Names.BuildDeploy, jobArgs); err != nil {
     err = fmt.Errorf("error scheduling BuildDeploy job: %s", err.Error())
     deploysvc.Fail(deploy)

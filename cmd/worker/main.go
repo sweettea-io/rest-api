@@ -29,8 +29,10 @@ func main() {
 
   // Assign handler functions to different jobs.
   workerPool.JobWithOptions(jobs.Names.CreateTrainJob, noRetry, (*jobs.Context).CreateTrainJob)
+  workerPool.JobWithOptions(jobs.Names.CreateDeploy, noRetry, (*jobs.Context).CreateDeploy)
   workerPool.JobWithOptions(jobs.Names.BuildDeploy, noRetry, (*jobs.Context).BuildDeploy)
   workerPool.JobWithOptions(jobs.Names.TrainDeploy, noRetry, (*jobs.Context).TrainDeploy)
+  workerPool.JobWithOptions(jobs.Names.ApiDeploy, noRetry, (*jobs.Context).ApiDeploy)
 
   // Start processing jobs.
   workerPool.Start()

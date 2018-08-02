@@ -29,3 +29,7 @@ func (mv *ModelVersion) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("Version", unique.NewUid()[:8])
   return nil
 }
+
+func (mv *ModelVersion) StorageKey() string {
+  return "<s3_bucket_key>"
+}

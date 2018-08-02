@@ -3,6 +3,7 @@ package kdeploy
 import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
+  "github.com/sweettea-io/rest-api/internal/app/worker/jobs"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
@@ -15,7 +16,6 @@ import (
   "k8s.io/apimachinery/pkg/watch"
   corev1 "k8s.io/api/core/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-  "github.com/sweettea-io/rest-api/internal/app/worker/jobs"
 )
 
 type Build struct {
@@ -41,11 +41,6 @@ type Build struct {
   Envs          []corev1.EnvVar
   Containers    []corev1.Container
   Pod           *corev1.Pod
-}
-
-type Result struct {
-  Ok    bool
-  Error error
 }
 
 func (b *Build) Init(args map[string]interface{}) error {
@@ -106,7 +101,7 @@ func (b *Build) Configure() error {
 
 // Perform deploys the configured pod to the Build Cluster.
 func (b *Build) Perform() error {
-  return DeployPod(b.Client, b.Namespace, b.Pod, cluster.Build)
+  return CreatePod(b.Client, b.Namespace, b.Pod, cluster.Build)
 }
 
 func (b *Build) GetResultChannel() <-chan Result {
