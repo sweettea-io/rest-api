@@ -18,7 +18,7 @@ type ApiCluster struct {
   Deploys    []Deploy
 }
 
-// Assign Slug to Cluster before creation.
+// Assign Slug to Cluster before saving.
 func (apiCluster *ApiCluster) BeforeSave(scope *gorm.Scope) error {
   scope.SetColumn("Slug", str.Slugify(apiCluster.Name))
   return nil

@@ -13,6 +13,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/modelversionsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
   "github.com/sweettea-io/work"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -39,6 +40,7 @@ func InitDeployRouter() {
   Method:  POST
   Route:   /deploy
   Payload:
+    name       string (required)
     apiCluster string (required)
     projectNsp string (required)
     model      string (optional)
@@ -52,6 +54,11 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
   if !pl.Validate(req) {
     respond.Error(w, errmsg.InvalidPayload())
     return
+  }
+
+  // Validate deploy name availability.
+  if !deploysvc.NameAvailable(pl.Name) {
+    respond.Error(w, errmsg.DeployNameUnavailable())
   }
 
   // Find ApiCluster by slug.
@@ -88,6 +95,7 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
   // Create args for CreateDeploy job.
   jobArgs := work.Q{
     "deployUid": deployUid,
+    "name": pl.Name,
     "apiClusterID": apiCluster.ID,
     "modelVersionID": modelVersion.ID,
     "sha": pl.Sha,

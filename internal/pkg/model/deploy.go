@@ -4,6 +4,7 @@ import (
   "github.com/jinzhu/gorm"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/str"
 )
 
 /*
@@ -22,13 +23,21 @@ type Deploy struct {
   ModelVersionID uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
   ApiCluster     ApiCluster
   ApiClusterID   uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
-  Name           string       `gorm:"default:null"`
+  Name           string       `gorm:"default:null;not null"`
+  Slug           string       `gorm:"default:null;not null;unique_index:deploy_slug"`
+  DeploymentName string       `gorm:"default:null"`
   Stage          string       `gorm:"default:null;not null"`
   Failed         bool         `gorm:"default:false"`
   LBHost         string       `gorm:"type:varchar(240);default:null"`
   ClientID       string       `gorm:"type:varchar(240);default:null;not null"`
   ClientSecret   string       `gorm:"type:varchar(240);default:null;not null"`
   EnvVars        []EnvVar
+}
+
+// Assign Slug to Deploy before saving.
+func (deploy *Deploy) BeforeSave(scope *gorm.Scope) error {
+  scope.SetColumn("Slug", str.Slugify(deploy.Name))
+  return nil
 }
 
 // Assign initial Stage, ClientID, & ClientSecret to Deploy before creation.

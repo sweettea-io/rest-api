@@ -6,7 +6,7 @@ import (
   "fmt"
 )
 
-func Upsert(commitID uint, modelVersionID uint, apiClusterID uint, uid string) (*model.Deploy, bool, error) {
+func Upsert(commitID uint, modelVersionID uint, apiClusterID uint, uid string, name string) (*model.Deploy, bool, error) {
   deployWithAttrs := model.Deploy{
     CommitID: commitID,
     ModelVersionID: modelVersionID,
@@ -21,6 +21,7 @@ func Upsert(commitID uint, modelVersionID uint, apiClusterID uint, uid string) (
   if result.RecordNotFound() {
     deploy = deployWithAttrs
     deploy.Uid = uid
+    deploy.Name = name
     
     // Create record.
     if err := app.DB.Create(&deploy).Error; err != nil {

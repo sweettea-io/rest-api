@@ -24,7 +24,7 @@ type Api struct {
   ModelVersion    *model.ModelVersion
   Model           *model.Model
   ApiCluster      *model.ApiCluster
-  DeployName      string
+  DeploymentName  string
   Image           string
   ContainerName   string
   ResultChannel   <-chan Result
@@ -72,9 +72,9 @@ func (api *Api) Init(args map[string]interface{}) error {
 
   // Create a new unique deploy name for new deploys. Otherwise, use the existing deploy name.
   if api.IsNewDeployment() {
-    api.DeployName = fmt.Sprintf("%s-%v", api.ContainerName, timeutil.MSSinceEpoch())
+    api.DeploymentName = fmt.Sprintf("%s-%v", api.ContainerName, timeutil.MSSinceEpoch())
   } else {
-    api.DeployName = api.Deploy.Name
+    api.DeploymentName = api.Deploy.DeploymentName
   }
 
   return nil
@@ -101,7 +101,7 @@ func (api *Api) Configure() error {
 func (api *Api) Perform() error {
   // What patching an existing deploy would look like:
   //jsonReprOfStuffToChange := `{shit to change}`
-  //api.Client.Deployments(api.Namespace).Patch(api.DeployName, types.JSONPatchType, []byte(jsonReprOfStuffToChange))
+  //api.Client.Deployments(api.Namespace).Patch(api.DeploymentName, types.JSONPatchType, []byte(jsonReprOfStuffToChange))
 
   return CreateDeployment(api.Client, api.Namespace, api.Deployment)
 }
@@ -112,7 +112,7 @@ func (api *Api) GetResultChannel() <-chan Result {
 
 func (api *Api) Watch() {
   // Get a namespaced deployment-watcher channel.
-  ch, err := DeploymentWatcherChannel(api.Client, api.Namespace, api.DeployName)
+  ch, err := DeploymentWatcherChannel(api.Client, api.Namespace, api.DeploymentName)
 
   if err != nil {
     api.ResultChannel <- Result{Ok: false, Error: err}
@@ -130,7 +130,7 @@ func (api *Api) Watch() {
 
 // IsNewDeployment returns whether a k8s deployment already exists for this Deploy.
 func (api *Api) IsNewDeployment() bool {
-  return api.Deploy.Name == ""
+  return api.Deploy.DeploymentName == ""
 }
 
 func (api *Api) makeClient() error {
@@ -184,7 +184,7 @@ func (api *Api) makeContainers() {
 
 func (api *Api) makePodTemplateSpec() {
   api.PodTemplateSpec = PodTemplateSpec(map[string]interface{}{
-    "label": api.DeployName,
+    "label": api.DeploymentName,
     "containers": api.Containers,
     "restart": corev1.RestartPolicyNever,
   })
@@ -195,7 +195,7 @@ func (api *Api) makeDeploymentSpec() {
 }
 
 func (api *Api) makeDeployment() {
-  api.Deployment = Deployment(api.DeploymentSpec, api.DeployName)
+  api.Deployment = Deployment(api.DeploymentSpec, api.DeploymentName)
 }
 
 func (api *Api) checkEventForResult(event watch.Event) *Result {
@@ -203,12 +203,12 @@ func (api *Api) checkEventForResult(event watch.Event) *Result {
 
   // Log & return with success when deployment has been added.
   case watch.Added:
-    app.Log.Infof("Deployment %s started.", api.DeployName)
+    app.Log.Infof("Deployment %s started.", api.DeploymentName)
     return &Result{Ok: true}
 
   // Return with error if watch error occurs before deployment has been added.
   case watch.Error:
-    err := fmt.Errorf("Deployment %s encountered error.", api.DeployName)
+    err := fmt.Errorf("Deployment %s encountered error.", api.DeploymentName)
     app.Log.Errorf(err.Error())
     return &Result{Ok: false, Error: err}
 

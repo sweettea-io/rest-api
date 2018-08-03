@@ -3,7 +3,6 @@ package jobs
 import (
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/work"
 )
@@ -49,8 +48,8 @@ func (c *Context) ApiDeploy(job *work.Job) error {
     return err
   }
 
-  // Update Deploy stage to Deployed.
-  if err := deploysvc.UpdateStageByID(deployID, buildable.Deployed); err != nil {
+  // Update Deploy stage to Deployed and register its deployment name.
+  if err := deploysvc.Deployed(deployID, apiDeploy.DeploymentName); err != nil {
     deploysvc.FailByID(deployID)
     app.Log.Errorln(err.Error())
     return err

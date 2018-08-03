@@ -21,14 +21,16 @@ import (
 
   Args:
     deployUid      (string) Uid to assign to Deploy during creation
+    name           (string) Name of Deploy
     apiClusterID   (uint)   ID of ApiCluster to deploy to
-    modelVersionID (uint) ID of ModelVersion to use with this deploy
+    modelVersionID (uint)   ID of ModelVersion to use with this deploy
     sha            (string) commit sha to deploy
-    envs           (string)   custom env vars to assign to this Deploy
+    envs           (string) custom env vars to assign to this Deploy
 */
 func (c *Context) CreateDeploy(job *work.Job) error {
   // Extract args from job.
   deployUid := job.ArgString("deployUid")
+  deployName := job.ArgString("name")
   apiClusterID := uint(job.ArgInt64("apiClusterID"))
   modelVersionID := uint(job.ArgInt64("modelVersionID"))
   sha := job.ArgString("sha")
@@ -97,6 +99,7 @@ func (c *Context) CreateDeploy(job *work.Job) error {
     modelVersion.ID,
     apiCluster.ID,
     deployUid,
+    deployName,
   )
 
   if err != nil {

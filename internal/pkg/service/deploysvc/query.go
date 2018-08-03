@@ -4,6 +4,7 @@ import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/str"
 )
 
 // FromID attempts to find a Deploy record by the provided id.
@@ -25,4 +26,10 @@ func FromID(id uint) (*model.Deploy, error) {
   }
 
   return &deploy, nil
+}
+
+func NameAvailable(name string) bool {
+  var count uint
+  app.DB.Model(&model.Deploy{}).Where(&model.Deploy{Slug: str.Slugify(name)}).Count(count)
+  return count == 0
 }
