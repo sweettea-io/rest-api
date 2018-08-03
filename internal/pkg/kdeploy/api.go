@@ -53,6 +53,9 @@ func (api *Api) Init(args map[string]interface{}) error {
     return err
   }
 
+  // Initialize the result channel.
+  api.ResultChannel = make(chan Result)
+
   // Store refs to models.
   api.Deploy = deploy
   api.Commit = &deploy.Commit
@@ -61,15 +64,18 @@ func (api *Api) Init(args map[string]interface{}) error {
   api.Model = &deploy.ModelVersion.Model
   api.ApiCluster = &deploy.ApiCluster
 
-  // Create unique container and deploy names.
+  // Name of container to be run inside the pods.
   api.ContainerName = fmt.Sprintf("%s-%s", cluster.Api, api.Project.Uid)
-  api.DeployName = fmt.Sprintf("%s-%v", api.ContainerName, timeutil.MSSinceEpoch())
 
-  // Ex: sweetteaprod/api-<project_uid>:<commit_sha>
+  // Docker image to deploy (ex: sweetteaprod/api-<project_uid>:<commit_sha>)
   api.Image = fmt.Sprintf("%s/%s:%s", app.Config.DockerRegistryOrg, api.ContainerName, api.Commit.Sha)
 
-  // Initialize the result channel.
-  api.ResultChannel = make(chan Result)
+  // Create a new unique deploy name for new deploys. Otherwise, use the existing deploy name.
+  if api.IsNewDeployment() {
+    api.DeployName = fmt.Sprintf("%s-%v", api.ContainerName, timeutil.MSSinceEpoch())
+  } else {
+    api.DeployName = api.Deploy.Name
+  }
 
   return nil
 }
@@ -93,6 +99,10 @@ func (api *Api) Configure() error {
 
 // Perform deploys the configured deployment to provided ApiCluster.
 func (api *Api) Perform() error {
+  // What patching an existing deploy would look like:
+  //jsonReprOfStuffToChange := `{shit to change}`
+  //api.Client.Deployments(api.Namespace).Patch(api.DeployName, types.JSONPatchType, []byte(jsonReprOfStuffToChange))
+
   return CreateDeployment(api.Client, api.Namespace, api.Deployment)
 }
 
@@ -116,6 +126,11 @@ func (api *Api) Watch() {
       return
     }
   }
+}
+
+// IsNewDeployment returns whether a k8s deployment already exists for this Deploy.
+func (api *Api) IsNewDeployment() bool {
+  return api.Deploy.Name == ""
 }
 
 func (api *Api) makeClient() error {

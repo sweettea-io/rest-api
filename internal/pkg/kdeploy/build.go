@@ -63,6 +63,9 @@ func (b *Build) Init(args map[string]interface{}) error {
     return err
   }
 
+  // Initialize the result channel.
+  b.ResultChannel = make(chan Result)
+
   // Set project and builable resource.
   b.Project = project
   b.Buildable = resource
@@ -76,9 +79,6 @@ func (b *Build) Init(args map[string]interface{}) error {
 
   // Set image to the SweetTea Build Server image.
   b.Image = fmt.Sprintf("%s/%s", app.Config.DockerRegistryOrg, image.BuildServer)
-
-  // Initialize the result channel.
-  b.ResultChannel = make(chan Result)
 
   return nil
 }

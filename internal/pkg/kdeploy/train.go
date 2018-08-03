@@ -54,6 +54,9 @@ func (t *Train) Init(args map[string]interface{}) error {
     return err
   }
 
+  // Initialize the result channel.
+  t.ResultChannel = make(chan Result)
+
   // Store refs to models.
   t.CustomEnvs = customEnvs
   t.TrainJob = trainJob
@@ -71,9 +74,6 @@ func (t *Train) Init(args map[string]interface{}) error {
 
   // Ex: sweetteaprod/train-<project_uid>:<commit_sha>
   t.Image = fmt.Sprintf("%s/%s:%s", app.Config.DockerRegistryOrg, t.ContainerName, t.Commit.Sha)
-
-  // Initialize the result channel.
-  t.ResultChannel = make(chan Result)
 
   return nil
 }

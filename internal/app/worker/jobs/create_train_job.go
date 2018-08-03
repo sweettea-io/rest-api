@@ -24,7 +24,7 @@ import (
     envs        (string) env vars to use with this TrainJob's Train Cluster deploy (json string)
 */
 func (c *Context) CreateTrainJob(job *work.Job) error {
-  // Ensure Train cluster exists first.
+  // Ensure Train Cluster exists first.
   if !app.Config.TrainClusterConfigured() {
     err := fmt.Errorf("train cluster not configured -- leaving CreateTrainJob")
     app.Log.Errorln(err.Error())

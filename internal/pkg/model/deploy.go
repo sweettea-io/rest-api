@@ -22,6 +22,7 @@ type Deploy struct {
   ModelVersionID uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
   ApiCluster     ApiCluster
   ApiClusterID   uint         `gorm:"default:null;not null;unique_index:deploy_grouped_index"`
+  Name           string       `gorm:"default:null"`
   Stage          string       `gorm:"default:null;not null"`
   Failed         bool         `gorm:"default:false"`
   LBHost         string       `gorm:"type:varchar(240);default:null"`
