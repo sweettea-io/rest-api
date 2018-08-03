@@ -1,13 +1,13 @@
 package jobs
 
 import (
-  "encoding/json"
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/work"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/envvarsvc"
 )
 
 /*
@@ -37,9 +37,9 @@ func (c *Context) TrainDeploy(job *work.Job) error {
   }
 
   // Convert stringified envs into map[string]string representation.
-  var envsMap map[string]string
-  if err := json.Unmarshal([]byte(envs), &envsMap); err != nil {
-    err = fmt.Errorf("error converting custom train envs into map[string]string: %s", err.Error())
+  envsMap, err := envvarsvc.MapFromBytes([]byte(envs))
+
+  if err != nil {
     trainjobsvc.FailByID(trainJobID)
     app.Log.Errorln(err.Error())
     return err
@@ -47,7 +47,6 @@ func (c *Context) TrainDeploy(job *work.Job) error {
 
   // Create K8S train deploy and prep args.
   trainDeploy := kdeploy.Train{}
-
   trainDeployArgs := map[string]interface{}{
     "trainJobID": trainJobID,
     "envs": envsMap,

@@ -1,7 +1,6 @@
 package jobs
 
 import (
-  "encoding/json"
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
@@ -115,10 +114,9 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   }
 
   // Convert stringified envs into map[string]string representation.
-  var envsMap map[string]string
+  envsMap, err := envvarsvc.MapFromBytes([]byte(envs))
 
-  if err := json.Unmarshal([]byte(envs), &envsMap); err != nil {
-    err = fmt.Errorf("error converting custom deploy envs into map[string]string: %s", err.Error())
+  if err != nil {
     deploysvc.Fail(deploy)
     app.Log.Errorln(err.Error())
     return err

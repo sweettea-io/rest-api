@@ -3,6 +3,7 @@ package model
 import (
   "github.com/jinzhu/gorm"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
+  "strings"
 )
 
 /*
@@ -15,6 +16,12 @@ type EnvVar struct {
   DeployID   uint   `gorm:"default:null;not null;unique_index:env_var_grouped_index"`
   Key        string `gorm:"type:varchar(360);default:null;not null;unique_index:env_var_grouped_index"`
   Val        string `gorm:"type:varchar(360);default:null"`
+}
+
+// Uppercase Key before save.
+func (ev *EnvVar) BeforeSave(scope *gorm.Scope) error {
+  scope.SetColumn("Key", strings.ToUpper(ev.Key))
+  return nil
 }
 
 // Assign Uid to EnvVar before creation.
