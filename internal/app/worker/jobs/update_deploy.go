@@ -53,7 +53,7 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
     if sha == "latest" {
       sha, err = host.LatestSha(project.Owner(), project.Repo())
     } else {
-      err = host.CheckCommitExists(project.Owner(), project.Repo())
+      err = host.EnsureCommitExists(project.Owner(), project.Repo(), sha)
     }
 
     if err != nil {

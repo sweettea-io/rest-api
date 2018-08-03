@@ -57,6 +57,14 @@ func (gh *GitHub) LatestSha(owner, repo string) (string, error) {
   return *commits[0].SHA, nil
 }
 
+func (gh *GitHub) EnsureCommitExists(owner, repo, sha string) error {
+  if _, _, err := gh.Client.Repositories.GetCommit(gh.Ctx, owner, repo, sha); err != nil {
+    return fmt.Errorf("no commit(sha=%s) exists for GitHub project: %s/%s", owner, repo, sha)
+  }
+
+  return nil
+}
+
 func (gh *GitHub) GetToken() string {
   return gh.Token
 }
