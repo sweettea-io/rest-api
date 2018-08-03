@@ -11,6 +11,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/work"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
 )
 
 /*
@@ -97,9 +98,14 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   // Enqueue new job to build this Project for the Train Cluster.
   jobArgs := work.Q{
     "resourceID": trainJob.ID,
+    "buildTargetSha": sha,
     "projectID": projectID,
     "targetCluster": cluster.Train,
-    "envs": envs,
+    "followOnJob": Names.TrainDeploy,
+    "followOnArgs": enc.JSON{
+      "trainJobID": trainJob.ID,
+      "envs": envs,
+    }.AsString(),
   }
 
   if _, err := app.JobQueue.Enqueue(Names.BuildDeploy, jobArgs); err != nil {

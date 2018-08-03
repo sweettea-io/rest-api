@@ -6,7 +6,6 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/model"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/envvarsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/rest-api/internal/pkg/util/maputil"
   "github.com/sweettea-io/rest-api/internal/pkg/util/timeutil"
@@ -20,8 +19,9 @@ type Api struct {
   // Establish on Init
   Deploy          *model.Deploy
   Commit          *model.Commit
-  Project         *model.Project
   ModelVersion    *model.ModelVersion
+  CustomEnvs      map[string]string
+  Project         *model.Project
   Model           *model.Model
   ApiCluster      *model.ApiCluster
   DeploymentName  string
@@ -41,28 +41,24 @@ type Api struct {
 }
 
 func (api *Api) Init(args map[string]interface{}) error {
-  // Find Deploy by ID.
-  deploy, err := deploysvc.FromID(args["deployID"].(uint))
-
-  if err != nil {
-    return err
-  }
+  // Parse args.
+  api.Deploy = args["deploy"].(*model.Deploy)
+  api.Commit = args["commit"].(*model.Commit)
+  api.ModelVersion = args["modelVersion"].(*model.ModelVersion)
+  api.CustomEnvs = args["customEnvs"].(map[string]string)
 
   // Update Deploy to Deploying.
-  if err := deploysvc.UpdateStage(deploy, buildable.Deploying); err != nil {
+  if err := deploysvc.UpdateStage(api.Deploy, buildable.Deploying); err != nil {
     return err
   }
 
   // Initialize the result channel.
   api.ResultChannel = make(chan Result)
 
-  // Store refs to models.
-  api.Deploy = deploy
-  api.Commit = &deploy.Commit
-  api.Project = &deploy.Commit.Project
-  api.ModelVersion = &deploy.ModelVersion
-  api.Model = &deploy.ModelVersion.Model
-  api.ApiCluster = &deploy.ApiCluster
+  // Set further models through associations.
+  api.Project = &api.Commit.Project
+  api.Model = &api.ModelVersion.Model
+  api.ApiCluster = &api.Deploy.ApiCluster
 
   // Name of container to be run inside the pods.
   api.ContainerName = fmt.Sprintf("%s-%s", cluster.Api, api.Project.Uid)
@@ -70,10 +66,11 @@ func (api *Api) Init(args map[string]interface{}) error {
   // Docker image to deploy (ex: sweetteaprod/api-<project_uid>:<commit_sha>)
   api.Image = fmt.Sprintf("%s/%s:%s", app.Config.DockerRegistryOrg, api.ContainerName, api.Commit.Sha)
 
-  // Create a new unique deploy name for new deploys. Otherwise, use the existing deploy name.
   if api.IsNewDeployment() {
+    // Create new deployment name if not.
     api.DeploymentName = fmt.Sprintf("%s-%v", api.ContainerName, timeutil.MSSinceEpoch())
   } else {
+    // Use current deployment if already exists.
     api.DeploymentName = api.Deploy.DeploymentName
   }
 
@@ -99,11 +96,11 @@ func (api *Api) Configure() error {
 
 // Perform deploys the configured deployment to provided ApiCluster.
 func (api *Api) Perform() error {
-  // What patching an existing deploy would look like:
-  //jsonReprOfStuffToChange := `{shit to change}`
-  //api.Client.Deployments(api.Namespace).Patch(api.DeploymentName, types.JSONPatchType, []byte(jsonReprOfStuffToChange))
-
-  return CreateDeployment(api.Client, api.Namespace, api.Deployment)
+  if api.IsNewDeployment() {
+    return CreateDeployment(api.Client, api.Namespace, api.Deployment)
+  } else {
+    return UpdateDeployment(api.Client, api.Namespace, api.Deployment)
+  }
 }
 
 func (api *Api) GetResultChannel() <-chan Result {
@@ -128,7 +125,6 @@ func (api *Api) Watch() {
   }
 }
 
-// IsNewDeployment returns whether a k8s deployment already exists for this Deploy.
 func (api *Api) IsNewDeployment() bool {
   return api.Deploy.DeploymentName == ""
 }
@@ -149,11 +145,7 @@ func (api *Api) makeClient() error {
 }
 
 func (api *Api) makeEnvs() {
-  // Start with Deploy EnvVars.
-  envs := envvarsvc.GetMap(api.Deploy.ID)
-
-  // Add deploy-agnostic envs.
-  envs = maputil.MergeMaps(envs, map[string]string{
+  envs := maputil.MergeMaps(api.CustomEnvs, map[string]string{
     "AWS_ACCESS_KEY_ID": app.Config.AWSAccessKeyId,
     "AWS_REGION_NAME": app.Config.AWSRegionName,
     "AWS_SECRET_ACCESS_KEY": app.Config.AWSSecretAccessKey,

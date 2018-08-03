@@ -42,15 +42,12 @@ func FailByID(id uint) error {
   return Fail(&deploy)
 }
 
-func Deployed(id uint, deploymentName string) error {
+func Deployed(id uint, updates map[string]interface{}) error {
   // Prep Deploy model for ID.
   deploy := model.Deploy{}
   deploy.ID = id
 
-  updates := map[string]interface{}{
-    "stage": buildable.Deployed,
-    "deployment_name": deploymentName,
-  }
+  updates["stage"] = buildable.Deployed
 
   if err := app.DB.Model(&deploy).Updates(updates).Error; err != nil {
     return fmt.Errorf("error updating Deploy: %s", err.Error())

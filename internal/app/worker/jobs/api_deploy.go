@@ -5,6 +5,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/work"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/envvarsvc"
 )
 
 /*
@@ -23,9 +24,24 @@ func (c *Context) ApiDeploy(job *work.Job) error {
     return err
   }
 
-  // Create K8S train deploy and prep args.
+  // Get Deploy by ID.
+  deploy, err := deploysvc.FromID(deployID)
+
+  if err != nil {
+    deploysvc.FailByID(deployID)
+    app.Log.Errorln(err.Error())
+    return err
+  }
+
+  // Create K8S API deploy and prep args.
   apiDeploy := kdeploy.Api{}
-  apiDeployArgs := map[string]interface{}{"deployID": deployID}
+
+  apiDeployArgs := map[string]interface{}{
+    "deploy": deploy,
+    "commit": &deploy.Commit,
+    "model": &deploy.Model,
+    "customEnvs": envvarsvc.GetMap(deploy.ID),
+  }
 
   // Initialize API deploy.
   if err := apiDeploy.Init(apiDeployArgs); err != nil {
@@ -49,7 +65,11 @@ func (c *Context) ApiDeploy(job *work.Job) error {
   }
 
   // Update Deploy stage to Deployed and register its deployment name.
-  if err := deploysvc.Deployed(deployID, apiDeploy.DeploymentName); err != nil {
+  updates := map[string]interface{}{
+    "deployment_name": apiDeploy.DeploymentName,
+  }
+
+  if err := deploysvc.Deployed(deployID, updates); err != nil {
     deploysvc.FailByID(deployID)
     app.Log.Errorln(err.Error())
     return err

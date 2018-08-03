@@ -13,6 +13,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/modelversionsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/work"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
 )
 
 /*
@@ -133,9 +134,13 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   // Define args for the BuildDeploy job.
   jobArgs := work.Q{
     "resourceID": deploy.ID,
+    "buildTargetSha": commit.Sha,
     "projectID": project.ID,
     "targetCluster": cluster.Api,
-    "envs": envs,
+    "followOnJob": Names.ApiDeploy,
+    "followOnArgs": enc.JSON{
+      "deployID": deploy.ID,
+    },
   }
 
   // Enqueue new job to build this Project for the ApiCluster.
@@ -154,5 +159,4 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   }
 
   return nil
-
 }

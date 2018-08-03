@@ -12,8 +12,8 @@ type EnvVar struct {
   gorm.Model
   Uid        string `gorm:"type:varchar(240);default:null;not null;unique;index:env_var_uid"`
   Deploy     Deploy
-  DeployID   uint   `gorm:"default:null;not null;index:env_var_deploy_id"`
-  Key        string `gorm:"type:varchar(360);default:null;not null"`
+  DeployID   uint   `gorm:"default:null;not null;unique_index:env_var_grouped_index"`
+  Key        string `gorm:"type:varchar(360);default:null;not null;unique_index:env_var_grouped_index"`
   Val        string `gorm:"type:varchar(360);default:null"`
 }
 

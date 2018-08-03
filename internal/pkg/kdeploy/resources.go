@@ -269,6 +269,14 @@ func CreateDeployment(client *typedv1beta1.ExtensionsV1beta1Client, nsp string, 
   return nil
 }
 
+func UpdateDeployment(client *typedv1beta1.ExtensionsV1beta1Client, nsp string, deployment *v1beta1.Deployment) error {
+  if _, err := client.Deployments(nsp).Update(deployment); err != nil {
+    return fmt.Errorf("error updating deployment during API deploy: %s", err.Error())
+  }
+
+  return nil
+}
+
 func PodWatcherChannel(client *typedcorev1.CoreV1Client, nsp string, deployName string) (<-chan watch.Event, error) {
   // Define selector options to only find the pod we just deployed.
   watchOpts := metav1.ListOptions{

@@ -6,6 +6,8 @@ type names struct {
   BuildDeploy    string
   TrainDeploy    string
   ApiDeploy      string
+  UpdateDeploy   string
+  ApiUpdate      string
 }
 
 // Names for all supported jobs.
@@ -15,4 +17,6 @@ var Names = &names{
   BuildDeploy: "build_server_deploy",
   TrainDeploy: "train_deploy",
   ApiDeploy: "api_deploy",
+  UpdateDeploy: "update_deploy",
+  ApiUpdate: "api_update",
 }

@@ -30,6 +30,7 @@ func InitDeployRouter() {
 
   // Attach route handlers.
   deployRouter.HandleFunc("", CreateDeployHandler).Methods("POST")
+  deployRouter.HandleFunc("", UpdateDeployHandler).Methods("PUT")
 }
 
 // ----------- ROUTE HANDLERS -----------
@@ -59,6 +60,7 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
   // Validate deploy name availability.
   if !deploysvc.NameAvailable(pl.Name) {
     respond.Error(w, errmsg.DeployNameUnavailable())
+    return
   }
 
   // Find ApiCluster by slug.
@@ -67,6 +69,7 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
   if err != nil {
     app.Log.Errorln(err.Error())
     respond.Error(w, errmsg.ApiClusterNotFound())
+    return
   }
 
   // Find ModelVersion --> Model --> Project.
@@ -87,6 +90,7 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
   if mvError != nil {
     app.Log.Errorln(err.Error())
     respond.Error(w, errmsg.ModelVersionNotFound())
+    return
   }
 
   // Create Uid for Deploy manually so that its available as the log stream key.
@@ -111,4 +115,74 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
 
 
   // TODO: stream training logs as response.
+}
+
+/*
+  Update a Deploy
+
+  Method:  PIUT
+  Route:   /deploy
+  Payload:
+    name       string (required)
+    projectNsp string (required)
+    model      string (optional)
+    sha        string (optional)
+    envs       string (optional)
+*/
+func UpdateDeployHandler(w http.ResponseWriter, req *http.Request) {
+  // Parse & validate payload.
+  var pl payload.UpdateDeployPayload
+
+  if !pl.Validate(req) {
+    respond.Error(w, errmsg.InvalidPayload())
+    return
+  }
+
+  // Find Deploy by slug.
+  deploy, err := deploysvc.FromSlug(pl.Slug())
+
+  if err != nil {
+    respond.Error(w, errmsg.DeployNotFound())
+    return
+  }
+
+  modelVersion := deploy.ModelVersion
+
+  // If model was provided, validate it (and its version) exists.
+  if pl.Model != "" {
+    var modelVersion *model.ModelVersion
+    var mvError error
+
+    // Use model slug and version to find ModelVersion.
+    modelSlug, version := pl.ModelBreakdown()
+
+    if version != "" {
+      // If version provided, query by that.
+      modelVersion, mvError = modelversionsvc.PreloadFromVersion(version, modelSlug, pl.ProjectNsp)
+    } else {
+      // Otherwise, take the most recently created one.
+      modelVersion, mvError = modelversionsvc.PreloadLatest(modelSlug, pl.ProjectNsp)
+    }
+
+    if mvError != nil {
+      app.Log.Errorln(err.Error())
+      respond.Error(w, errmsg.ModelVersionNotFound())
+      return
+    }
+  }
+
+  // Create args for UpdateDeploy job.
+  jobArgs := work.Q{
+    "deployID": deploy.ID,
+    "modelVersionID": modelVersion.ID,
+    "sha": pl.Sha,
+    "envs": pl.Envs,
+  }
+
+  // Enqueue UpdateDeploy job.
+  if _, err := app.JobQueue.Enqueue(jobs.Names.UpdateDeploy, jobArgs); err != nil {
+    app.Log.Errorf("error scheduling UpdateDeploy job: %s", err.Error())
+    respond.Error(w, errmsg.UpdateDeploySchedulingFailed())
+    return
+  }
 }

@@ -33,6 +33,7 @@ func main() {
   workerPool.JobWithOptions(jobs.Names.BuildDeploy, noRetry, (*jobs.Context).BuildDeploy)
   workerPool.JobWithOptions(jobs.Names.TrainDeploy, noRetry, (*jobs.Context).TrainDeploy)
   workerPool.JobWithOptions(jobs.Names.ApiDeploy, noRetry, (*jobs.Context).ApiDeploy)
+  workerPool.JobWithOptions(jobs.Names.UpdateDeploy, noRetry, (*jobs.Context).UpdateDeploy)
 
   // Start processing jobs.
   workerPool.Start()

@@ -3,7 +3,6 @@ package kdeploy
 import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/app/worker/jobs"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
@@ -20,34 +19,38 @@ import (
 
 type Build struct {
   // Args
-  ResourceID    uint
-  TargetCluster string
+  ResourceID       uint
+  BuildTargetSha   string
+  TargetCluster    string
   TargetDeployEnvs string
+  PassThruMetadata string
 
   // Establish on Init
-  Project       *model.Project
-  Buildable     buildable.Buildable
-  ClusterName   string
-  DeployName    string
-  Image         string
-  ContainerName string
-  ResultChannel <-chan Result
+  Project          *model.Project
+  Buildable        buildable.Buildable
+  ClusterName      string
+  DeployName       string
+  Image            string
+  ContainerName    string
+  ResultChannel    <-chan Result
 
   // K8S resources
-  Namespace     string
-  Client        *typedcorev1.CoreV1Client
-  VolumeMounts  []corev1.VolumeMount
-  Volumes       []corev1.Volume
-  Envs          []corev1.EnvVar
-  Containers    []corev1.Container
-  Pod           *corev1.Pod
+  Namespace        string
+  Client           *typedcorev1.CoreV1Client
+  VolumeMounts     []corev1.VolumeMount
+  Volumes          []corev1.Volume
+  Envs             []corev1.EnvVar
+  Containers       []corev1.Container
+  Pod              *corev1.Pod
 }
 
 func (b *Build) Init(args map[string]interface{}) error {
   // Decode/assign args to struct keys.
   b.ResourceID = args["resourceID"].(uint)
+  b.BuildTargetSha = args["buildTargetSha"].(string)
   b.TargetCluster = args["targetCluster"].(string)
   b.TargetDeployEnvs = args["envs"].(string)
+  b.PassThruMetadata = args["passThruMetadata"].(string)
 
   // Find Project by ID.
   project, err := projectsvc.FromID(args["projectID"].(uint))
@@ -126,24 +129,6 @@ func (b *Build) Watch() {
   }
 }
 
-// FollowOnDeploy returns the KDeploy instance responsible for
-// deploying to the target cluster of the Build deploy.
-func (b *Build) NextDeploy() (string, map[string]interface{}) {
-  switch b.TargetCluster {
-  case cluster.Train:
-    return jobs.Names.TrainDeploy, map[string]interface{}{
-      "trainJobID": b.ResourceID,
-      "envs": b.TargetDeployEnvs,
-    }
-  case cluster.Api:
-    return jobs.Names.ApiDeploy, map[string]interface{}{
-      "deployID": b.ResourceID,
-    }
-  default:
-    return "", nil
-  }
-}
-
 func (b *Build) makeClient() error {
   // Configure CoreV1 client.
   client, nsp, err := ConfigureCoreV1(b.ClusterName)
@@ -176,7 +161,7 @@ func (b *Build) makeVolumes() {
 func (b *Build) makeEnvs() {
   envs := map[string]string{
     "BUILD_TARGET_ACCESS_TOKEN": b.Project.GetHost().GetToken(),
-    "BUILD_TARGET_SHA": b.Buildable.GetCommit().Sha,
+    "BUILD_TARGET_SHA": b.BuildTargetSha,
     "BUILD_TARGET_UID": b.Project.Uid,
     "BUILD_TARGET_URL": b.Project.Url(),
     "LOG_STREAM_KEY": b.Buildable.GetUid(),

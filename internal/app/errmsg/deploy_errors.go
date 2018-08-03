@@ -13,3 +13,11 @@ func CreateDeploySchedulingFailed() (*Error) {
 func DeployNameUnavailable() (*Error) {
   return ApiError(http.StatusInternalServerError, 9003, "deploy_name_unavailable")
 }
+
+func DeployNotFound() (*Error) {
+  return ApiError(http.StatusNotFound, 9004, "deploy_not_found")
+}
+
+func UpdateDeploySchedulingFailed() (*Error) {
+  return ApiError(http.StatusInternalServerError, 9005, "update_deploy_scheduling_failed")
+}

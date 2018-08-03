@@ -8,6 +8,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/work"
+  "encoding/json"
 )
 
 /*
@@ -16,17 +17,21 @@ import (
   its own deploy to either the Train Cluster or an API Cluster
 
   Args:
-    resourceID     (uint)   ID of the buildable model (TrainJob or Deploy -- based on the targetCluster)
-    projectID      (uint)   ID of the project to build
-    targetCluster  (string) which cluster the project is being built for ('train' or 'api')
-    envs           (string) json string representation of the custom env vars to use with the final target cluster deploy
+    resourceID       (uint)   ID of the buildable model (TrainJob or Deploy -- based on the targetCluster)
+    buildTargetSha   (string) sha to build target repo at
+    projectID        (uint)   ID of the project to build
+    targetCluster    (string) which cluster the project is being built for ('train' or 'api')
+    followOnJob      (string) Name of job to run immediately after the build succeeds
+    followOnArgs     (string) Args to pass to followOnJob
 */
 func (c *Context) BuildDeploy(job *work.Job) error {
   // Extract args from job.
   resourceID := uint(job.ArgInt64("resourceID"))
+  buildTargetSha := job.ArgString("buildTargetSha")
   projectID := uint(job.ArgInt64("projectID"))
   targetCluster := job.ArgString("targetCluster")
-  envs := job.ArgString("envs")
+  followOnJob := job.ArgString("followOnJob")
+  followOnArgs := job.ArgString("followOnArgs")
 
   if err := job.ArgError(); err != nil {
     buildablesvc.Fail(resourceID, targetCluster)
@@ -47,9 +52,9 @@ func (c *Context) BuildDeploy(job *work.Job) error {
 
   bdArgs := map[string]interface{}{
     "resourceID": resourceID,
+    "buildTargetSha": buildTargetSha,
     "projectID": projectID,
     "targetCluster": targetCluster,
-    "envs": envs,
   }
 
   // Initialize build deploy.
@@ -94,11 +99,15 @@ func (c *Context) BuildDeploy(job *work.Job) error {
     return deployResult.Error
   }
 
-  // Schedule deploy to target cluster.
-  targetDeployJob, targetDeployArgs := buildDeploy.NextDeploy()
+  // Unmarshal followOnArgs for target cluster deploy.
+  var targetDeployArgs map[string]interface{}
+  if followOnArgs != "" {
+    json.Unmarshal([]byte(followOnArgs), &targetDeployArgs)
+  }
 
-  if _, err := app.JobQueue.Enqueue(targetDeployJob, targetDeployArgs); err != nil {
-    app.Log.Errorf("error scheduling %s job: %s", targetDeployJob, err.Error())
+  // Schedule deploy to target cluster.
+  if _, err := app.JobQueue.Enqueue(followOnJob, targetDeployArgs); err != nil {
+    app.Log.Errorf("error scheduling %s job: %s", followOnJob, err.Error())
     return err
   }
 

@@ -18,3 +18,18 @@ func FromSha(sha string) (*model.Commit, error) {
 
   return &commit, nil
 }
+
+// FromID attempts to find a Commit record by the provided id.
+// Will return an error if no record is found.
+func FromID(id uint) (*model.Commit, error) {
+  // Find Commit by ID.
+  var commit model.Commit
+  result := app.DB.First(&commit, id)
+
+  // Return error if not found.
+  if result.RecordNotFound() {
+    return nil, fmt.Errorf("Commit(ID=%v) not found.\n", id)
+  }
+
+  return &commit, nil
+}
