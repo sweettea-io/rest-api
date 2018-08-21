@@ -7,14 +7,18 @@ import (
   "github.com/sweettea-io/rest-api/internal/app/route"
   "github.com/sweettea-io/rest-api/internal/pkg/config"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cloud"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/dns"
 )
 
 func main() {
   // Initialize the app.
   app.Init(config.New())
 
-  // Create cloud session object.
+  // Init cloud session.
   cloud.InitCloud()
+
+  // Init DNS service provider.
+  dns.InitDNS()
 
   // Build API routes.
   route.InitRouter()

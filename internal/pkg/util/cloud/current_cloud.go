@@ -5,19 +5,14 @@ import "github.com/sweettea-io/rest-api/internal/app"
 var CurrentCloud Cloud
 
 func InitCloud() {
+  var err error
+
   switch app.Config.CloudProvider {
   case AWS:
-    CurrentCloud = &AWSCloud{}
-  default:
-    CurrentCloud = nil
+    CurrentCloud, err = NewAWSCloud()
   }
 
-  // This is okay for environments where CLOUD_PROVIDER env var isn't required.
-  if CurrentCloud == nil {
-    app.Log.Warnln("Not initializing current cloud session.")
-    return
+  if err != nil {
+    panic(err)
   }
-
-  // Initialize current cloud.
-  CurrentCloud.Init()
 }

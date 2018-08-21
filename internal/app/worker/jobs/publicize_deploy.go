@@ -5,7 +5,6 @@ import (
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/rest-api/internal/pkg/k"
-  "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/util/dns"
 )
 
@@ -82,10 +81,8 @@ func (c *Context) PublicizeDeploy(job *work.Job) error {
     return failDeploy(deployID, err)
   }
 
-  // Get configured DNS service provider.
-  dnsProvider := app.Config.DNS()
-
-  if dnsProvider == nil {
+  // Ensure DNS service is currently configured.
+  if dns.CurrentDNS == nil {
     return failDeploy(deployID, fmt.Errorf("Can't upsert CNAME record for Deploy -- DNS not currently configured..."))
   }
 
@@ -93,7 +90,7 @@ func (c *Context) PublicizeDeploy(job *work.Job) error {
   subdomain := deploy.NewHostname()
 
   // Add a CNAME RR to your domain's DNS, aliasing the Deploy's hostname to the LoadBalancer hostname.
-  if err := dnsProvider.UpsertRR(dns.CNAME, subdomain, []string{lbHostname}, 60); err != nil {
+  if err := dns.CurrentDNS.UpsertRR(dns.CNAME, subdomain, []string{lbHostname}, 60); err != nil {
     return failDeploy(deployID, err)
   }
 

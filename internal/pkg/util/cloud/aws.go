@@ -12,7 +12,7 @@ type AWSCloud struct {
   Client *session.Session
 }
 
-func (a *AWSCloud) Init() error {
+func NewAWSCloud() (*AWSCloud, error) {
   // Create a new AWS Session.
   sess, err := session.NewSession(&aws.Config{
     Region: aws.String(app.Config.AWSRegionName),
@@ -20,13 +20,14 @@ func (a *AWSCloud) Init() error {
   })
 
   if err != nil {
-    return fmt.Errorf("error initializing new AWS session: %s", err.Error())
+    return nil, fmt.Errorf("error initializing new AWS session: %s", err.Error())
   }
 
-  // Store session object as Client.
-  a.Client = sess
+  return &AWSCloud{Client: sess}, nil
+}
 
-  return nil
+func (a *AWSCloud) GetClient() *session.Session {
+  return a.Client
 }
 
 func (a *AWSCloud) SSLServiceLabels() map[string]string {

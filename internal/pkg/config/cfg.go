@@ -100,24 +100,6 @@ func (cfg *Config) BuildpackEnvs() map[string]string {
   }
 }
 
-func (cfg *Config) Cloud() cloud.Cloud {
-  switch cfg.CloudProvider {
-  case cloud.AWS:
-    return &cloud.AWSCloud{}
-  default:
-    return nil
-  }
-}
-
-func (cfg *Config) DNS() dns.DNS {
-  switch cfg.DNSService {
-  case dns.Route53:
-    return &dns.Route53DNS{}
-  default:
-    return nil
-  }
-}
-
 // New creates and returns a new Config struct instance populated from environment variables.
 func New() *Config {
   // Unmarshal values into a config struct.
@@ -128,9 +110,6 @@ func New() *Config {
 
   // Validate config values.
   validateConfigs(&cfg)
-
-  // Load current cloud session.
-  cloud.Load(&cfg)
 
   return &cfg
 }

@@ -8,6 +8,7 @@ import (
   "k8s.io/apimachinery/pkg/watch"
   "fmt"
   "github.com/sweettea-io/rest-api/internal/pkg/util/maputil"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/cloud"
 )
 
 type Expose struct {
@@ -47,12 +48,9 @@ func (expose *Expose) Init(args map[string]interface{}) error {
     "name": expose.ServiceName,
   }
 
-  // Check if need to expand service labels.
-  cloud := app.Config.Cloud()
-
   // Add SSL labels if port is 443
-  if expose.Port == 443 && cloud != nil {
-    expose.Labels = maputil.MergeMaps(expose.Labels, cloud.SSLServiceLabels())
+  if expose.Port == 443 && cloud.CurrentCloud != nil {
+    expose.Labels = maputil.MergeMaps(expose.Labels, cloud.CurrentCloud.SSLServiceLabels())
   }
 
   return nil
