@@ -109,6 +109,15 @@ func (cfg *Config) Cloud() cloud.Cloud {
   }
 }
 
+func (cfg *Config) DNS() dns.DNS {
+  switch cfg.DNSService {
+  case dns.Route53:
+    return &dns.Route53DNS{}
+  default:
+    return nil
+  }
+}
+
 // New creates and returns a new Config struct instance populated from environment variables.
 func New() *Config {
   // Unmarshal values into a config struct.
