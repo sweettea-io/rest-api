@@ -7,6 +7,7 @@ import (
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
   "k8s.io/apimachinery/pkg/watch"
   "fmt"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/maputil"
 )
 
 type Expose struct {
@@ -46,10 +47,12 @@ func (expose *Expose) Init(args map[string]interface{}) error {
     "name": expose.ServiceName,
   }
 
+  // Check if need to expand service labels.
+  cloud := app.Config.Cloud()
+
   // Add SSL labels if port is 443
-  if expose.Port == 443 {
-    expose.Labels["service.beta.kubernetes.io/aws-load-balancer-ssl-cert"] = app.Config.WildcardSSLCertArn
-    expose.Labels["service.beta.kubernetes.io/aws-load-balancer-ssl-ports"] = "443"
+  if expose.Port == 443 && cloud != nil {
+    expose.Labels = maputil.MergeMaps(expose.Labels, cloud.SSLServiceLabels())
   }
 
   return nil

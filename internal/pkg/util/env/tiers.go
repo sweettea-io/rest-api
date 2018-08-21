@@ -1,11 +1,13 @@
 package env
 
-// Supported environments
-const Test = "test"
-const Local = "local"
-const Dev = "dev"
-const Staging = "staging"
-const Prod ="prod"
+// Supported environments.
+const (
+  Test = "test"
+  Local = "local"
+  Dev = "dev"
+  Staging = "staging"
+  Prod ="prod"
+)
 
 var tiers = map[string]bool {
   Test: true,
