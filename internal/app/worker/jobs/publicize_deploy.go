@@ -5,6 +5,8 @@ import (
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/rest-api/internal/pkg/k"
+  "github.com/sweettea-io/rest-api/internal/app"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/dns"
 )
 
 /*
@@ -69,22 +71,34 @@ func (c *Context) PublicizeDeploy(job *work.Job) error {
   }
 
   // Parse LoadBalancer hostname from result.
-  lbHost, ok := serviceResult.Meta["lbHost"].(string)
+  lbHostname, ok := serviceResult.Meta["lbHostname"].(string)
 
-  if !ok || lbHost == "" {
-    return failDeploy(deployID, fmt.Errorf("Error parsing lbHost from Service creation result for Deploy(id=%v).", deployID))
+  if !ok || lbHostname == "" {
+    return failDeploy(deployID, fmt.Errorf("Error parsing lbHostname from Service creation result for Deploy(id=%v).", deployID))
   }
 
   // Assign LoadBalancer hostname to Deploy.
-  if err := deploysvc.RegisterLoadBalancerHost(deploy, lbHost); err != nil {
+  if err := deploysvc.RegisterLoadBalancerHost(deploy, lbHostname); err != nil {
     return failDeploy(deployID, err)
   }
 
-  // Add a CNAME RR to your domain's DNS, aliasing the the LoadBalancer hostname to a specific subdomain.
-  //if err :=
+  // Get configured DNS service provider.
+  dnsProvider := app.Config.DNS()
 
-  // Mark Deploy as public now.
-  if err := deploysvc.Publicize(deploy); err != nil {
+  if dnsProvider == nil {
+    return failDeploy(deployID, fmt.Errorf("Can't upsert CNAME record for Deploy -- DNS not currently configured..."))
+  }
+
+  // Generate new subdomain for this Deploy, using currently configured Domain.
+  subdomain := deploy.NewHostname()
+
+  // Add a CNAME RR to your domain's DNS, aliasing the Deploy's hostname to the LoadBalancer hostname.
+  if err := dnsProvider.UpsertRR(dns.CNAME, subdomain, []string{lbHostname}, 60); err != nil {
+    return failDeploy(deployID, err)
+  }
+
+  // Mark Deploy as public now at specified subdomain.
+  if err := deploysvc.Publicize(deploy, subdomain); err != nil {
     return failDeploy(deployID, err)
   }
 

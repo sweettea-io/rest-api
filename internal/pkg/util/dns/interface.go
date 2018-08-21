@@ -1,5 +1,5 @@
 package dns
 
 type DNS interface {
-  UpsertRR() error
+  UpsertRR(rrType string, name string, values []string, ttl uint) error
 }

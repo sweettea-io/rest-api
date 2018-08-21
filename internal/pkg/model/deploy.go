@@ -2,9 +2,11 @@ package model
 
 import (
   "github.com/jinzhu/gorm"
+  "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/util/str"
+  "fmt"
 )
 
 /*
@@ -29,7 +31,8 @@ type Deploy struct {
   Public         bool         `gorm:"default:false"`
   Stage          string       `gorm:"default:null;not null"`
   Failed         bool         `gorm:"default:false"`
-  LBHost         string       `gorm:"type:varchar(240);default:null"`
+  LBHostname     string       `gorm:"type:varchar(240);default:null"`
+  Hostname       string       `gorm:"type:varchar(240);default:null"`
   ClientID       string       `gorm:"type:varchar(240);default:null;not null"`
   ClientSecret   string       `gorm:"type:varchar(240);default:null;not null"`
   EnvVars        []EnvVar
@@ -55,4 +58,8 @@ func (deploy *Deploy) GetCommit() *Commit {
 
 func (deploy *Deploy) GetUid() string {
   return deploy.Uid
+}
+
+func (deploy *Deploy) NewHostname() string {
+  return fmt.Sprintf("%s.%s", deploy.Slug, app.Config.Domain)
 }

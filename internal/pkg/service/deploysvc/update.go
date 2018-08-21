@@ -56,16 +56,21 @@ func Deployed(id uint, updates map[string]interface{}) error {
   return nil
 }
 
-func RegisterLoadBalancerHost(deploy *model.Deploy, lbHost string) error {
-  if err := app.DB.Model(deploy).Updates(map[string]interface{}{"LBHost": lbHost}).Error; err != nil {
+func RegisterLoadBalancerHost(deploy *model.Deploy, lbHostname string) error {
+  if err := app.DB.Model(deploy).Updates(map[string]interface{}{"LBHostname": lbHostname}).Error; err != nil {
     return fmt.Errorf("error updating LBHost on Deploy(id=%v): %s", deploy.ID, err.Error())
   }
 
   return nil
 }
 
-func Publicize(deploy *model.Deploy) error {
-  if err := app.DB.Model(deploy).Updates(map[string]interface{}{"Public": true}).Error; err != nil {
+func Publicize(deploy *model.Deploy, hostname string) error {
+  updates := map[string]interface{}{
+    "Public": true,
+    "Hostname": hostname,
+  }
+
+  if err := app.DB.Model(deploy).Updates(updates).Error; err != nil {
     return fmt.Errorf("error registering Deploy(id=%v) as public: %s", deploy.ID, err.Error())
   }
 

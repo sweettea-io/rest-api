@@ -147,16 +147,16 @@ func (expose *Expose) checkEventForResult(event watch.Event) *Result {
   }
 
   // We only care about first one (there should only ever be one).
-  lbHost := ingressList[0].Hostname
+  lbHostname := ingressList[0].Hostname
 
-  if lbHost == "" {
+  if lbHostname == "" {
     return nil
   }
 
   return &Result{
     Ok: true,
     Meta: map[string]interface{}{
-      "lbHost": lbHost,
+      "lbHostname": lbHostname,
     },
   }
 }
