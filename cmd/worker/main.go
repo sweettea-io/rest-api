@@ -6,12 +6,16 @@ import (
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/app/worker/jobs"
   "github.com/sweettea-io/rest-api/internal/pkg/config"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/cloud"
   "github.com/sweettea-io/work"
 )
 
 func main() {
   // Initialize the app.
   app.Init(config.New())
+
+  // Create cloud session object.
+  cloud.InitCloud()
 
   // Create new worker pool with empty job context.
   workerPool := work.NewWorkerPool(
