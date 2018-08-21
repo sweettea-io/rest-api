@@ -4,7 +4,6 @@ import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/rest-api/internal/pkg/util/maputil"
@@ -48,7 +47,7 @@ func (api *Api) Init(args map[string]interface{}) error {
   api.CustomEnvs = args["customEnvs"].(map[string]string)
 
   // Update Deploy to Deploying.
-  if err := deploysvc.UpdateStage(api.Deploy, buildable.Deploying); err != nil {
+  if err := deploysvc.UpdateStage(api.Deploy, model.BuildStages.Deploying); err != nil {
     return err
   }
 

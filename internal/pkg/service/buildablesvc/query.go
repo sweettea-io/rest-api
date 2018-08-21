@@ -2,13 +2,13 @@ package buildablesvc
 
 import (
   "fmt"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
+  "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
-func FromID(id uint, targetCluster string) (buildable.Buildable, error) {
+func FromID(id uint, targetCluster string) (model.Buildable, error) {
   switch targetCluster {
   case cluster.Train:
     return trainjobsvc.FromID(id)

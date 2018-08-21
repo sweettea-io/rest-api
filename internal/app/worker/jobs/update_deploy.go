@@ -8,6 +8,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
   "fmt"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/projectsvc"
 )
 
 /*
@@ -40,13 +41,12 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
 
   // Get ref to this Deploy's current Commit/Project.
   commit := &deploy.Commit
-  project := commit.Project
+  project := &commit.Project
 
   // If sha was provided to migrate to, fetch & upsert its Commit.
   if sha != "" {
     var err error
-    host := project.GetHost()
-    host.Configure()
+    host := projectsvc.GetHost(project)
 
     if sha == "latest" {
       sha, err = host.LatestSha(project.Owner(), project.Repo())
@@ -59,7 +59,6 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
     }
 
     commit, err = commitsvc.Upsert(project.ID, sha)
-
     if err != nil {
       return logAndFail(err)
     }

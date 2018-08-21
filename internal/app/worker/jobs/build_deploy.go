@@ -3,12 +3,12 @@ package jobs
 import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/work"
   "encoding/json"
   "github.com/sweettea-io/rest-api/internal/pkg/k"
+  "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
 /*
@@ -69,7 +69,7 @@ func (c *Context) BuildDeploy(job *work.Job) error {
   }
 
   // Update buildable stage to Building.
-  if err := buildablesvc.UpdateStage(resourceID, buildable.Building, targetCluster); err != nil {
+  if err := buildablesvc.UpdateStage(resourceID, model.BuildStages.Building, targetCluster); err != nil {
     return failBuildable(resourceID, targetCluster, err)
   }
 
@@ -97,7 +97,7 @@ func (c *Context) BuildDeploy(job *work.Job) error {
   }
 
   // Update buildable stage to DeployScheduled.
-  if err := buildablesvc.UpdateStage(resourceID, buildable.DeployScheduled, targetCluster); err != nil {
+  if err := buildablesvc.UpdateStage(resourceID, model.BuildStages.DeployScheduled, targetCluster); err != nil {
     return failBuildable(resourceID, targetCluster, err)
   }
 

@@ -87,7 +87,7 @@ func (c *Context) PublicizeDeploy(job *work.Job) error {
   }
 
   // Generate new subdomain for this Deploy, using currently configured Domain.
-  subdomain := deploy.NewHostname()
+  subdomain := deploysvc.NewHostname(deploy)
 
   // Add a CNAME RR to your domain's DNS, aliasing the Deploy's hostname to the LoadBalancer hostname.
   if err := dns.CurrentDNS.UpsertRR(dns.CNAME, subdomain, []string{lbHostname}, 60); err != nil {

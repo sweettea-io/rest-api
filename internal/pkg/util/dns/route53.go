@@ -2,17 +2,16 @@ package dns
 
 import (
   "fmt"
-  "github.com/sweettea-io/rest-api/internal/app"
   "github.com/aws/aws-sdk-go/service/route53"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cloud"
 )
 
 type Route53DNS struct {
   Client *route53.Route53
-  HostedZoneID string
+  HostedZoneId string
 }
 
-func NewRoute53() *Route53DNS {
+func NewRoute53(hostedZoneId string) *Route53DNS {
   // Route53 requires the AWS cloud provider to be configured.
   currCloud, ok := cloud.CurrentCloud.(*cloud.AWSCloud)
 
@@ -20,13 +19,13 @@ func NewRoute53() *Route53DNS {
     panic(fmt.Errorf("Can't configure Route53 as DNS Service without AWS as cloud provider..."))
   }
 
-  if app.Config.HostedZoneId == "" {
+  if hostedZoneId == "" {
     panic(fmt.Errorf("HostedZoneId config can't be blank when using Route53 as DNS Service"))
   }
 
   return &Route53DNS{
     Client: route53.New(currCloud.Client),
-    HostedZoneID: app.Config.HostedZoneId,
+    HostedZoneId: hostedZoneId,
   }
 }
 
@@ -42,7 +41,7 @@ func (r *Route53DNS) UpsertRR(rrType string, name string, values []string, ttl i
 
   // Prep changes for Route53 API call.
   changes := &route53.ChangeResourceRecordSetsInput{
-    HostedZoneId: &r.HostedZoneID,
+    HostedZoneId: &r.HostedZoneId,
     ChangeBatch: &route53.ChangeBatch{
       Changes: []*route53.Change{{
         Action: &action,

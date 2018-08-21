@@ -4,7 +4,6 @@ import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/projectsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
@@ -27,7 +26,7 @@ type Build struct {
 
   // Establish on Init
   Project          *model.Project
-  Buildable        buildable.Buildable
+  Buildable        model.Buildable
   ClusterName      string
   DeployName       string
   Image            string
@@ -160,7 +159,7 @@ func (b *Build) makeVolumes() {
 
 func (b *Build) makeEnvs() {
   envs := map[string]string{
-    "BUILD_TARGET_ACCESS_TOKEN": b.Project.GetHost().GetToken(),
+    "BUILD_TARGET_ACCESS_TOKEN": projectsvc.GetHost(b.Project).GetToken(),
     "BUILD_TARGET_SHA": b.BuildTargetSha,
     "BUILD_TARGET_UID": b.Project.Uid,
     "BUILD_TARGET_URL": b.Project.Url(),

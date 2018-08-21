@@ -15,11 +15,16 @@ func main() {
   // Initialize the app.
   app.Init(config.New())
 
-  // Init cloud session.
-  cloud.InitCloud()
+  // Init cloud instance.
+  cloud.InitCloud(app.Config.CloudProvider, map[string]string{
+    "region": app.Config.AWSRegionName,
+    "sslCert": app.Config.WildcardSSLCertArn,
+  })
 
   // Init DNS service provider.
-  dns.InitDNS()
+  dns.InitDNS(app.Config.DNSService, map[string]string{
+    "hostedZoneId": app.Config.HostedZoneId,
+  })
 
   // Create new worker pool with empty job context.
   workerPool := work.NewWorkerPool(

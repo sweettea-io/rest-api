@@ -1,9 +1,10 @@
 package commitsvc
 
 import (
+  "fmt"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
   "github.com/sweettea-io/rest-api/internal/app"
-  "fmt"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/projectsvc"
 )
 
 // FromID attempts to find a Commit record by the provided sha.
@@ -41,10 +42,7 @@ func FromShaOrLatest(sha string, project *model.Project) (*model.Commit, error) 
   }
 
   // If sha doesn't exist, fetch, upsert, and return the latest commit for this project.
-  host := project.GetHost()
-  host.Configure()
-
-  // Get latest commit sha for project.
+  host := projectsvc.GetHost(project)
   latestSha, err := host.LatestSha(project.Owner(), project.Repo())
 
   if err != nil {

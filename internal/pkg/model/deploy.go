@@ -2,11 +2,8 @@ package model
 
 import (
   "github.com/jinzhu/gorm"
-  "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/util/str"
-  "fmt"
 )
 
 /*
@@ -46,7 +43,7 @@ func (deploy *Deploy) BeforeSave(scope *gorm.Scope) error {
 
 // Assign initial Stage, ClientID, & ClientSecret to Deploy before creation.
 func (deploy *Deploy) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Stage", buildable.Created)
+  scope.SetColumn("Stage", BuildStages.Created)
   scope.SetColumn("ClientID", unique.NewUid())
   scope.SetColumn("ClientSecret", unique.FreshSecret())
   return nil
@@ -58,8 +55,4 @@ func (deploy *Deploy) GetCommit() *Commit {
 
 func (deploy *Deploy) GetUid() string {
   return deploy.Uid
-}
-
-func (deploy *Deploy) NewHostname() string {
-  return fmt.Sprintf("%s.%s", deploy.Slug, app.Config.Domain)
 }

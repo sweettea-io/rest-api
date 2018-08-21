@@ -3,7 +3,6 @@ package model
 import (
   "github.com/jinzhu/gorm"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
 )
 
 /*
@@ -24,7 +23,7 @@ type TrainJob struct {
 
 // Assign initial stage before creation.
 func (tj *TrainJob) BeforeCreate(scope *gorm.Scope) error {
-  scope.SetColumn("Stage", buildable.Created)
+  scope.SetColumn("Stage", BuildStages.Created)
   return nil
 }
 

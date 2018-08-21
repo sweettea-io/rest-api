@@ -3,11 +3,11 @@ package jobs
 import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/envvarsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/k"
+  "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
 /*
@@ -61,7 +61,7 @@ func (c *Context) TrainDeploy(job *work.Job) error {
   }
 
   // Update TrainJob stage to Deployed.
-  if err := trainjobsvc.UpdateStageByID(trainJobID, buildable.Deployed); err != nil {
+  if err := trainjobsvc.UpdateStageByID(trainJobID, model.BuildStages.Deployed); err != nil {
     return failTrainJob(trainJobID, err)
   }
 

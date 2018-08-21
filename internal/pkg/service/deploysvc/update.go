@@ -1,10 +1,9 @@
 package deploysvc
 
 import (
-  "github.com/sweettea-io/rest-api/internal/pkg/model"
-  "github.com/sweettea-io/rest-api/internal/app"
   "fmt"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
+  "github.com/sweettea-io/rest-api/internal/app"
+  "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
 func UpdateStage(deploy *model.Deploy, stage string) error {
@@ -47,7 +46,7 @@ func Deployed(id uint, updates map[string]interface{}) error {
   deploy := model.Deploy{}
   deploy.ID = id
 
-  updates["stage"] = buildable.Deployed
+  updates["stage"] = model.BuildStages.Deployed
 
   if err := app.DB.Model(&deploy).Updates(updates).Error; err != nil {
     return fmt.Errorf("error updating Deploy: %s", err.Error())

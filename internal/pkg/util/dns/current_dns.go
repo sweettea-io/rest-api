@@ -1,12 +1,10 @@
 package dns
 
-import "github.com/sweettea-io/rest-api/internal/app"
-
 var CurrentDNS DNS
 
-func InitDNS() {
-  switch app.Config.DNSService {
+func InitDNS(dnsService string, config map[string]string) {
+  switch dnsService {
   case Route53:
-    CurrentDNS = NewRoute53()
+    CurrentDNS = NewRoute53(config["hostedZoneId"])
   }
 }

@@ -1,15 +1,16 @@
 package cloud
 
-import "github.com/sweettea-io/rest-api/internal/app"
-
 var CurrentCloud Cloud
 
-func InitCloud() {
+func InitCloud(provider string, config map[string]string) {
   var err error
 
-  switch app.Config.CloudProvider {
+  switch provider {
   case AWS:
-    CurrentCloud, err = NewAWSCloud()
+    CurrentCloud, err = NewAWSCloud(
+      config["region"],
+      config["sslCert"],
+    )
   }
 
   if err != nil {

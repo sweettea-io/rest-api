@@ -5,7 +5,6 @@ import (
   "strings"
   "github.com/jinzhu/gorm"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/projecthost"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
 )
 
@@ -18,7 +17,6 @@ import (
 type Project struct {
   gorm.Model
   Uid             string        `gorm:"type:varchar(240);default:null;not null;unique;index:project_uid"`
-  Host            string        `gorm:"type:varchar(240);default:null;not null"`
   Nsp             string        `gorm:"type:varchar(360);default:null;not null;unique;index:project_nsp"`
   ProjectConfig   *ProjectConfig
   ProjectConfigID uint          `gorm:"default:null;not null;index:project_config_id"`
@@ -26,19 +24,9 @@ type Project struct {
   Models          []Model
 }
 
-// Assign Host to Project before saving.
+// Downcase project namespace before saving.
 func (project *Project) BeforeSave(scope *gorm.Scope) error {
-  // Downcase project namespace.
   scope.SetColumn("Nsp", strings.ToLower(project.Nsp))
-
-  // Get supported host for namespace.
-  host := hostNameForNsp(project.Nsp)
-
-  if host == "" {
-    return fmt.Errorf("invalid project namespace \"%s\" -- no recognizable host", project.Nsp)
-  }
-
-  scope.SetColumn("Host", host)
   return nil
 }
 
@@ -51,22 +39,9 @@ func (project *Project) BeforeCreate(scope *gorm.Scope) error {
 func (project *Project) AsJSON() enc.JSON {
   return enc.JSON{
     "uid": project.Uid,
-    "host": project.Host,
     "nsp": project.Nsp,
     "config": project.ProjectConfig.AsJSON(),
   }
-}
-
-func (project *Project) GetHost() projecthost.Host {
-  var host projecthost.Host
-
-  switch project.Host {
-  case projecthost.GitHubName:
-    host = &projecthost.GitHub{}
-    host.Init()
-  }
-
-  return host
 }
 
 func (project *Project) SplitNsp() []string {
@@ -83,15 +58,4 @@ func (project *Project) Repo() string {
 
 func (project *Project) Url() string {
   return fmt.Sprintf("https://%s", project.Nsp)
-}
-
-func hostNameForNsp(nsp string) string {
-  host := ""
-
-  switch true {
-  case strings.HasPrefix(nsp, projecthost.GitHubDomain):
-    host = projecthost.GitHubName
-  }
-
-  return host
 }

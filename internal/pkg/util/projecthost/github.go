@@ -5,7 +5,6 @@ import (
   "fmt"
   "net/http"
   "github.com/google/go-github/github"
-  "github.com/sweettea-io/rest-api/internal/app"
   "golang.org/x/oauth2"
 )
 
@@ -16,10 +15,6 @@ type GitHub struct {
   Token  string
   Client *github.Client
   Ctx    context.Context
-}
-
-func (gh *GitHub) Init() {
-  gh.Token = app.Config.GitHubAccessToken
 }
 
 func (gh *GitHub) Configure() {
@@ -59,7 +54,7 @@ func (gh *GitHub) LatestSha(owner, repo string) (string, error) {
 
 func (gh *GitHub) EnsureCommitExists(owner, repo, sha string) error {
   if _, _, err := gh.Client.Repositories.GetCommit(gh.Ctx, owner, repo, sha); err != nil {
-    return fmt.Errorf("no commit(sha=%s) exists for GitHub project: %s/%s", owner, repo, sha)
+    return fmt.Errorf("no commit(sha=%s) exists for GitHub project: %s/%s\n", sha, owner, repo)
   }
 
   return nil

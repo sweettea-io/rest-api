@@ -4,7 +4,6 @@ import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/model"
-  "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/rest-api/internal/pkg/util/maputil"
@@ -50,7 +49,7 @@ func (t *Train) Init(args map[string]interface{}) error {
   }
 
   // Update TrainJob to Deploying.
-  if err := trainjobsvc.UpdateStage(trainJob, buildable.Deploying); err != nil {
+  if err := trainjobsvc.UpdateStage(trainJob, model.BuildStages.Deploying); err != nil {
     return err
   }
 
