@@ -33,3 +33,30 @@ func FromID(id uint) (*model.Commit, error) {
 
   return &commit, nil
 }
+
+func FromShaOrLatest(sha string, project *model.Project) (*model.Commit, error) {
+  // If sha exists, return the Commit for that sha.
+  if sha != "" {
+    return FromSha(sha)
+  }
+
+  // If sha doesn't exist, fetch, upsert, and return the latest commit for this project.
+  host := project.GetHost()
+  host.Configure()
+
+  // Get latest commit sha for project.
+  latestSha, err := host.LatestSha(project.Owner(), project.Repo())
+
+  if err != nil {
+    return nil, err
+  }
+
+  // Upsert Commit for fetched sha.
+  commit, err := Upsert(project.ID, latestSha)
+
+  if err != nil {
+    return nil, err
+  }
+
+  return commit, nil
+}

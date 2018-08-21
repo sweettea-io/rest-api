@@ -3,7 +3,6 @@ package jobs
 import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/pkg/model"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/apiclustersvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/commitsvc"
@@ -42,49 +41,23 @@ func (c *Context) CreateDeploy(job *work.Job) error {
 
   // Find ApiCluster by ID.
   apiCluster, err := apiclustersvc.FromID(apiClusterID)
-
   if err != nil {
     return logAndFail(err)
   }
 
   // Find ModelVersion by ID.
   modelVersion, err := modelversionsvc.FromID(modelVersionID)
-
   if err != nil {
     return logAndFail(err)
   }
 
-  project := modelVersion.Model.Project
-  var commit *model.Commit
+  // Store ref to project.
+  project := &modelVersion.Model.Project
 
-  // If sha provided, find Commit by that value.
-  // Otherwise, fetch the latest commit from the project's repo host.
-  if sha != "" {
-    var err error
-    commit, err = commitsvc.FromSha(sha)
-
-    if err != nil {
-      return logAndFail(err)
-    }
-  } else {
-    // Get host for this project.
-    host := project.GetHost()
-    host.Configure()
-
-    // Get latest commit sha for project.
-    latestSha, err := host.LatestSha(project.Owner(), project.Repo())
-
-    if err != nil {
-      return logAndFail(err)
-    }
-
-    // Upsert Commit for fetched sha.
-    var commitUpsertErr error
-    commit, err = commitsvc.Upsert(project.ID, latestSha)
-
-    if commitUpsertErr != nil {
-      return logAndFail(err)
-    }
+  // If sha provided, find Commit by that value. Otherwise, fetch latest commit from repo.
+  commit, err := commitsvc.FromShaOrLatest(sha, project)
+  if err != nil {
+    return logAndFail(err)
   }
 
   // Upsert Deploy.
@@ -100,15 +73,14 @@ func (c *Context) CreateDeploy(job *work.Job) error {
     return logAndFail(err)
   }
 
-  // If Deploy already exists,
+  // If Deploy already exists, return an "Everything up-to-date." message.
   if !isNew {
-    // Stream back a success message with "Everything up-to-date."
+    // TODO: stream back a success message with "Everything up-to-date."
     return nil
   }
 
   // Convert stringified envs into map[string]string representation.
   envsMap, err := envvarsvc.MapFromBytes([]byte(envs))
-
   if err != nil {
     return failDeploy(deploy.ID, err)
   }

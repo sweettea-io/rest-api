@@ -12,7 +12,6 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
-  m "github.com/sweettea-io/rest-api/internal/pkg/model"
 )
 
 /*
@@ -45,60 +44,30 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
 
   // Get project by ID.
   project, err := projectsvc.FromID(projectID)
-
   if err != nil {
     return logAndFail(err)
   }
 
-  var commit *m.Commit
-
-  // If sha provided, find Commit by that value.
-  // Otherwise, fetch the latest commit from the project's repo host.
-  if sha != "" {
-    var err error
-    commit, err = commitsvc.FromSha(sha)
-
-    if err != nil {
-      return logAndFail(err)
-    }
-  } else {
-    // Get host for this project.
-    host := project.GetHost()
-    host.Configure()
-
-    // Get latest commit sha for project.
-    latestSha, err := host.LatestSha(project.Owner(), project.Repo())
-
-    if err != nil {
-      return logAndFail(err)
-    }
-
-    // Upsert Commit for fetched sha.
-    var commitUpsertErr error
-    commit, err = commitsvc.Upsert(project.ID, latestSha)
-
-    if commitUpsertErr != nil {
-      return logAndFail(err)
-    }
+  // If sha provided, find Commit by that value. Otherwise, fetch latest commit from repo.
+  commit, err := commitsvc.FromShaOrLatest(sha, project)
+  if err != nil {
+    return logAndFail(err)
   }
 
   // Upsert Model for provided slug.
   model, err := modelsvc.Upsert(project.ID, modelSlug)
-
   if err != nil {
     return logAndFail(err)
   }
 
   // Create new ModelVersion for this model.
   modelVersion, err := modelversionsvc.Create(model.ID)
-
   if err != nil {
     return logAndFail(err)
   }
 
   // Create new TrainJob.
   trainJob, err := trainjobsvc.Create(trainJobUid, commit.ID, modelVersion.ID)
-
   if err != nil {
     return logAndFail(err)
   }
