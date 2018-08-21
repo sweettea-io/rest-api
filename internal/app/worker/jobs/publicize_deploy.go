@@ -80,9 +80,13 @@ func (c *Context) PublicizeDeploy(job *work.Job) error {
     return failDeploy(deployID, err)
   }
 
-
   // Add a CNAME record to your domain's DNS mapping the publicized deploy url to the ELB url
-  // Update Deploy.Public to true
+
+
+  // Mark Deploy as public now.
+  if err := deploysvc.Publicize(deploy); err != nil {
+    return failDeploy(deployID, err)
+  }
 
   return nil
 }

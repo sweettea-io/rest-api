@@ -63,3 +63,11 @@ func RegisterLoadBalancerHost(deploy *model.Deploy, lbHost string) error {
 
   return nil
 }
+
+func Publicize(deploy *model.Deploy) error {
+  if err := app.DB.Model(deploy).Updates(map[string]interface{}{"Public": true}).Error; err != nil {
+    return fmt.Errorf("error registering Deploy(id=%v) as public: %s", deploy.ID, err.Error())
+  }
+
+  return nil
+}
