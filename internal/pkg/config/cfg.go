@@ -5,6 +5,7 @@ import (
   "github.com/sweettea-io/envdecode"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cloud"
   "github.com/sweettea-io/rest-api/internal/pkg/util/env"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/dns"
 )
 
 // Config represents app config populated from environment variables.
@@ -19,6 +20,7 @@ type Config struct {
   CloudProvider                     string `env:"CLOUD_PROVIDER,required,ignore_on_envs=test|local"`
   DatabaseUrl                       string `env:"DATABASE_URL,required"`
   Debug                             bool   `env:"DEBUG,required"`
+  DNSService                        string `env:"DNS_SERVICE,required,ignore_on_envs=test|local"`
   DeployReplicasCount               int32  `env:"DEPLOY_REPLICAS_COUNT,required,ignore_on_envs=test"`
   DockerRegistryOrg                 string `env:"DOCKER_REGISTRY_ORG,required,ignore_on_envs=test"`
   DockerRegistryUsername            string `env:"DOCKER_REGISTRY_USERNAME,required,ignore_on_envs=test"`
@@ -137,6 +139,14 @@ func validateConfigs(cfg *Config) {
     panic(fmt.Errorf(
       "%s is not a valid cloud provider. Check 'internal/pkg/util/cloud/clouds.go' for a list of valid options.\n",
       cfg.CloudProvider,
+    ))
+  }
+
+  // Ensure DNS_SERVICE value is supported (if it exists -- not always required)
+  if cfg.DNSService != "" && !dns.IsValidDNS(cfg.DNSService) {
+    panic(fmt.Errorf(
+      "%s is not a valid DNS service. Check 'internal/pkg/util/dns/dns_services.go' for a list of valid options.\n",
+      cfg.DNSService,
     ))
   }
 }

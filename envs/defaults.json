@@ -16,6 +16,7 @@
     "CORE_CLUSTER_ZONES": "us-west-1a",
     "DATABASE_URL": "",
     "DEBUG": "true",
+    "DNS_SERVICE": "route53",
     "DEPLOY_REPLICAS_COUNT": "3",
     "DOCKER_REGISTRY_ORG": "",
     "DOCKER_REGISTRY_USERNAME": "",
