@@ -41,7 +41,7 @@ func FromShaOrLatest(sha string, project *model.Project) (*model.Commit, error) 
     return FromSha(sha)
   }
 
-  // If sha doesn't exist, fetch, upsert, and return the latest commit for this project.
+  // Fetch the latest sha from the remote project repo, and upsert the commit.
   host := projectsvc.GetHost(project)
   latestSha, err := host.LatestSha(project.Owner(), project.Repo())
 
@@ -51,7 +51,6 @@ func FromShaOrLatest(sha string, project *model.Project) (*model.Commit, error) 
 
   // Upsert Commit for fetched sha.
   commit, err := Upsert(project.ID, latestSha)
-
   if err != nil {
     return nil, err
   }
