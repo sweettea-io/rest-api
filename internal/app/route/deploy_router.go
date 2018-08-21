@@ -146,11 +146,10 @@ func UpdateDeployHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  modelVersion := deploy.ModelVersion
+  modelVersion := &deploy.ModelVersion
 
   // If model was provided, validate it (and its version) exists.
   if pl.Model != "" {
-    var modelVersion *model.ModelVersion
     var mvError error
 
     // Use model slug and version to find ModelVersion.

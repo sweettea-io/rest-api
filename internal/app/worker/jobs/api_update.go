@@ -4,11 +4,11 @@ import (
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
   "github.com/sweettea-io/rest-api/internal/pkg/service/commitsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/modelversionsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/maputil"
   "github.com/sweettea-io/rest-api/internal/pkg/service/envvarsvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/k"
 )
 
 /*
@@ -87,7 +87,7 @@ func (c *Context) ApiUpdate(job *work.Job) error {
   allCustomEnvs := maputil.MergeMaps(envvarsvc.GetMap(deployID), envUpdates)
 
   // Create K8S API deploy and prep args.
-  apiDeploy := kdeploy.Api{}
+  apiDeploy := k.Api{}
   apiDeployArgs := map[string]interface{}{
     "deploy": deploy,
     "commit": commit,

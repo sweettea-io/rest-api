@@ -26,6 +26,7 @@ type Deploy struct {
   Name           string       `gorm:"default:null;not null"`
   Slug           string       `gorm:"default:null;not null;unique_index:deploy_slug"`
   DeploymentName string       `gorm:"default:null"`
+  Public         bool         `gorm:"default:false"`
   Stage          string       `gorm:"default:null;not null"`
   Failed         bool         `gorm:"default:false"`
   LBHost         string       `gorm:"type:varchar(240);default:null"`

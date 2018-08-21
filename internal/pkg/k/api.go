@@ -1,4 +1,4 @@
-package kdeploy
+package k
 
 import (
   "fmt"
@@ -83,7 +83,7 @@ func (api *Api) Configure() error {
     return err
   }
 
-  // Build up k8s resources into the Pod we wish to deploy.
+  // Build up K8S resources into the Pod we wish to deploy.
   api.makeEnvs()
   api.makePorts()
   api.makeContainers()

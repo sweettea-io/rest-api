@@ -1,4 +1,4 @@
-package kdeploy
+package k
 
 type KDeploy interface {
   Init(args map[string]interface{}) error

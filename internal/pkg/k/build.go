@@ -1,4 +1,4 @@
-package kdeploy
+package k
 
 import (
   "fmt"

@@ -77,6 +77,7 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
     "trainJobUid": trainJobUid,
     "projectID": project.ID,
     "modelSlug": pl.ModelSlug(),
+    "sha": pl.Sha,
     "envs": pl.Envs,
   }
 

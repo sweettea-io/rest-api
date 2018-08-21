@@ -1,4 +1,4 @@
-package kdeploy
+package k
 
 import (
   "fmt"
@@ -6,6 +6,7 @@ import (
   "k8s.io/api/extensions/v1beta1"
   "k8s.io/client-go/rest"
   "k8s.io/client-go/tools/clientcmd"
+  "k8s.io/apimachinery/pkg/util/intstr"
   corev1 "k8s.io/api/core/v1"
   metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
   typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -253,6 +254,30 @@ func Deployment(deploymentSpec *v1beta1.DeploymentSpec, name string) *v1beta1.De
   }
 }
 
+func ServiceSpec(deploymentName string, port int32, targetPort int32) *corev1.ServiceSpec {
+  return &corev1.ServiceSpec{
+    Ports: []corev1.ServicePort{{
+      Port: port,
+      TargetPort: intstr.IntOrString{IntVal: targetPort},
+    }},
+    Selector: map[string]string{
+      "app": deploymentName,
+    },
+    Type: corev1.ServiceTypeLoadBalancer,
+  }
+}
+
+func Service(serviceSpec *corev1.ServiceSpec, labels map[string]string) *corev1.Service {
+  return &corev1.Service{
+    TypeMeta: metav1.TypeMeta{
+      APIVersion: "core/v1",
+      Kind: "Service",
+    },
+    ObjectMeta: metav1.ObjectMeta{Labels: labels},
+    Spec: *serviceSpec,
+  }
+}
+
 func CreatePod(client *typedcorev1.CoreV1Client, nsp string, pod *corev1.Pod, targetCluster string) error {
   if _, err := client.Pods(nsp).Create(pod); err != nil {
     return fmt.Errorf("error creating pod during %s deploy: %s", targetCluster, err.Error())
@@ -272,6 +297,14 @@ func CreateDeployment(client *typedv1beta1.ExtensionsV1beta1Client, nsp string, 
 func UpdateDeployment(client *typedv1beta1.ExtensionsV1beta1Client, nsp string, deployment *v1beta1.Deployment) error {
   if _, err := client.Deployments(nsp).Update(deployment); err != nil {
     return fmt.Errorf("error updating deployment during API deploy: %s", err.Error())
+  }
+
+  return nil
+}
+
+func CreateService(client *typedcorev1.CoreV1Client, nsp string, service *corev1.Service) error {
+  if _, err := client.Services(nsp).Create(service); err != nil {
+    return fmt.Errorf("error creating k8s service: %s", err.Error())
   }
 
   return nil

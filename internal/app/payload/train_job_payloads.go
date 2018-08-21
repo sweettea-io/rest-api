@@ -12,6 +12,7 @@ import (
 type CreateTrainJobPayload struct {
   ProjectNsp string `json:"projectNsp" validate:"nonzero"`
   ModelName  string `json:"modelName" default:"default"`
+  Sha        string `json:"sha"`
   Envs       string `json:"envs"`
 }
 

@@ -3,11 +3,11 @@ package jobs
 import (
   "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
   "github.com/sweettea-io/rest-api/internal/pkg/model/buildable"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/envvarsvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/k"
 )
 
 /*
@@ -46,7 +46,7 @@ func (c *Context) TrainDeploy(job *work.Job) error {
   }
 
   // Create K8S train deploy and prep args.
-  trainDeploy := kdeploy.Train{}
+  trainDeploy := k.Train{}
   trainDeployArgs := map[string]interface{}{
     "trainJobID": trainJobID,
     "envs": envsMap,

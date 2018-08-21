@@ -1,13 +1,14 @@
 package jobs
 
 type names struct {
-  CreateTrainJob string
-  CreateDeploy   string
-  BuildDeploy    string
-  TrainDeploy    string
-  ApiDeploy      string
-  UpdateDeploy   string
-  ApiUpdate      string
+  CreateTrainJob  string
+  CreateDeploy    string
+  BuildDeploy     string
+  TrainDeploy     string
+  ApiDeploy       string
+  UpdateDeploy    string
+  ApiUpdate       string
+  PublicizeDeploy string
 }
 
 // Names for all supported jobs.
@@ -19,4 +20,5 @@ var Names = &names{
   ApiDeploy: "api_deploy",
   UpdateDeploy: "update_deploy",
   ApiUpdate: "api_update",
+  PublicizeDeploy: "publicize_api_deploy",
 }

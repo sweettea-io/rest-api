@@ -2,10 +2,10 @@ package jobs
 
 import (
   "github.com/sweettea-io/rest-api/internal/app"
-  "github.com/sweettea-io/rest-api/internal/pkg/kdeploy"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/envvarsvc"
+  "github.com/sweettea-io/rest-api/internal/pkg/k"
 )
 
 /*
@@ -34,7 +34,7 @@ func (c *Context) ApiDeploy(job *work.Job) error {
   }
 
   // Create K8S API deploy and prep args.
-  apiDeploy := kdeploy.Api{}
+  apiDeploy := k.Api{}
 
   apiDeployArgs := map[string]interface{}{
     "deploy": deploy,
@@ -89,6 +89,13 @@ func (c *Context) ApiDeploy(job *work.Job) error {
     deploysvc.FailByID(deployID)
     app.Log.Errorf(deployResult.Error.Error())
     return deployResult.Error
+  }
+
+  // Schedule Deploy publication.
+  if _, err := app.JobQueue.Enqueue(Names.PublicizeDeploy, work.Q{"deployID": deployID}); err != nil {
+    deploysvc.FailByID(deployID)
+    app.Log.Errorf("error scheduling PublicizeDeploy job: %s", err.Error())
+    return err
   }
 
   return nil
