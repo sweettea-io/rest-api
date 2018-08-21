@@ -55,3 +55,11 @@ func Deployed(id uint, updates map[string]interface{}) error {
 
   return nil
 }
+
+func RegisterLoadBalancerHost(deploy *model.Deploy, lbHost string) error {
+  if err := app.DB.Model(deploy).Updates(map[string]interface{}{"LBHost": lbHost}).Error; err != nil {
+    return fmt.Errorf("error updating LBHost on Deploy(id=%v): %s", deploy.ID, err.Error())
+  }
+
+  return nil
+}

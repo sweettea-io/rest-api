@@ -44,8 +44,14 @@ func (c *Context) PublicizeDeploy(job *work.Job) error {
   // Used to create a K8S Service from a Deploy.
   serviceCreation := k.Expose{}
 
+  serviceCreationArgs := map[string]interface{}{
+    "deploy": deploy,
+    "port": 443,
+    "targetPort": 443,
+  }
+
   // Initialize service creation.
-  if err := serviceCreation.Init(map[string]interface{}{"deploy": deploy}); err != nil {
+  if err := serviceCreation.Init(serviceCreationArgs); err != nil {
     deploysvc.FailByID(deployID)
     app.Log.Errorln(err.Error())
     return err
@@ -65,8 +71,37 @@ func (c *Context) PublicizeDeploy(job *work.Job) error {
     return err
   }
 
-  // Get ELB from service
-  // Assign ELB to Deploy.LBHost
+  // Get channel to watch for successful service creation.
+  resultCh := serviceCreation.GetResultChannel()
+
+  // Watch service until it has a LoadBalancer hostname assigned to it.
+  go serviceCreation.Watch()
+  serviceResult := <-resultCh
+
+  // Error out if service watching failed.
+  if !serviceResult.Ok {
+    deploysvc.FailByID(deployID)
+    app.Log.Errorf(serviceResult.Error.Error())
+    return serviceResult.Error
+  }
+
+  // Parse LoadBalancer hostname from result.
+  lbHost, ok := serviceResult.Meta["lbHost"].(string)
+
+  if !ok || lbHost == "" {
+    deploysvc.FailByID(deployID)
+    err := fmt.Errorf("Error parsing lbHost from Service creation result for Deploy(id=%v).", deployID)
+    app.Log.Errorln(err.Error())
+    return err
+  }
+
+  // Assign LoadBalancer hostname to Deploy.
+  if err := deploysvc.RegisterLoadBalancerHost(deploy, lbHost); err != nil {
+    deploysvc.FailByID(deployID)
+    app.Log.Errorln(err.Error())
+    return err
+  }
+  
   // Add a CNAME record to your domain's DNS mapping the publicized deploy url to the ELB url
   // Update Deploy.Public to true
 

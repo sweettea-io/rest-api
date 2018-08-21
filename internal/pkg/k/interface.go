@@ -11,4 +11,5 @@ type KDeploy interface {
 type Result struct {
   Ok    bool
   Error error
+  Meta  map[string]interface{}
 }

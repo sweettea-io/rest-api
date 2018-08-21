@@ -108,7 +108,7 @@ func (api *Api) GetResultChannel() <-chan Result {
 }
 
 func (api *Api) Watch() {
-  // Get a namespaced deployment-watcher channel.
+  // Get a namespaced deployment watcher channel.
   ch, err := DeploymentWatcherChannel(api.Client, api.Namespace, api.DeploymentName)
 
   if err != nil {

@@ -261,7 +261,7 @@ func ServiceSpec(deploymentName string, port int32, targetPort int32) *corev1.Se
       TargetPort: intstr.IntOrString{IntVal: targetPort},
     }},
     Selector: map[string]string{
-      "app": deploymentName,
+      "app": deploymentName,  // select pods with app=<deploymentName> label
     },
     Type: corev1.ServiceTypeLoadBalancer,
   }
@@ -328,9 +328,9 @@ func PodWatcherChannel(client *typedcorev1.CoreV1Client, nsp string, deployName 
 }
 
 func DeploymentWatcherChannel(client *typedv1beta1.ExtensionsV1beta1Client, nsp string, deployName string) (<-chan watch.Event, error) {
-  // Define selector options to only find the pod we just deployed.
+  // Define selector options to only find the deployment we just created.
   watchOpts := metav1.ListOptions{
-    LabelSelector: fmt.Sprintf("app=%s", deployName),
+    LabelSelector: fmt.Sprintf("name=%s", deployName),
   }
 
   // Get a namespaced deployment watcher object.
@@ -338,6 +338,23 @@ func DeploymentWatcherChannel(client *typedv1beta1.ExtensionsV1beta1Client, nsp 
 
   if err != nil {
     return nil, fmt.Errorf("error creating deployment watcher for deploy(%s): %s", deployName, err.Error())
+  }
+
+  // Return the watcher's channel.
+  return watcher.ResultChan(), nil
+}
+
+func ServiceWatcherChannel(client *typedcorev1.CoreV1Client, nsp string, serviceName string) (<-chan watch.Event, error) {
+  // Define selector options to only find the service we just created.
+  watchOpts := metav1.ListOptions{
+    LabelSelector: fmt.Sprintf("name=%s", serviceName),
+  }
+
+  // Get a namespaced service watcher object.
+  watcher, err := client.Services(nsp).Watch(watchOpts)
+
+  if err != nil {
+    return nil, fmt.Errorf("error creating service watcher for deploy(%s): %s", serviceName, err.Error())
   }
 
   // Return the watcher's channel.
