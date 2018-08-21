@@ -129,6 +129,9 @@ func New() *Config {
   // Validate config values.
   validateConfigs(&cfg)
 
+  // Load current cloud session.
+  cloud.Load(&cfg)
+
   return &cfg
 }
 

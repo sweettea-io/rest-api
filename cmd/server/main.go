@@ -6,11 +6,15 @@ import (
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/app/route"
   "github.com/sweettea-io/rest-api/internal/pkg/config"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/cloud"
 )
 
 func main() {
   // Initialize the app.
   app.Init(config.New())
+
+  // Create cloud session object.
+  cloud.InitCloud()
 
   // Build API routes.
   route.InitRouter()
