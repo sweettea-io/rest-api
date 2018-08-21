@@ -37,9 +37,7 @@ func (c *Context) ApiUpdate(job *work.Job) error {
   deploy, err := deploysvc.FromID(deployID)
 
   if err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Get current Commit & ModelVersion
@@ -56,9 +54,7 @@ func (c *Context) ApiUpdate(job *work.Job) error {
     commit, err = commitsvc.FromID(commitID)
 
     if err != nil {
-      deploysvc.FailByID(deployID)
-      app.Log.Errorln(err.Error())
-      return err
+      return failDeploy(deployID, err)
     }
   }
 
@@ -68,9 +64,7 @@ func (c *Context) ApiUpdate(job *work.Job) error {
     modelVersion, err = modelversionsvc.FromID(modelVersionID)
 
     if err != nil {
-      deploysvc.FailByID(deployID)
-      app.Log.Errorln(err.Error())
-      return err
+      return failDeploy(deployID, err)
     }
   }
 
@@ -78,9 +72,7 @@ func (c *Context) ApiUpdate(job *work.Job) error {
   envUpdates, err := envvarsvc.MapFromBytes([]byte(envs))
 
   if err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Merge new envs on top of existing ones.
@@ -97,23 +89,17 @@ func (c *Context) ApiUpdate(job *work.Job) error {
 
   // Initialize API deploy.
   if err := apiDeploy.Init(apiDeployArgs); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Create deploy resources.
   if err := apiDeploy.Configure(); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Deploy to ApiCluster.
   if err := apiDeploy.Perform(); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Create map of updates to apply to Deploy now that it has succeeded.
@@ -129,16 +115,12 @@ func (c *Context) ApiUpdate(job *work.Job) error {
 
   // Update Deploy stage to Deployed and apply updates.
   if err := deploysvc.Deployed(deployID, updates); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Upsert all envs that could have been changed.
   if err := envvarsvc.UpsertFromMap(deployID, envUpdates); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // TODO: Stream message back successfully disconnecting client.
@@ -152,9 +134,7 @@ func (c *Context) ApiUpdate(job *work.Job) error {
 
   // Error out if deployment failed to start.
   if !deployResult.Ok {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorf(deployResult.Error.Error())
-    return deployResult.Error
+    return failDeploy(deployID, deployResult.Error)
   }
 
   return nil

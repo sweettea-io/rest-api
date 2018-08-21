@@ -29,9 +29,7 @@ import (
 func (c *Context) CreateTrainJob(job *work.Job) error {
   // Ensure Train Cluster exists first.
   if !app.Config.TrainClusterConfigured() {
-    err := fmt.Errorf("train cluster not configured -- leaving CreateTrainJob")
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(fmt.Errorf("train cluster not configured -- leaving CreateTrainJob"))
   }
 
   // Extract args from job.
@@ -42,16 +40,14 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   envs := job.ArgString("envs")
 
   if err := job.ArgError(); err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   // Get project by ID.
   project, err := projectsvc.FromID(projectID)
 
   if err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   var commit *m.Commit
@@ -63,8 +59,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
     commit, err = commitsvc.FromSha(sha)
 
     if err != nil {
-      app.Log.Errorln(err.Error())
-      return err
+      return logAndFail(err)
     }
   } else {
     // Get host for this project.
@@ -75,8 +70,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
     latestSha, err := host.LatestSha(project.Owner(), project.Repo())
 
     if err != nil {
-      app.Log.Errorln(err.Error())
-      return err
+      return logAndFail(err)
     }
 
     // Upsert Commit for fetched sha.
@@ -84,8 +78,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
     commit, err = commitsvc.Upsert(project.ID, latestSha)
 
     if commitUpsertErr != nil {
-      app.Log.Errorln(err.Error())
-      return err
+      return logAndFail(err)
     }
   }
 
@@ -93,24 +86,21 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   model, err := modelsvc.Upsert(project.ID, modelSlug)
 
   if err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   // Create new ModelVersion for this model.
   modelVersion, err := modelversionsvc.Create(model.ID)
 
   if err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   // Create new TrainJob.
   trainJob, err := trainjobsvc.Create(trainJobUid, commit.ID, modelVersion.ID)
 
   if err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   // Enqueue new job to build this Project for the Train Cluster.
@@ -127,17 +117,12 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   }
 
   if _, err := app.JobQueue.Enqueue(Names.BuildDeploy, jobArgs); err != nil {
-    err = fmt.Errorf("error scheduling BuildDeploy job: %s", err.Error())
-    trainjobsvc.Fail(trainJob)
-    app.Log.Errorln(err.Error())
-    return err
+    return failTrainJob(trainJob.ID, fmt.Errorf("error scheduling BuildDeploy job: %s", err.Error()))
   }
 
   // Update trainJob stage to BuildScheduled.
   if err := trainjobsvc.UpdateStage(trainJob, buildable.BuildScheduled); err != nil {
-    trainjobsvc.Fail(trainJob)
-    app.Log.Errorln(err.Error())
-    return err
+    return failTrainJob(trainJob.ID, err)
   }
   
   return nil

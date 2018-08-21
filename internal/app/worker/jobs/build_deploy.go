@@ -34,17 +34,13 @@ func (c *Context) BuildDeploy(job *work.Job) error {
   followOnArgs := job.ArgString("followOnArgs")
 
   if err := job.ArgError(); err != nil {
-    buildablesvc.Fail(resourceID, targetCluster)
-    app.Log.Errorln(err.Error())
-    return err
+    return failBuildable(resourceID, targetCluster, err)
   }
 
   // Validate we're building for either the Train or Build Cluster.
   if targetCluster != cluster.Train && targetCluster != cluster.Api {
     err := fmt.Errorf("build deploy error: target cluster \"%s\" unsupported", targetCluster)
-    buildablesvc.Fail(resourceID, targetCluster)
-    app.Log.Errorln(err.Error())
-    return err
+    return failBuildable(resourceID, targetCluster, err)
   }
 
   // Create K8S build deploy object and args.
@@ -59,30 +55,22 @@ func (c *Context) BuildDeploy(job *work.Job) error {
 
   // Initialize build deploy.
   if err := buildDeploy.Init(bdArgs); err != nil {
-    buildablesvc.Fail(resourceID, targetCluster)
-    app.Log.Errorln(err.Error())
-    return err
+    return failBuildable(resourceID, targetCluster, err)
   }
 
   // Create deploy resources.
   if err := buildDeploy.Configure(); err != nil {
-    buildablesvc.Fail(resourceID, targetCluster)
-    app.Log.Errorln(err.Error())
-    return err
+    return failBuildable(resourceID, targetCluster, err)
   }
 
   // Deploy to build cluster.
   if err := buildDeploy.Perform(); err != nil {
-    buildablesvc.Fail(resourceID, targetCluster)
-    app.Log.Errorln(err.Error())
-    return err
+    return failBuildable(resourceID, targetCluster, err)
   }
 
   // Update buildable stage to Building.
   if err := buildablesvc.UpdateStage(resourceID, buildable.Building, targetCluster); err != nil {
-    buildablesvc.Fail(resourceID, targetCluster)
-    app.Log.Errorln(err.Error())
-    return err
+    return failBuildable(resourceID, targetCluster, err)
   }
 
   // Get channel to watch for build result.
@@ -94,9 +82,7 @@ func (c *Context) BuildDeploy(job *work.Job) error {
 
   // Error out if build failed.
   if !deployResult.Ok {
-    buildablesvc.Fail(resourceID, targetCluster)
-    app.Log.Errorf(deployResult.Error.Error())
-    return deployResult.Error
+    return failBuildable(resourceID, targetCluster, deployResult.Error)
   }
 
   // Unmarshal followOnArgs for target cluster deploy.
@@ -107,15 +93,12 @@ func (c *Context) BuildDeploy(job *work.Job) error {
 
   // Schedule deploy to target cluster.
   if _, err := app.JobQueue.Enqueue(followOnJob, targetDeployArgs); err != nil {
-    app.Log.Errorf("error scheduling %s job: %s", followOnJob, err.Error())
-    return err
+    return failBuildable(resourceID, targetCluster, fmt.Errorf("error scheduling %s job: %s", followOnJob, err.Error()))
   }
 
   // Update buildable stage to DeployScheduled.
   if err := buildablesvc.UpdateStage(resourceID, buildable.DeployScheduled, targetCluster); err != nil {
-    buildablesvc.Fail(resourceID, targetCluster)
-    app.Log.Errorln(err.Error())
-    return err
+    return failBuildable(resourceID, targetCluster, err)
   }
 
   return nil

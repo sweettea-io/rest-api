@@ -6,6 +6,7 @@ import (
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/envvarsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/k"
+  "fmt"
 )
 
 /*
@@ -19,18 +20,14 @@ func (c *Context) ApiDeploy(job *work.Job) error {
   deployID := uint(job.ArgInt64("deployID"))
 
   if err := job.ArgError(); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Get Deploy by ID.
   deploy, err := deploysvc.FromID(deployID)
 
   if err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Create K8S API deploy and prep args.
@@ -45,23 +42,17 @@ func (c *Context) ApiDeploy(job *work.Job) error {
 
   // Initialize API deploy.
   if err := apiDeploy.Init(apiDeployArgs); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Create deploy resources.
   if err := apiDeploy.Configure(); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Deploy to ApiCluster.
   if err := apiDeploy.Perform(); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // Update Deploy stage to Deployed and register its deployment name.
@@ -70,9 +61,7 @@ func (c *Context) ApiDeploy(job *work.Job) error {
   }
 
   if err := deploysvc.Deployed(deployID, updates); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deployID, err)
   }
 
   // TODO: Stream message back successfully disconnecting client.
@@ -86,16 +75,12 @@ func (c *Context) ApiDeploy(job *work.Job) error {
 
   // Error out if deployment failed to start.
   if !deployResult.Ok {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorf(deployResult.Error.Error())
-    return deployResult.Error
+    return failDeploy(deployID, err)
   }
 
   // Schedule Deploy publication.
   if _, err := app.JobQueue.Enqueue(Names.PublicizeDeploy, work.Q{"deployID": deployID}); err != nil {
-    deploysvc.FailByID(deployID)
-    app.Log.Errorf("error scheduling PublicizeDeploy job: %s", err.Error())
-    return err
+    return failDeploy(deployID, fmt.Errorf("error scheduling PublicizeDeploy job: %s", err.Error()))
   }
 
   return nil

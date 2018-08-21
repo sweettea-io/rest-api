@@ -23,26 +23,19 @@ func (c *Context) TrainDeploy(job *work.Job) error {
   envs := job.ArgString("envs")
 
   if err := job.ArgError(); err != nil {
-    trainjobsvc.FailByID(trainJobID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failTrainJob(trainJobID, err)
   }
 
   // Ensure Train Cluster exists first.
   if !app.Config.TrainClusterConfigured() {
-    err := fmt.Errorf("train cluster not configured -- leaving CreateTrainJob")
-    trainjobsvc.FailByID(trainJobID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failTrainJob(trainJobID, fmt.Errorf("train cluster not configured -- leaving CreateTrainJob"))
   }
 
   // Convert stringified envs into map[string]string representation.
   envsMap, err := envvarsvc.MapFromBytes([]byte(envs))
 
   if err != nil {
-    trainjobsvc.FailByID(trainJobID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failTrainJob(trainJobID, err)
   }
 
   // Create K8S train deploy and prep args.
@@ -54,30 +47,22 @@ func (c *Context) TrainDeploy(job *work.Job) error {
 
   // Initialize train deploy.
   if err := trainDeploy.Init(trainDeployArgs); err != nil {
-    trainjobsvc.FailByID(trainJobID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failTrainJob(trainJobID, err)
   }
 
   // Create deploy resources.
   if err := trainDeploy.Configure(); err != nil {
-    trainjobsvc.FailByID(trainJobID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failTrainJob(trainJobID, err)
   }
 
   // Deploy to train cluster.
   if err := trainDeploy.Perform(); err != nil {
-    trainjobsvc.FailByID(trainJobID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failTrainJob(trainJobID, err)
   }
 
   // Update TrainJob stage to Deployed.
   if err := trainjobsvc.UpdateStageByID(trainJobID, buildable.Deployed); err != nil {
-    trainjobsvc.FailByID(trainJobID)
-    app.Log.Errorln(err.Error())
-    return err
+    return failTrainJob(trainJobID, err)
   }
 
   // TODO: Stream message back successfully disconnecting client.
@@ -91,9 +76,7 @@ func (c *Context) TrainDeploy(job *work.Job) error {
 
   // Error out if pod failed to be added.
   if !deployResult.Ok {
-    trainjobsvc.FailByID(trainJobID)
-    app.Log.Errorf(deployResult.Error.Error())
-    return deployResult.Error
+    return failTrainJob(trainJobID, deployResult.Error)
   }
 
   return nil

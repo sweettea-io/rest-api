@@ -20,5 +20,5 @@ var Names = &names{
   ApiDeploy: "api_deploy",
   UpdateDeploy: "update_deploy",
   ApiUpdate: "api_update",
-  PublicizeDeploy: "publicize_api_deploy",
+  PublicizeDeploy: "publicize_deploy",
 }

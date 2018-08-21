@@ -37,24 +37,21 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   envs := job.ArgString("envs")
 
   if err := job.ArgError(); err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   // Find ApiCluster by ID.
   apiCluster, err := apiclustersvc.FromID(apiClusterID)
 
   if err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   // Find ModelVersion by ID.
   modelVersion, err := modelversionsvc.FromID(modelVersionID)
 
   if err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   project := modelVersion.Model.Project
@@ -67,8 +64,7 @@ func (c *Context) CreateDeploy(job *work.Job) error {
     commit, err = commitsvc.FromSha(sha)
 
     if err != nil {
-      app.Log.Errorln(err.Error())
-      return err
+      return logAndFail(err)
     }
   } else {
     // Get host for this project.
@@ -79,8 +75,7 @@ func (c *Context) CreateDeploy(job *work.Job) error {
     latestSha, err := host.LatestSha(project.Owner(), project.Repo())
 
     if err != nil {
-      app.Log.Errorln(err.Error())
-      return err
+      return logAndFail(err)
     }
 
     // Upsert Commit for fetched sha.
@@ -88,8 +83,7 @@ func (c *Context) CreateDeploy(job *work.Job) error {
     commit, err = commitsvc.Upsert(project.ID, latestSha)
 
     if commitUpsertErr != nil {
-      app.Log.Errorln(err.Error())
-      return err
+      return logAndFail(err)
     }
   }
 
@@ -103,8 +97,7 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   )
 
   if err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   // If Deploy already exists,
@@ -117,16 +110,12 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   envsMap, err := envvarsvc.MapFromBytes([]byte(envs))
 
   if err != nil {
-    deploysvc.Fail(deploy)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deploy.ID, err)
   }
 
   // Create EnvVars for this Deploy.
   if err := envvarsvc.CreateFromMap(deploy.ID, envsMap); err != nil {
-    deploysvc.Fail(deploy)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deploy.ID, err)
   }
 
   // Define args for the BuildDeploy job.
@@ -143,17 +132,12 @@ func (c *Context) CreateDeploy(job *work.Job) error {
 
   // Enqueue new job to build this Project for the ApiCluster.
   if _, err := app.JobQueue.Enqueue(Names.BuildDeploy, jobArgs); err != nil {
-    err = fmt.Errorf("error scheduling BuildDeploy job: %s", err.Error())
-    deploysvc.Fail(deploy)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deploy.ID, fmt.Errorf("error scheduling BuildDeploy job: %s", err.Error()))
   }
 
   // Update deploy stage to BuildScheduled.
   if err := deploysvc.UpdateStage(deploy, buildable.BuildScheduled); err != nil {
-    deploysvc.Fail(deploy)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deploy.ID, err)
   }
 
   return nil

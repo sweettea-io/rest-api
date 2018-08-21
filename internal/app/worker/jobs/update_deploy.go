@@ -1,13 +1,13 @@
 package jobs
 
 import (
-  "fmt"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/commitsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
+  "fmt"
 )
 
 /*
@@ -28,16 +28,14 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
   envs := job.ArgString("envs")
 
   if err := job.ArgError(); err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   // Find Deploy by ID.
   deploy, err := deploysvc.FromID(deployID)
 
   if err != nil {
-    app.Log.Errorln(err.Error())
-    return err
+    return logAndFail(err)
   }
 
   // Get ref to this Deploy's current Commit/Project.
@@ -57,15 +55,13 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
     }
 
     if err != nil {
-      app.Log.Errorln(err.Error())
-      return err
+      return logAndFail(err)
     }
 
     commit, err = commitsvc.Upsert(project.ID, sha)
 
     if err != nil {
-      app.Log.Errorln(err.Error())
-      return err
+      return logAndFail(err)
     }
   }
 
@@ -103,10 +99,7 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
 
   // Schedule the appropriate job.
   if _, err := app.JobQueue.Enqueue(jobName, jobArgs); err != nil {
-    err = fmt.Errorf("error scheduling %s job: %s", jobName, err.Error())
-    deploysvc.Fail(deploy)
-    app.Log.Errorln(err.Error())
-    return err
+    return failDeploy(deploy.ID, fmt.Errorf("error scheduling %s job: %s", jobName, err.Error()))
   }
 
   return nil
