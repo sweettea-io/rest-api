@@ -68,8 +68,8 @@ func (ls *LogStreamer) Watch() {
     // If the read timed out, send a filler log to keep the log stream alive
     // and get a new connection from the Redis pool.
     if reply == nil {
-      readFromTs = "$" // code for "read from the latest timestamp as new stream entries come in"
-      ls.Channel <- BuildableLog{Msg: "..."}
+      readFromTs = redis.LatestXStartTs
+      ls.Channel <- StreamKeepAlive
       conn = app.Redis.Get()
       continue
     }
