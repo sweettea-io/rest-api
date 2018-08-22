@@ -116,32 +116,29 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
     case <-connClosedCh:
       return
 
-    // Parse log messages as they come in.
+    // Parse logs as they come in.
     default:
       log := <-logStreamer.Channel
 
-      // Reading logs hit unexpected error.
-      if log.Error != nil {
+      // Stream log message if it exists.
+      if log.Msg != "" {
         streamLog(log.Msg)
+      }
+
+      // Reading logs hit unexpected error, so return.
+      if log.Error != nil {
         app.Log.Errorf("Unexpected error while streaming logs: %s\n", log.Error.Error())
         return
       }
 
-      // Log level of "error" was used somewhere during the build,
-      // telling us to fail the buildable.
+      // Log level of "error" was used somewhere during the build, so fail the TrainJob.
       if log.Failed {
-        streamLog(log.Msg)
-
-        // Fail the TrainJob.
         if err := trainjobsvc.FailByUid(trainJobUid); err != nil {
           app.Log.Error(err)
         }
 
         return
       }
-
-      // Stream the latest log, whether its the last one or not.
-      streamLog(log.Msg)
 
       // TrainJob reached the end of its lifecycle.
       if log.Completed {
