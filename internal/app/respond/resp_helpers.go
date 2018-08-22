@@ -7,6 +7,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/app/errmsg"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
+  "fmt"
 )
 
 func Send(w http.ResponseWriter, status int, body string, headers map[string]string) {
@@ -83,7 +84,7 @@ func Error(w http.ResponseWriter, err *errmsg.Error, headers ...map[string]strin
   )
 }
 
-func StreamResources(w http.ResponseWriter) (http.Flusher, <-chan bool, bool) {
+func StreamResources(w http.ResponseWriter) (func(msg string), <-chan bool, bool) {
   // Get response flusher.
   flusher, ok := w.(http.Flusher)
   if !ok {
@@ -96,5 +97,10 @@ func StreamResources(w http.ResponseWriter) (http.Flusher, <-chan bool, bool) {
     return nil, nil, false
   }
 
-  return flusher, cn.CloseNotify(), true
+  streamLog := func(msg string) {
+    fmt.Fprintln(w, msg)
+    flusher.Flush()
+  }
+
+  return streamLog, cn.CloseNotify(), true
 }

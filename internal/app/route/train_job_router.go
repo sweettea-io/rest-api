@@ -15,7 +15,6 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
-  "fmt"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -50,7 +49,7 @@ func InitTrainJobRouter() {
 */
 func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
   // Get response streaming resources (and check if supported).
-  flusher, closeNotifyCh, ok := respond.StreamResources(w)
+  streamLog, connClosedCh, ok := respond.StreamResources(w)
 
   if !ok {
     respond.Error(w, errmsg.StreamingNotSupported())
@@ -68,6 +67,7 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
   // Ensure Train cluster exists.
   if !app.Config.TrainClusterConfigured() {
     respond.Error(w, errmsg.TrainClusterNotConfigured())
+    return
   }
 
   // Find project by namespace.
@@ -98,9 +98,12 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  // TODO: prep writer with stream headers.
+  // Prep response headers for log streaming.
+  w.Header().Set("Content-Type", "text/plain")   // only working with text logs
+  w.Header().Set("Transfer-Encoding", "chunked") // we're gonna stream the logs
+  w.Header().Set("X-Accel-Buffering", "no")      // prevent logs from getting backed up inside Nginx
 
-  // Create buildable log streamer.
+  // Create log streamer.
   logStreamer := buildablesvc.NewLogStreamer(trainJobUid)
 
   // Start listening for training logs.
@@ -110,27 +113,40 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
   for {
     select {
     // Return if client closes the connection.
-    case <-closeNotifyCh:
+    case <-connClosedCh:
       return
+
+    // Parse log messages as they come in.
     default:
-      // Parse BuildableLog messages as they come in.
       log := <-logStreamer.Channel
 
-      // If error-level log is received, fail the buildable, close the client connection, and return.
-      if log.Level == "error" {
-        // TODO: fail buildable and close client connection.
+      // Reading logs hit unexpected error.
+      if log.Error != nil {
+        streamLog(log.Msg)
+        app.Log.Errorf("Unexpected error while streaming logs: %s\n", log.Error.Error())
         return
       }
 
-      // If buildable has completed its lifecycle, close the client connection, and return.
-      if log.Complete {
-        // TODO: close client connection.
+      // Log level of "error" was used somewhere during the build,
+      // telling us to fail the buildable.
+      if log.Failed {
+        streamLog(log.Msg)
+
+        // Fail the TrainJob.
+        if err := trainjobsvc.FailByUid(trainJobUid); err != nil {
+          app.Log.Error(err)
+        }
+
         return
       }
 
-      // Stream the log message to the client and flush data immediately.
-      fmt.Fprintln(w, log.Msg)
-      flusher.Flush()
+      // Stream the latest log, whether its the last one or not.
+      streamLog(log.Msg)
+
+      // TrainJob reached the end of its lifecycle.
+      if log.Completed {
+        return
+      }
     }
   }
 }

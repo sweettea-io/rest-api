@@ -33,3 +33,7 @@ func FailByID(id uint) error {
   trainJob.ID = id
   return Fail(&trainJob)
 }
+
+func FailByUid(uid string) error {
+  return Fail(&model.TrainJob{Uid: uid})
+}
