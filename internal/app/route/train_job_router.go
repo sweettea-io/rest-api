@@ -107,6 +107,9 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
   logStreamer := buildablesvc.NewLogStreamer(trainJobUid)
 
   // Start listening for training logs.
+  // TODO: This is bad and doesn't scale...don't want an API route handler sprouting
+  // goroutines in an uncapped manner like this. Create system to handle goroutine allocation
+  // in a productionized and capped manner.
   go logStreamer.Watch()
 
   // Respond with stream of training logs.
