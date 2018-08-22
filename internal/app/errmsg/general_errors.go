@@ -22,3 +22,7 @@ func ISE() (*Error) {
 func InvalidPayload() (*Error) {
   return ApiError(http.StatusBadRequest, http.StatusBadRequest, "invalid_input_payload")
 }
+
+func StreamingNotSupported() (*Error) {
+  return ApiError(http.StatusBadRequest, http.StatusBadRequest, "streaming_not_supported")
+}

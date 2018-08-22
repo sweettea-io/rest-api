@@ -14,6 +14,8 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/work"
+  "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
+  "fmt"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -47,6 +49,14 @@ func InitTrainJobRouter() {
     envs        string (optional)
 */
 func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
+  // Get response streaming resources (and check if supported).
+  flusher, closeNotifyCh, ok := respond.StreamResources(w)
+
+  if !ok {
+    respond.Error(w, errmsg.StreamingNotSupported())
+    return
+  }
+
   // Parse & validate payload.
   var pl payload.CreateTrainJobPayload
 
@@ -88,7 +98,41 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  // TODO: stream training logs as response.
+  // TODO: prep writer with stream headers.
+
+  // Create buildable log streamer.
+  logStreamer := buildablesvc.NewLogStreamer(trainJobUid)
+
+  // Start listening for training logs.
+  go logStreamer.Watch()
+
+  // Respond with stream of training logs.
+  for {
+    select {
+    // Return if client closes the connection.
+    case <-closeNotifyCh:
+      return
+    default:
+      // Parse BuildableLog messages as they come in.
+      log := <-logStreamer.Channel
+
+      // If error-level log is received, fail the buildable, close the client connection, and return.
+      if log.Level == "error" {
+        // TODO: fail buildable and close client connection.
+        return
+      }
+
+      // If buildable has completed its lifecycle, close the client connection, and return.
+      if log.Complete {
+        // TODO: close client connection.
+        return
+      }
+
+      // Stream the log message to the client and flush data immediately.
+      fmt.Fprintln(w, log.Msg)
+      flusher.Flush()
+    }
+  }
 }
 
 /*

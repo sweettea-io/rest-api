@@ -82,3 +82,19 @@ func Error(w http.ResponseWriter, err *errmsg.Error, headers ...map[string]strin
     err.Data["error"],
   )
 }
+
+func StreamResources(w http.ResponseWriter) (http.Flusher, <-chan bool, bool) {
+  // Get response flusher.
+  flusher, ok := w.(http.Flusher)
+  if !ok {
+    return nil, nil, false
+  }
+
+  // Get client connection close notifier.
+  cn, ok := w.(http.CloseNotifier)
+  if !ok {
+    return nil, nil, false
+  }
+
+  return flusher, cn.CloseNotify(), true
+}
