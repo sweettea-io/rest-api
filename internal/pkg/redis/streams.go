@@ -19,7 +19,7 @@ func XRead(conn *redis.Conn, stream string, startTs string, timeout int64) (inte
     "STREAMS",
     stream,
     startTs,
-  )s
+  )
 
   // If no error, return successfully with reply.
   if err == nil {
