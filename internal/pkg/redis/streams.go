@@ -1,21 +1,21 @@
 package redis
 
 import (
-  "github.com/gomodule/redigo/redis"
-  "time"
+  r "github.com/gomodule/redigo/redis"
   "net"
+  "time"
 )
 
 const DefaultReadTimeout = 30 // seconds
 const DefaultXStartTs = "0.0" // very beginning of stream
 
-func XRead(conn *redis.Conn, stream string, startTs string, timeout int64) (interface{}, error) {
-  reply, err := redis.DoWithTimeout(
-    conn,
+func XRead(conn *r.Conn, stream string, startTs string, timeout int) (interface{}, error) {
+  reply, err := r.DoWithTimeout(
+    *conn,
     time.Duration(timeout) * time.Second,
     "XREAD",
     "BLOCK",
-    string(timeout * 1000),
+    timeout * 1000,
     "STREAMS",
     stream,
     startTs,
