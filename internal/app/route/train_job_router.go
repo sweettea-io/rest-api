@@ -14,8 +14,6 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/work"
-  "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
-  "github.com/sweettea-io/rest-api/internal/app/respond/streamgenerator"
   "github.com/sweettea-io/rest-api/internal/app/respond/stream"
 )
 
