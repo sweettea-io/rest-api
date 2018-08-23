@@ -15,6 +15,8 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/buildablesvc"
+  "github.com/sweettea-io/rest-api/internal/app/respond/streamgenerator"
+  "github.com/sweettea-io/rest-api/internal/app/respond/stream"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -48,10 +50,8 @@ func InitTrainJobRouter() {
     envs        string (optional)
 */
 func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
-  // Get response streaming resources (and check if supported).
-  streamLog, connClosedCh, ok := respond.StreamResources(w)
-
-  if !ok {
+  // Ensure streaming response is supported.
+  if _, ok := w.(http.Flusher); !ok {
     respond.Error(w, errmsg.StreamingNotSupported())
     return
   }
@@ -98,57 +98,24 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  // Prep response headers for log streaming.
-  w.Header().Set("Content-Type", "text/plain")   // only working with text logs
-  w.Header().Set("Transfer-Encoding", "chunked") // we're gonna stream the logs
-  w.Header().Set("X-Accel-Buffering", "no")      // prevent logs from getting backed up inside Nginx
-
-  // Create log streamer.
-  logStreamer := buildablesvc.NewLogStreamer(trainJobUid)
-
-  // Start listening for training logs.
-  // TODO: This is bad and doesn't scale...don't want an API route handler sprouting
-  // goroutines in an uncapped manner like this. Create system to handle goroutine allocation
-  // in a productionized and capped manner.
-  go logStreamer.Watch()
-
-  // Respond with stream of training logs.
-  for {
-    select {
-    // Return if client closes the connection.
-    case <-connClosedCh:
-      return
-
-    // Parse logs as they come in.
-    default:
-      log := <-logStreamer.Channel
-
-      // Stream log message if it exists.
-      if log.Msg != "" {
-        streamLog(log.Msg)
-      }
-
-      // Reading logs hit unexpected error, so return.
-      if log.Error != nil {
-        app.Log.Errorf("Unexpected error while streaming logs: %s\n", log.Error.Error())
-        return
-      }
-
-      // Log level of "error" was used somewhere during the build, so fail the TrainJob.
-      if log.Failed {
-        if err := trainjobsvc.FailByUid(trainJobUid); err != nil {
-          app.Log.Error(err)
-        }
-
-        return
-      }
-
-      // TrainJob reached the end of its lifecycle.
-      if log.Completed {
-        return
-      }
+  // Handler function to call if TrainJob hits any errors throughout its lifecycle.
+  failHandler := func() {
+    if err := trainjobsvc.FailByUid(trainJobUid); err != nil {
+      app.Log.Errorln(err)
     }
   }
+
+  // Create response streamer with log stream generator.
+  logStreamer, err := stream.NewLogStreamer(w, trainJobUid, &failHandler)
+
+  if err != nil {
+    app.Log.Errorln(err.Error())
+    respond.Error(w, errmsg.StreamingNotSupported())
+    return
+  }
+
+  // Stream TrainJob logs.
+  logStreamer.Stream()
 }
 
 /*

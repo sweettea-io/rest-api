@@ -8,7 +8,6 @@ import (
 
 const DefaultReadTimeout = 30 // seconds
 const DefaultXStartTs = "0.0" // very beginning of stream
-const LatestXStartTs = "$"
 
 func XRead(conn *redis.Conn, stream string, startTs string, timeout int64) (interface{}, error) {
   reply, err := redis.DoWithTimeout(
@@ -20,7 +19,7 @@ func XRead(conn *redis.Conn, stream string, startTs string, timeout int64) (inte
     "STREAMS",
     stream,
     startTs,
-  )
+  )s
 
   // If no error, return successfully with reply.
   if err == nil {
