@@ -41,6 +41,10 @@ func FailByID(id uint) error {
   return Fail(&deploy)
 }
 
+func FailByUid(uid string) error {
+  return Fail(&model.Deploy{Uid: uid})
+}
+
 func Deployed(id uint, updates map[string]interface{}) error {
   // Prep Deploy model for ID.
   deploy := model.Deploy{}

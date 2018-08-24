@@ -14,6 +14,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
+  "github.com/sweettea-io/rest-api/internal/app/respond/stream"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -49,6 +50,12 @@ func InitDeployRouter() {
     envs       string (optional)
 */
 func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
+  // Ensure streaming response is supported.
+  if _, ok := w.(http.Flusher); !ok {
+    respond.Error(w, errmsg.StreamingNotSupported())
+    return
+  }
+
   // Parse & validate payload.
   var pl payload.CreateDeployPayload
 
@@ -113,14 +120,30 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
+  // Handler function to call if Deploy hits any errors throughout its lifecycle.
+  failHandler := func() {
+    if err := deploysvc.FailByUid(deployUid); err != nil {
+      app.Log.Errorln(err)
+    }
+  }
 
-  // TODO: stream training logs as response.
+  // Create response streamer with log stream generator.
+  logStreamer, err := stream.NewLogStreamer(w, deployUid, &failHandler)
+
+  if err != nil {
+    app.Log.Errorln(err.Error())
+    respond.Error(w, errmsg.StreamingNotSupported())
+    return
+  }
+
+  // Stream Deploy logs.
+  logStreamer.Stream()
 }
 
 /*
   Update a Deploy
 
-  Method:  PIUT
+  Method:  PUT
   Route:   /deploy
   Payload:
     name       string (required)
@@ -130,6 +153,12 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
     envs       string (optional)
 */
 func UpdateDeployHandler(w http.ResponseWriter, req *http.Request) {
+  // Ensure streaming response is supported.
+  if _, ok := w.(http.Flusher); !ok {
+    respond.Error(w, errmsg.StreamingNotSupported())
+    return
+  }
+
   // Parse & validate payload.
   var pl payload.UpdateDeployPayload
 
@@ -184,4 +213,23 @@ func UpdateDeployHandler(w http.ResponseWriter, req *http.Request) {
     respond.Error(w, errmsg.UpdateDeploySchedulingFailed())
     return
   }
+
+  // Handler function to call if Deploy hits any errors throughout its update.
+  failHandler := func() {
+    if err := deploysvc.FailByUid(deploy.Uid); err != nil {
+      app.Log.Errorln(err)
+    }
+  }
+
+  // Create response streamer with log stream generator.
+  logStreamer, err := stream.NewLogStreamer(w, deploy.Uid, &failHandler)
+
+  if err != nil {
+    app.Log.Errorln(err.Error())
+    respond.Error(w, errmsg.StreamingNotSupported())
+    return
+  }
+
+  // Stream Deploy logs.
+  logStreamer.Stream()
 }
