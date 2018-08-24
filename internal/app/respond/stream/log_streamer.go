@@ -8,8 +8,8 @@ import (
 )
 
 type Log struct {
-  Msg       string
   Timestamp string
+  Msg       string
   Completed bool
   Failed    bool
 }
@@ -51,7 +51,7 @@ func (ls *logStreamer) watchLogs() {
 
   readFromTs := redis.DefaultXStartTs // start reading from beginning of Redis stream.
   for {
-    reply, err := redis.XRead(&conn, ls.streamKey, readFromTs, redis.DefaultReadTimeout)
+    entries, err := redis.XRead(&conn, ls.streamKey, readFromTs, redis.DefaultReadTimeout)
 
     // Pipe any unexpected errors and return (if those occur).
     if err != nil {
@@ -61,31 +61,34 @@ func (ls *logStreamer) watchLogs() {
     }
 
     // If the read timed out, send a filler log to keep the log stream alive & get fresh Redis connection.
-    if reply == nil {
+    if entries == nil || len(entries) == 0 {
       ls.streamLog(&Log{Msg: "..."})
       conn = app.Redis.Get()
       continue
     }
 
-    // Unmarshal Redis reply into Log structure.
-    log := unmarshalLog(reply)
+    // Iterate over entries since last timestamp.
+    for _, entry := range entries {
+      // Unmarshal entry into Log structure
+      log := unmarshalLog(&entry)
 
-    // Set the next timestamp to read from.
-    readFromTs = log.Timestamp
+      // Set the next timestamp to read from.
+      readFromTs = log.Timestamp
 
-    // Stream latest log.
-    ls.streamLog(log)
+      // Stream latest log.
+      ls.streamLog(log)
 
-    // Call log fail handler if log failed.
-    if log.Failed && ls.failedLogHandler != nil {
-      failHandler := *ls.failedLogHandler
-      failHandler()
-    }
+      // Call log fail handler if log failed.
+      if log.Failed && ls.failedLogHandler != nil {
+        failHandler := *ls.failedLogHandler
+        failHandler()
+      }
 
-    // Stop watching logs if failed or completed.
-    if log.Failed || log.Completed {
-      ls.completeNotifyCh <- true
-      return
+      // Stop watching logs if failed or completed.
+      if log.Failed || log.Completed {
+        ls.completeNotifyCh <- true
+        return
+      }
     }
   }
 }
@@ -95,11 +98,11 @@ func (ls *logStreamer) streamLog(log *Log) {
   ls.flusher.Flush()
 }
 
-func unmarshalLog(reply interface{}) *Log {
-  log := &Log{}
-
-  // Set Completed if completed
-  // Set Failed if level is 'error'
-
-  return log
+func unmarshalLog(entry *redis.XReadEntry) *Log {
+  return &Log{
+    Timestamp: entry.Timestamp,
+    Msg: entry.Args["msg"],
+    Completed: entry.Args["complete"] == "true",
+    Failed: entry.Args["level"] == "error",
+  }
 }
