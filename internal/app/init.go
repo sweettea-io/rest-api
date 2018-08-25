@@ -2,7 +2,6 @@ package app
 
 import (
   "github.com/jinzhu/gorm"
-  "github.com/Sirupsen/logrus"
   "github.com/sweettea-io/rest-api/internal/pkg/config"
   "github.com/sweettea-io/rest-api/internal/pkg/db"
   "github.com/sweettea-io/rest-api/internal/pkg/logger"
@@ -15,7 +14,7 @@ var Config *config.Config
 var Redis *r.Pool
 var JobQueue *work.Enqueuer
 var DB *gorm.DB
-var Log *logrus.Logger
+var Log *logger.Lgr
 
 func Init(cfg *config.Config) {
   // Set global config.
@@ -37,5 +36,5 @@ func Init(cfg *config.Config) {
   DB = db.NewConnection(Config.DatabaseUrl, Config.Debug)
 
   // Create app logger.
-  Log = logger.NewLogger()
+  Log = logger.NewLogger(Redis)
 }

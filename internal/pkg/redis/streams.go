@@ -13,7 +13,7 @@ const DefaultXStartTs = "0.0" // very beginning of stream
 
 type XReadEntry struct {
   Timestamp string
-  Args      map[string]string
+  Args      map[string]interface{}
 }
 
 func XRead(conn *r.Conn, stream string, startTs string, timeout int) ([]XReadEntry, error) {
@@ -75,15 +75,21 @@ func parseXReadReply(streams []interface{}) (map[string][]XReadEntry, error) {
       }
 
       var timestamp string
-      var args []string
+      var args []interface{}
       if _, err := r.Scan(streamEntry, &timestamp, &args); err != nil {
+        return nil, err
+      }
+
+      // Create map from args list.
+      mapArgs, err := maputil.FromStrSlice(args)
+      if err != nil {
         return nil, err
       }
 
       // Create new XReadEntry.
       xReadEntry := XReadEntry{
         Timestamp: timestamp,
-        Args: maputil.FromStrSlice(args),
+        Args: mapArgs,
       }
 
       // Append entry to stream key.
