@@ -34,6 +34,8 @@ func InitDeployRouter() {
   // Attach route handlers.
   deployRouter.HandleFunc("", CreateDeployHandler).Methods("POST")
   deployRouter.HandleFunc("", UpdateDeployHandler).Methods("PUT")
+  // TODO: Delete handler
+  // TODO: Get handler
 }
 
 // ----------- ROUTE HANDLERS -----------

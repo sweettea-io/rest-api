@@ -148,7 +148,7 @@ func UserAuthHandler(w http.ResponseWriter, req *http.Request) {
 
   // Ensure passwords match.
   if !crypt.VerifyBcrypt(pl.Password, user.HashedPw) {
-    app.Log.Errorln("error authing User: invalid password")
+    app.Log.Errorln("user auth error: invalid password")
     respond.Error(w, errmsg.Unauthorized())
     return
   }
