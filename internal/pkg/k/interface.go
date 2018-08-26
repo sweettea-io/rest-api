@@ -4,7 +4,7 @@ type KDeploy interface {
   Init(args map[string]interface{}) error
   Configure() error
   Perform() error
-  GetResultChannel() <-chan Result
+  GetResultChannel() chan Result
   Watch()
 }
 

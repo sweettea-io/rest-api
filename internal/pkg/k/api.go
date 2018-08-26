@@ -26,7 +26,7 @@ type Api struct {
   DeploymentName  string
   Image           string
   ContainerName   string
-  ResultChannel   <-chan Result
+  ResultChannel   chan Result
 
   // K8S resources
   Namespace       string
@@ -102,7 +102,7 @@ func (api *Api) Perform() error {
   }
 }
 
-func (api *Api) GetResultChannel() <-chan Result {
+func (api *Api) GetResultChannel() chan Result {
   return api.ResultChannel
 }
 

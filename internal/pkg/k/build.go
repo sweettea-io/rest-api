@@ -29,9 +29,9 @@ type Build struct {
   DeployName       string
   Image            string
   ContainerName    string
-  ResultChannel    <-chan Result
+  ResultChannel    chan Result
 
-  // K8S resources
+  // K8S resourcess
   Namespace        string
   Client           *typedcorev1.CoreV1Client
   VolumeMounts     []corev1.VolumeMount
@@ -102,7 +102,7 @@ func (b *Build) Perform() error {
   return CreatePod(b.Client, b.Namespace, b.Pod, cluster.Build)
 }
 
-func (b *Build) GetResultChannel() <-chan Result {
+func (b *Build) GetResultChannel() chan Result {
   return b.ResultChannel
 }
 

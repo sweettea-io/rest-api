@@ -18,7 +18,7 @@ type TrainJob struct {
   ModelVersion   ModelVersion
   ModelVersionID uint         `gorm:"default:null;not null;unique_index:train_job_grouped_index"`
   Stage          string       `gorm:"default:null;not null"`
-  Failed         bool         `gorm:"default:fslse"`
+  Failed         bool         `gorm:"default:false"`
 }
 
 // Assign initial stage before creation.

@@ -19,7 +19,7 @@ type Expose struct {
   Port          int32
   TargetPort    int32
   Labels        map[string]string
-  ResultChannel <-chan Result
+  ResultChannel chan Result
 
   // K8S resources
   Namespace     string
@@ -74,7 +74,7 @@ func (expose *Expose) Perform() error {
   return CreateService(expose.Client, expose.Namespace, expose.Service)
 }
 
-func (expose *Expose) GetResultChannel() <-chan Result {
+func (expose *Expose) GetResultChannel() chan Result {
   return expose.ResultChannel
 }
 

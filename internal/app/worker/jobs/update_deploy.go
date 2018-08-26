@@ -69,7 +69,7 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
 
   // Prep to run the ApiUpdate job.
   jobName := Names.ApiUpdate
-  jobArgs := enc.JSON{
+  jobArgs := &enc.JSON{
     "deployID": deploy.ID,
     "modelVersionID": modelVersionID,
     "commitID": commit.ID,
@@ -80,19 +80,24 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
   // If the commit changed, though, schedule the BuildDeploy instead.
   if commitChanged {
     jobName = Names.BuildDeploy
-    jobArgs = enc.JSON{
+    followOnArgsStr, err := jobArgs.AsString()
+    if err != nil {
+      return logBuildableErr(err, logKey, "Error stringifying JSON.")
+    }
+
+    jobArgs = &enc.JSON{
       "resourceID": deploy.ID,
       "buildTargetSha": commit.Sha,
       "projectID": project.ID,
       "targetCluster": cluster.Api,
       "logKey": logKey,
       "followOnJob": Names.ApiUpdate,
-      "followOnArgs": jobArgs.AsString(),
+      "followOnArgs": followOnArgsStr,
     }
   }
 
   // Schedule the appropriate job.
-  if _, err := app.JobQueue.Enqueue(jobName, jobArgs); err != nil {
+  if _, err := app.JobQueue.Enqueue(jobName, *jobArgs); err != nil {
     return failDeploy(deploy.ID, err, logKey, "Failed to schedule %s", jobName)
   }
 

@@ -80,6 +80,18 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
     return logBuildableErr(err, logKey, "Creating train job failed.")
   }
 
+  // Follow-on job args.
+  followOnArgs := &enc.JSON{
+    "trainJobID": trainJob.ID,
+    "envs": envs,
+    "logKey": logKey,
+  }
+
+  followOnArgsStr, err := followOnArgs.AsString()
+  if err != nil {
+    return logBuildableErr(err, logKey, "Arg error during build deploy job scheduling.")
+  }
+
   // Enqueue new job to build this Project for the Train Cluster.
   jobArgs := work.Q{
     "resourceID": trainJob.ID,
@@ -88,11 +100,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
     "targetCluster": cluster.Train,
     "logKey": logKey,
     "followOnJob": Names.TrainDeploy,
-    "followOnArgs": enc.JSON{
-      "trainJobID": trainJob.ID,
-      "envs": envs,
-      "logKey": logKey,
-    }.AsString(),
+    "followOnArgs": followOnArgsStr,
   }
 
   if _, err := app.JobQueue.Enqueue(Names.BuildDeploy, jobArgs); err != nil {

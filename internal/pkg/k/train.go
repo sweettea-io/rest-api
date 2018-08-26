@@ -25,7 +25,7 @@ type Train struct {
   DeployName    string
   Image         string
   ContainerName string
-  ResultChannel <-chan Result
+  ResultChannel chan Result
 
   // K8S resources
   Namespace     string
@@ -97,7 +97,7 @@ func (t *Train) Perform() error {
 }
 
 
-func (t *Train) GetResultChannel() <-chan Result {
+func (t *Train) GetResultChannel() chan Result {
   return t.ResultChannel
 }
 

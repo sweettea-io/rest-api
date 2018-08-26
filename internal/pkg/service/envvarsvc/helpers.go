@@ -6,7 +6,7 @@ import (
   "strings"
 )
 
-func MapFromBytes(data []bytes) (map[string]string, error) {
+func MapFromBytes(data []byte) (map[string]string, error) {
   var envsMap map[string]string
 
   // Unmarshal bytes into map.

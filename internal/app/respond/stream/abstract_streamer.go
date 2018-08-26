@@ -9,7 +9,7 @@ type AbstractStreamer struct {
   writer           http.ResponseWriter
   flusher          http.Flusher
   closeNotifyCh    <-chan bool
-  completeNotifyCh <-chan bool
+  completeNotifyCh chan bool
   respHeaders      map[string]string
 }
 
