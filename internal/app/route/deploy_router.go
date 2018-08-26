@@ -15,6 +15,8 @@ import (
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/pkg/service/deploysvc"
   "github.com/sweettea-io/rest-api/internal/app/respond/stream"
+  "fmt"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/timeutil"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -100,8 +102,9 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  // Create Uid for Deploy manually so that its available as the log stream key.
+  // Create Uid for Deploy now so its available to use in the log stream key.
   deployUid := unique.NewUid()
+  logKey := fmt.Sprintf("%s-%v", deployUid, timeutil.MSSinceEpoch())
 
   // Create args for CreateDeploy job.
   jobArgs := work.Q{
@@ -111,6 +114,7 @@ func CreateDeployHandler(w http.ResponseWriter, req *http.Request) {
     "modelVersionID": modelVersion.ID,
     "sha": pl.Sha,
     "envs": pl.Envs,
+    "logKey": logKey,
   }
 
   // Enqueue CreateDeploy job.
@@ -205,6 +209,7 @@ func UpdateDeployHandler(w http.ResponseWriter, req *http.Request) {
     "modelVersionID": modelVersion.ID,
     "sha": pl.Sha,
     "envs": pl.Envs,
+    "logKey": fmt.Sprintf("%s-%v", deploy.Uid, timeutil.MSSinceEpoch()),
   }
 
   // Enqueue UpdateDeploy job.

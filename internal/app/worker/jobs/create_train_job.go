@@ -24,52 +24,60 @@ import (
     modelSlug   (string) slug of Model associated with this TrainJob
     sha         (string) commit sha to train with
     envs        (string) env vars to use with this TrainJob's Train Cluster deploy (json string)
+    logKey      (string) log key for buildable
 */
 func (c *Context) CreateTrainJob(job *work.Job) error {
-  // Ensure Train Cluster exists first.
-  if !app.Config.TrainClusterConfigured() {
-    return logAndFail(fmt.Errorf("train cluster not configured -- leaving CreateTrainJob"))
-  }
-
   // Extract args from job.
   trainJobUid := job.ArgString("trainJobUid")
   projectID := uint(job.ArgInt64("projectID"))
   modelSlug := job.ArgString("modelSlug")
   sha := job.ArgString("sha")
   envs := job.ArgString("envs")
+  logKey := job.ArgString("logKey")
 
   if err := job.ArgError(); err != nil {
-    return logAndFail(err)
+    if logKey != "" {
+      return logBuildableErr(err, logKey, "Arg error occurred inside create train job.")
+    }
+
+    app.Log.Errorln(err.Error())
+    return err
+  }
+
+  // Ensure Train Cluster even exists.
+  if !app.Config.TrainClusterConfigured() {
+    err := fmt.Errorf("Train Cluster not yet configured.")
+    return logBuildableErr(err, logKey, err.Error())
   }
 
   // Get project by ID.
   project, err := projectsvc.FromID(projectID)
   if err != nil {
-    return logAndFail(err)
+    return logBuildableErr(err, logKey, "SweetTea project not found.")
   }
 
   // If sha provided, find Commit by that value. Otherwise, fetch latest commit from repo.
   commit, err := commitsvc.FromShaOrLatest(sha, project)
   if err != nil {
-    return logAndFail(err)
+    return logBuildableErr(err, logKey, "Error finding commit sha to deploy.")
   }
 
   // Upsert Model for provided slug.
   model, err := modelsvc.Upsert(project.ID, modelSlug)
   if err != nil {
-    return logAndFail(err)
+    return logBuildableErr(err, logKey, "Upserting model \"%s\" failed.", modelSlug)
   }
 
   // Create new ModelVersion for this model.
   modelVersion, err := modelversionsvc.Create(model.ID)
   if err != nil {
-    return logAndFail(err)
+    return logBuildableErr(err, logKey, "Creating new version of model \"%s\" failed.", modelSlug)
   }
 
   // Create new TrainJob.
   trainJob, err := trainjobsvc.Create(trainJobUid, commit.ID, modelVersion.ID)
   if err != nil {
-    return logAndFail(err)
+    return logBuildableErr(err, logKey, "Creating train job failed.")
   }
 
   // Enqueue new job to build this Project for the Train Cluster.
@@ -78,20 +86,22 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
     "buildTargetSha": sha,
     "projectID": projectID,
     "targetCluster": cluster.Train,
+    "logKey": logKey,
     "followOnJob": Names.TrainDeploy,
     "followOnArgs": enc.JSON{
       "trainJobID": trainJob.ID,
       "envs": envs,
+      "logKey": logKey,
     }.AsString(),
   }
 
   if _, err := app.JobQueue.Enqueue(Names.BuildDeploy, jobArgs); err != nil {
-    return failTrainJob(trainJob.ID, fmt.Errorf("error scheduling BuildDeploy job: %s", err.Error()))
+    return failTrainJob(trainJob.ID, err, logKey, "Failed to schedule build deploy job.")
   }
 
   // Update trainJob stage to BuildScheduled.
   if err := trainjobsvc.UpdateStage(trainJob, m.BuildStages.BuildScheduled); err != nil {
-    return failTrainJob(trainJob.ID, err)
+    return failTrainJob(trainJob.ID, err, logKey, "Failed to update stage of train job.")
   }
   
   return nil

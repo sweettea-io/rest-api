@@ -19,6 +19,7 @@ import (
     modelVersionID (uint)   ModelVersion to migrate Deploy
     commitID       (uint)   Commit to migrate Deploy to
     envs           (string) stringified env var updates to apply
+    logKey         (string) log key for buildable
 */
 func (c *Context) ApiUpdate(job *work.Job) error {
   // Extract args from job.
@@ -26,18 +27,21 @@ func (c *Context) ApiUpdate(job *work.Job) error {
   modelVersionID := uint(job.ArgInt64("modelVersionID"))
   commitID := uint(job.ArgInt64("commitID"))
   envs := job.ArgString("envs")
+  logKey := job.ArgString("logKey")
 
   if err := job.ArgError(); err != nil {
-    deploysvc.FailByID(deployID)
+    if logKey != "" {
+      return failDeploy(deployID, err, logKey, "Arg error occurred inside API update job.")
+    }
+
     app.Log.Errorln(err.Error())
     return err
   }
 
   // Find Deploy by ID.
   deploy, err := deploysvc.FromID(deployID)
-
   if err != nil {
-    return failDeploy(deployID, err)
+    return failDeploy(deployID, err, logKey, "Deploy not found.")
   }
 
   // Get current Commit & ModelVersion
@@ -54,7 +58,7 @@ func (c *Context) ApiUpdate(job *work.Job) error {
     commit, err = commitsvc.FromID(commitID)
 
     if err != nil {
-      return failDeploy(deployID, err)
+      return failDeploy(deployID, err, logKey, "Commit not found.")
     }
   }
 
@@ -64,15 +68,14 @@ func (c *Context) ApiUpdate(job *work.Job) error {
     modelVersion, err = modelversionsvc.FromID(modelVersionID)
 
     if err != nil {
-      return failDeploy(deployID, err)
+      return failDeploy(deployID, err, logKey, "Model version not found.")
     }
   }
 
   // Convert stringified envs into map[string]string representation.
   envUpdates, err := envvarsvc.MapFromBytes([]byte(envs))
-
   if err != nil {
-    return failDeploy(deployID, err)
+    return failDeploy(deployID, err, logKey, "Failed to parse deploy environment variables.")
   }
 
   // Merge new envs on top of existing ones.
@@ -89,17 +92,17 @@ func (c *Context) ApiUpdate(job *work.Job) error {
 
   // Initialize API deploy.
   if err := apiDeploy.Init(apiDeployArgs); err != nil {
-    return failDeploy(deployID, err)
+    return failDeploy(deployID, err, logKey, "Failed to initialize API update.")
   }
 
   // Create deploy resources.
   if err := apiDeploy.Configure(); err != nil {
-    return failDeploy(deployID, err)
+    return failDeploy(deployID, err, logKey, "Failed to configure API update resources.")
   }
 
   // Deploy to ApiCluster.
   if err := apiDeploy.Perform(); err != nil {
-    return failDeploy(deployID, err)
+    return failDeploy(deployID, err, logKey, "Failed to perform API update.")
   }
 
   // Create map of updates to apply to Deploy now that it has succeeded.
@@ -115,15 +118,13 @@ func (c *Context) ApiUpdate(job *work.Job) error {
 
   // Update Deploy stage to Deployed and apply updates.
   if err := deploysvc.Deployed(deployID, updates); err != nil {
-    return failDeploy(deployID, err)
+    return failDeploy(deployID, err, logKey, "Failed to update stage of deploy.")
   }
 
   // Upsert all envs that could have been changed.
   if err := envvarsvc.UpsertFromMap(deployID, envUpdates); err != nil {
-    return failDeploy(deployID, err)
+    return failDeploy(deployID, err, logKey, "Failed to upsert deploy environment variables.")
   }
-
-  // TODO: Stream message back successfully disconnecting client.
 
   // Get channel to watch API deploy.
   resultCh := apiDeploy.GetResultChannel()
@@ -134,8 +135,10 @@ func (c *Context) ApiUpdate(job *work.Job) error {
 
   // Error out if deployment failed to start.
   if !deployResult.Ok {
-    return failDeploy(deployID, deployResult.Error)
+    return failDeploy(deployID, deployResult.Error, logKey, "Failed to update API deploy.")
   }
+
+  // TODO: Stream message back successfully disconnecting client.
 
   return nil
 }

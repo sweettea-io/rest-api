@@ -1,7 +1,6 @@
 package jobs
 
 import (
-  "fmt"
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/service/apiclustersvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/commitsvc"
@@ -25,6 +24,7 @@ import (
     modelVersionID (uint)   ID of ModelVersion to use with this deploy
     sha            (string) commit sha to deploy
     envs           (string) custom env vars to assign to this Deploy
+    logKey         (string) log key for buildable
 */
 func (c *Context) CreateDeploy(job *work.Job) error {
   // Extract args from job.
@@ -34,21 +34,27 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   modelVersionID := uint(job.ArgInt64("modelVersionID"))
   sha := job.ArgString("sha")
   envs := job.ArgString("envs")
+  logKey := job.ArgString("logKey")
 
   if err := job.ArgError(); err != nil {
-    return logAndFail(err)
+    if logKey != "" {
+      return logBuildableErr(err, logKey, "Arg error occurred inside create deploy job.")
+    }
+
+    app.Log.Errorln(err.Error())
+    return err
   }
 
   // Find ApiCluster by ID.
   apiCluster, err := apiclustersvc.FromID(apiClusterID)
   if err != nil {
-    return logAndFail(err)
+    return logBuildableErr(err, logKey, "API cluster not found.")
   }
 
   // Find ModelVersion by ID.
   modelVersion, err := modelversionsvc.FromID(modelVersionID)
   if err != nil {
-    return logAndFail(err)
+    return logBuildableErr(err, logKey, "Model version not found.")
   }
 
   // Store ref to project.
@@ -57,7 +63,7 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   // If sha provided, find Commit by that value. Otherwise, fetch latest commit from repo.
   commit, err := commitsvc.FromShaOrLatest(sha, project)
   if err != nil {
-    return logAndFail(err)
+    return logBuildableErr(err, logKey, "Error finding commit sha to deploy.")
   }
 
   // Upsert Deploy.
@@ -70,7 +76,7 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   )
 
   if err != nil {
-    return logAndFail(err)
+    return logBuildableErr(err, logKey, "Failed to upsert deploy.")
   }
 
   // If Deploy already exists, return an "Everything up-to-date." message.
@@ -82,12 +88,12 @@ func (c *Context) CreateDeploy(job *work.Job) error {
   // Convert stringified envs into map[string]string representation.
   envsMap, err := envvarsvc.MapFromBytes([]byte(envs))
   if err != nil {
-    return failDeploy(deploy.ID, err)
+    return failDeploy(deploy.ID, err, logKey, "Failed to parse deploy environment variables.")
   }
 
   // Create EnvVars for this Deploy.
   if err := envvarsvc.CreateFromMap(deploy.ID, envsMap); err != nil {
-    return failDeploy(deploy.ID, err)
+    return failDeploy(deploy.ID, err, logKey, "Failed to create deploy environment variables.")
   }
 
   // Define args for the BuildDeploy job.
@@ -96,20 +102,22 @@ func (c *Context) CreateDeploy(job *work.Job) error {
     "buildTargetSha": commit.Sha,
     "projectID": project.ID,
     "targetCluster": cluster.Api,
+    "logKey": logKey,
     "followOnJob": Names.ApiDeploy,
     "followOnArgs": enc.JSON{
       "deployID": deploy.ID,
+      "logKey": logKey,
     },
   }
 
   // Enqueue new job to build this Project for the ApiCluster.
   if _, err := app.JobQueue.Enqueue(Names.BuildDeploy, jobArgs); err != nil {
-    return failDeploy(deploy.ID, fmt.Errorf("error scheduling BuildDeploy job: %s", err.Error()))
+    return failDeploy(deploy.ID, err, logKey, "Failed to schedule build deploy job.")
   }
 
   // Update deploy stage to BuildScheduled.
   if err := deploysvc.UpdateStage(deploy, model.BuildStages.BuildScheduled); err != nil {
-    return failDeploy(deploy.ID, err)
+    return failDeploy(deploy.ID, err, logKey, "Failed to update stage of deploy.")
   }
 
   return nil

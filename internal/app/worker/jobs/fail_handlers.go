@@ -7,32 +7,33 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
 )
 
-func failBuildable(buildableID uint, targetCluster string, err error) error {
+func failBuildable(buildableID uint, targetCluster string, err error, logKey string, logMsg string, args ...interface{}) error {
   if e := buildablesvc.Fail(buildableID, targetCluster); e != nil {
-    return logAndFail(e)
+    app.Log.Errorln(e.Error())
   }
 
-  return logAndFail(err)
+  return logBuildableErr(err, logKey, logMsg, args...)
 
 }
 
-func failDeploy(deployID uint, err error) error {
+func failDeploy(deployID uint, err error, deployLogKey string, deployLogMsg string, args ...interface{}) error {
   if e := deploysvc.FailByID(deployID); e != nil {
-    return logAndFail(e)
+    app.Log.Errorln(e.Error())
   }
 
-  return logAndFail(err)
+  return logBuildableErr(err, deployLogKey, deployLogMsg, args...)
 }
 
-func failTrainJob(trainJobID uint, err error) error {
+func failTrainJob(trainJobID uint, err error, trainJobLogKey string, trainJobLogMsg string, args ...interface{}) error {
   if e := trainjobsvc.FailByID(trainJobID); e != nil {
-    return logAndFail(e)
+    app.Log.Errorln(e.Error())
   }
 
-  return logAndFail(err)
+  return logBuildableErr(err, trainJobLogKey, trainJobLogMsg, args...)
 }
 
-func logAndFail(err error) error {
+func logBuildableErr(err error, buildableLogKey string, buildableLogMsg string, args ...interface{}) error {
   app.Log.Errorln(err.Error())
+  app.Log.BuildableErrorf(buildableLogKey, buildableLogMsg, args...)
   return err
 }

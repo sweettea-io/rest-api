@@ -7,7 +7,6 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/commitsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/cluster"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
-  "fmt"
 )
 
 /*
@@ -19,6 +18,7 @@ import (
     modelVersionID (uint)   ID of ModelVersion to migrate to
     sha            (string) sha of Commit to migrate to
     envs           (string) custom env vars to apply to this Deploy
+    logKey         (string) log key for buildable
 */
 func (c *Context) UpdateDeploy(job *work.Job) error {
   // Extract args from job.
@@ -26,16 +26,21 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
   modelVersionID := uint(job.ArgInt64("modelVersionID"))
   sha := job.ArgString("sha")
   envs := job.ArgString("envs")
+  logKey := job.ArgString("logKey")
 
   if err := job.ArgError(); err != nil {
-    return logAndFail(err)
+    if logKey != "" {
+      return logBuildableErr(err, logKey, "Arg error occurred inside update deploy job.")
+    }
+
+    app.Log.Errorln(err.Error())
+    return err
   }
 
   // Find Deploy by ID.
   deploy, err := deploysvc.FromID(deployID)
-
   if err != nil {
-    return logAndFail(err)
+    return logBuildableErr(err, logKey, "Deploy not found.")
   }
 
   // Get ref to this Deploy's current Commit/Project.
@@ -47,7 +52,7 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
     commit, err = commitsvc.FetchAndUpsertFromSha(project, sha)
 
     if err != nil {
-      return logAndFail(err)
+      return logBuildableErr(err, logKey, "Failed to upsert commit with sha %s.", sha)
     }
   }
 
@@ -58,6 +63,7 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
 
   // Return that everything is up to date if there's nothing to change.
   if !commitChanged && !modelVersionChanged && !envsChanged {
+    // TODO: Stream everything up to date message.
     return nil
   }
 
@@ -68,6 +74,7 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
     "modelVersionID": modelVersionID,
     "commitID": commit.ID,
     "envs": envs,
+    "logKey": logKey,
   }
 
   // If the commit changed, though, schedule the BuildDeploy instead.
@@ -78,6 +85,7 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
       "buildTargetSha": commit.Sha,
       "projectID": project.ID,
       "targetCluster": cluster.Api,
+      "logKey": logKey,
       "followOnJob": Names.ApiUpdate,
       "followOnArgs": jobArgs.AsString(),
     }
@@ -85,7 +93,7 @@ func (c *Context) UpdateDeploy(job *work.Job) error {
 
   // Schedule the appropriate job.
   if _, err := app.JobQueue.Enqueue(jobName, jobArgs); err != nil {
-    return failDeploy(deploy.ID, fmt.Errorf("error scheduling %s job: %s", jobName, err.Error()))
+    return failDeploy(deploy.ID, err, logKey, "Failed to schedule %s", jobName)
   }
 
   return nil

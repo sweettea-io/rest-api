@@ -14,28 +14,35 @@ import (
   TrainDeploy deploys a TrainJob to the SweetTea Train Cluster for model training.
 
   Args:
-    trainJobID (uint) ID of the TrainJob to deploy
+    trainJobID (uint)   ID of the TrainJob to deploy
     envs       (string) json string representation of the custom env vars to use with this Train Cluster deploy
+    logKey     (string) log key for buildable
 */
 func (c *Context) TrainDeploy(job *work.Job) error {
   // Extract args from job.
   trainJobID := uint(job.ArgInt64("trainJobID"))
   envs := job.ArgString("envs")
+  logKey := job.ArgString("logKey")
 
   if err := job.ArgError(); err != nil {
-    return failTrainJob(trainJobID, err)
+    if logKey != "" {
+      return failTrainJob(trainJobID, err, logKey, "Arg error occurred inside train deploy job.")
+    }
+
+    app.Log.Errorln(err.Error())
+    return err
   }
 
   // Ensure Train Cluster exists first.
   if !app.Config.TrainClusterConfigured() {
-    return failTrainJob(trainJobID, fmt.Errorf("train cluster not configured -- leaving CreateTrainJob"))
+    err := fmt.Errorf("Train Cluster not yet configured.")
+    return failTrainJob(trainJobID, err, logKey, err.Error())
   }
 
   // Convert stringified envs into map[string]string representation.
   envsMap, err := envvarsvc.MapFromBytes([]byte(envs))
-
   if err != nil {
-    return failTrainJob(trainJobID, err)
+    return failTrainJob(trainJobID, err, logKey, "Failed to parse train environment variables.")
   }
 
   // Create K8S train deploy and prep args.
@@ -47,25 +54,23 @@ func (c *Context) TrainDeploy(job *work.Job) error {
 
   // Initialize train deploy.
   if err := trainDeploy.Init(trainDeployArgs); err != nil {
-    return failTrainJob(trainJobID, err)
+    return failTrainJob(trainJobID, err, logKey, "Failed to initialize train deploy.")
   }
 
   // Create deploy resources.
   if err := trainDeploy.Configure(); err != nil {
-    return failTrainJob(trainJobID, err)
+    return failTrainJob(trainJobID, err, logKey, "Failed to configure train deploy resources.")
   }
 
   // Deploy to train cluster.
   if err := trainDeploy.Perform(); err != nil {
-    return failTrainJob(trainJobID, err)
+    return failTrainJob(trainJobID, err, logKey, "Failed to perform train deploy.")
   }
 
   // Update TrainJob stage to Deployed.
   if err := trainjobsvc.UpdateStageByID(trainJobID, model.BuildStages.Deployed); err != nil {
-    return failTrainJob(trainJobID, err)
+    return failTrainJob(trainJobID, err, logKey, "Failed to update stage of train job.")
   }
-
-  // TODO: Stream message back successfully disconnecting client.
 
   // Get channel to watch train deploy.
   resultCh := trainDeploy.GetResultChannel()
@@ -76,8 +81,10 @@ func (c *Context) TrainDeploy(job *work.Job) error {
 
   // Error out if pod failed to be added.
   if !deployResult.Ok {
-    return failTrainJob(trainJobID, deployResult.Error)
+    return failTrainJob(trainJobID, deployResult.Error, logKey, "Deploy to Train Cluster failed.")
   }
+
+  // TODO: Stream message back successfully disconnecting client.
 
   return nil
 }

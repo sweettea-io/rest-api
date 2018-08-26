@@ -21,8 +21,6 @@ type Build struct {
   ResourceID       uint
   BuildTargetSha   string
   TargetCluster    string
-  TargetDeployEnvs string
-  PassThruMetadata string
 
   // Establish on Init
   Project          *model.Project
@@ -48,8 +46,6 @@ func (b *Build) Init(args map[string]interface{}) error {
   b.ResourceID = args["resourceID"].(uint)
   b.BuildTargetSha = args["buildTargetSha"].(string)
   b.TargetCluster = args["targetCluster"].(string)
-  b.TargetDeployEnvs = args["envs"].(string)
-  b.PassThruMetadata = args["passThruMetadata"].(string)
 
   // Find Project by ID.
   project, err := projectsvc.FromID(args["projectID"].(uint))

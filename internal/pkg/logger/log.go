@@ -43,42 +43,42 @@ func (l *Lgr) Infoln(args ...interface{}) {
 }
 
 // BuildableInfo logs to the InfoLevel and the Redis stream of the buildable.
-func (l *Lgr) BuildableInfo(buildableUid string, args ...interface{}) {
+func (l *Lgr) BuildableInfo(buildableLogKey string, args ...interface{}) {
   msg := fmt.Sprint(args...)
   l.Logger.Info(msg)
-  l.newStreamEntry(buildableUid, msg, InfoLevel, false)
+  l.newStreamEntry(buildableLogKey, msg, InfoLevel, false)
 }
 
 // BuildableInfof logs a formatted string to the InfoLevel and the Redis stream of the buildable.
-func (l *Lgr) BuildableInfof(buildableUid string, format string, args ...interface{}) {
+func (l *Lgr) BuildableInfof(buildableLogKey string, format string, args ...interface{}) {
   msg := fmt.Sprintf(format, args...)
   l.Logger.Info(msg)
-  l.newStreamEntry(buildableUid, msg, InfoLevel, false)
+  l.newStreamEntry(buildableLogKey, msg, InfoLevel, false)
 }
 
 // BuildableInfoln is equivalent to `BuildableInfo` but appends a new line to the message.
-func (l *Lgr) BuildableInfoln(buildableUid string, args ...interface{}) {
+func (l *Lgr) BuildableInfoln(buildableLogKey string, args ...interface{}) {
   msg := fmt.Sprintln(args...)
   l.Logger.Info(msg)
-  l.newStreamEntry(buildableUid, msg, InfoLevel, false)
+  l.newStreamEntry(buildableLogKey, msg, InfoLevel, false)
 }
 
-func (l *Lgr) CompleteBuildable(buildableUid string, args ...interface{}) {
+func (l *Lgr) CompleteBuildable(buildableLogKey string, args ...interface{}) {
   msg := fmt.Sprint(args...)
   l.Logger.Info(msg)
-  l.newStreamEntry(buildableUid, msg, InfoLevel, true)
+  l.newStreamEntry(buildableLogKey, msg, InfoLevel, true)
 }
 
-func (l *Lgr) CompleteBuildablef(buildableUid string, format string, args ...interface{}) {
+func (l *Lgr) CompleteBuildablef(buildableLogKey string, format string, args ...interface{}) {
   msg := fmt.Sprintf(format, args...)
   l.Logger.Info(msg)
-  l.newStreamEntry(buildableUid, msg, InfoLevel, true)
+  l.newStreamEntry(buildableLogKey, msg, InfoLevel, true)
 }
 
-func (l *Lgr) CompleteBuildableln(buildableUid string, args ...interface{}) {
+func (l *Lgr) CompleteBuildableln(buildableLogKey string, args ...interface{}) {
   msg := fmt.Sprintln(args...)
   l.Logger.Info(msg)
-  l.newStreamEntry(buildableUid, msg, InfoLevel, true)
+  l.newStreamEntry(buildableLogKey, msg, InfoLevel, true)
 }
 
 // Warn logs to the WarnLevel.
@@ -97,24 +97,24 @@ func (l *Lgr) Warnln(args ...interface{}) {
 }
 
 // BuildableWarn logs to the WarnLevel and the Redis stream of the buildable.
-func (l *Lgr) BuildableWarn(buildableUid string, args ...interface{}) {
+func (l *Lgr) BuildableWarn(buildableLogKey string, args ...interface{}) {
   msg := fmt.Sprint(args...)
   l.Logger.Warn(msg)
-  l.newStreamEntry(buildableUid, msg, WarnLevel, false)
+  l.newStreamEntry(buildableLogKey, msg, WarnLevel, false)
 }
 
 // BuildableWarnf logs a formatted string to the WarnLevel and the Redis stream of the buildable.
-func (l *Lgr) BuildableWarnf(buildableUid string, format string, args ...interface{}) {
+func (l *Lgr) BuildableWarnf(buildableLogKey string, format string, args ...interface{}) {
   msg := fmt.Sprintf(format, args...)
   l.Logger.Warn(msg)
-  l.newStreamEntry(buildableUid, msg, WarnLevel, false)
+  l.newStreamEntry(buildableLogKey, msg, WarnLevel, false)
 }
 
 // BuildableWarnln is equivalent to `BuildableWarn` but appends a new line to the message.
-func (l *Lgr) BuildableWarnln(buildableUid string, args ...interface{}) {
+func (l *Lgr) BuildableWarnln(buildableLogKey string, args ...interface{}) {
   msg := fmt.Sprintln(args...)
   l.Logger.Warn(msg)
-  l.newStreamEntry(buildableUid, msg, WarnLevel, false)
+  l.newStreamEntry(buildableLogKey, msg, WarnLevel, false)
 }
 
 // Error logs to the ErrorLevel.
@@ -133,24 +133,24 @@ func (l *Lgr) Errorln(args ...interface{}) {
 }
 
 // BuildableError logs to the ErrorLevel and the Redis stream of the buildable.
-func (l *Lgr) BuildableError(buildableUid string, args ...interface{}) {
+func (l *Lgr) BuildableError(buildableLogKey string, args ...interface{}) {
   msg := fmt.Sprint(args...)
   l.Logger.Error(msg)
-  l.newStreamEntry(buildableUid, msg, ErrorLevel, false)
+  l.newStreamEntry(buildableLogKey, msg, ErrorLevel, false)
 }
 
 // BuildableErrorf logs a formatted string to the ErrorLevel and the Redis stream of the buildable.
-func (l *Lgr) BuildableErrorf(buildableUid string, format string, args ...interface{}) {
+func (l *Lgr) BuildableErrorf(buildableLogKey string, format string, args ...interface{}) {
   msg := fmt.Sprintf(format, args...)
   l.Logger.Error(msg)
-  l.newStreamEntry(buildableUid, msg, ErrorLevel, false)
+  l.newStreamEntry(buildableLogKey, msg, ErrorLevel, false)
 }
 
 // BuildableErrorln is equivalent to `BuildableError` but appends a new line to the message.
-func (l *Lgr) BuildableErrorln(buildableUid string, args ...interface{}) {
+func (l *Lgr) BuildableErrorln(buildableLogKey string, args ...interface{}) {
   msg := fmt.Sprintln(args...)
   l.Logger.Error(msg)
-  l.newStreamEntry(buildableUid, msg, ErrorLevel, false)
+  l.newStreamEntry(buildableLogKey, msg, ErrorLevel, false)
 }
 
 // newStreamEntry adds a new message to the logger's redis stream.

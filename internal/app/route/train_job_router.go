@@ -15,6 +15,8 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/trainjobsvc"
   "github.com/sweettea-io/work"
   "github.com/sweettea-io/rest-api/internal/app/respond/stream"
+  "fmt"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/timeutil"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -77,8 +79,9 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  // Create Uid for TrainJob manually so that its available as the log stream key.
+  // Create Uid for TrainJob now so its available to use in the log stream key.
   trainJobUid := unique.NewUid()
+  logKey := fmt.Sprintf("%s-%v", trainJobUid, timeutil.MSSinceEpoch())
 
   // Create args for CreateTrainJob job.
   jobArgs := work.Q{
@@ -87,6 +90,7 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
     "modelSlug": pl.ModelSlug(),
     "sha": pl.Sha,
     "envs": pl.Envs,
+    "logKey": logKey,
   }
 
   // Enqueue CreateTrainJob job.
@@ -104,7 +108,7 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Create response streamer with log stream generator.
-  logStreamer, err := stream.NewLogStreamer(w, trainJobUid, &failHandler)
+  logStreamer, err := stream.NewLogStreamer(w, logKey, &failHandler)
 
   if err != nil {
     app.Log.Errorln(err.Error())
