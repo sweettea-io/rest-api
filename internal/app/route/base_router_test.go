@@ -20,8 +20,6 @@ func TestMain(m *testing.M) {
   TestRouter = &testutil.Router{
     Raw: Router,
     BaseRoute: app.Config.BaseRoute(),
-    AuthHeaderName: app.Config.AuthHeaderName,
-    AuthHeaderVal: app.Config.RestApiToken,
   }
 
   // Run the tests in this package and exit.

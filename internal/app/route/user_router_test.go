@@ -4,6 +4,7 @@ import (
   "reflect"
   "testing"
   "github.com/stretchr/testify/assert"
+  "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/util/testutil"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
 )
@@ -24,7 +25,9 @@ func TestCreateUserHandler(t *testing.T) {
         Method: "POST",
         Route: route,
         Data: &enc.JSON{},
-        Authed: true,
+        Headers: map[string]string{
+          app.Config.AuthHeaderName: app.Config.RestApiToken,
+        },
       },
       ExpectedStatus: 400,
       ExpectedRespJSON: &enc.JSON{"ok": false, "code": 400, "error": "invalid_input_payload"},

@@ -8,12 +8,11 @@ import (
 )
 
 type Request struct {
-  Method       string
-  Route        string
-  Body         io.Reader
-  Data         *enc.JSON
-  Authed       bool
-  ExtraHeaders map[string]string
+  Method  string
+  Route   string
+  Body    io.Reader
+  Data    *enc.JSON
+  Headers map[string]string
 }
 
 // Create HTTP request out of the Request object.
@@ -42,7 +41,7 @@ func (req *Request) CreateHTTPRequest(baseRoute string) *http.Request {
   httpReq.Header.Set("Content-Type", contentType)
 
   // Set any extra headers provided.
-  for k, v := range req.ExtraHeaders {
+  for k, v := range req.Headers {
     httpReq.Header.Set(k, v)
   }
 
