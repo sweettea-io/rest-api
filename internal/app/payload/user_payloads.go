@@ -17,7 +17,7 @@ type CreateUserPayload struct {
 }
 
 func (p *CreateUserPayload) Validate(req *http.Request) bool {
-  return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
+  return req.Body != nil && json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }
 
 // ----------- POST /user/auth -----------
@@ -28,5 +28,5 @@ type UserAuthPayload struct {
 }
 
 func (p *UserAuthPayload) Validate(req *http.Request) bool {
-  return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
+  return req.Body != nil && json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }

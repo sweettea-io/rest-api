@@ -13,7 +13,7 @@ type CreateProjectPayload struct {
 }
 
 func (p *CreateProjectPayload) Validate(req *http.Request) bool {
-  return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
+  return req.Body != nil && json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }
 
 // ----------- DELETE /project -----------
@@ -23,5 +23,5 @@ type DeleteProjectPayload struct {
 }
 
 func (p *DeleteProjectPayload) Validate(req *http.Request) bool {
-  return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
+  return req.Body != nil && json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }

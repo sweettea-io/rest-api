@@ -47,7 +47,6 @@ func TestCreateTrainJobHandler(t *testing.T) {
       Request: &testutil.Request{
         Method: "POST",
         Route: route,
-        Data: &enc.JSON{},  // TODO: Fix errors that occur during payload validation when req.Body isn't there
         BeforeSend: testutil.AuthReqWithNewUser,
       },
       ExpectedStatus: 400,

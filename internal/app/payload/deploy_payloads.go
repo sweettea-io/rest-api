@@ -28,7 +28,7 @@ func (p *CreateDeployPayload) ApiClusterSlug() string {
 }
 
 func (p *CreateDeployPayload) Validate(req *http.Request) bool {
-  return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
+  return req.Body != nil && json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }
 
 // ----------- PUT /deploy -----------
@@ -50,5 +50,5 @@ func (p *UpdateDeployPayload) Slug() string {
 }
 
 func (p *UpdateDeployPayload) Validate(req *http.Request) bool {
-  return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
+  return req.Body != nil && json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }

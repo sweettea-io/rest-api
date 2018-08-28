@@ -20,11 +20,10 @@ func TestCreateUserHandler(t *testing.T) {
       ExpectedRespJSON: &enc.JSON{"ok": false, "code": 401, "error": "Unauthorized"},
     },
     {
-      Name: "bad req data results in invalid payload",
+      Name: "invalid payload when required fields missing",
       Request: &testutil.Request{
         Method: "POST",
         Route: route,
-        Data: &enc.JSON{},
         Headers: map[string]string{
           app.Config.AuthHeaderName: app.Config.RestApiToken,
         },
@@ -33,9 +32,6 @@ func TestCreateUserHandler(t *testing.T) {
       ExpectedRespJSON: &enc.JSON{"ok": false, "code": 400, "error": "invalid_input_payload"},
     },
   }
-
-  // TODO: For the 2nd case above, what you would want to do is stub CreateUserPayload.Validate() to return false, ...
-  // TODO: ...and then check that what you have is returned.
 
   for _, tc := range testCases {
     func () {

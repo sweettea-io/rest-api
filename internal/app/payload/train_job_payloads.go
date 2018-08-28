@@ -21,5 +21,5 @@ func (p *CreateTrainJobPayload) ModelSlug() string {
 }
 
 func (p *CreateTrainJobPayload) Validate(req *http.Request) bool {
-  return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
+  return req.Body != nil && json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }

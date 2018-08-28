@@ -19,6 +19,10 @@ type CreateApiClusterPayload struct {
 }
 
 func (p *CreateApiClusterPayload) Validate(req *http.Request) bool {
+  if req.Body == nil {
+    return false
+  }
+
   if err := json.NewDecoder(req.Body).Decode(p); err != nil {
     return false
   }
@@ -53,6 +57,10 @@ type UpdateApiClusterPayload struct {
 }
 
 func (p *UpdateApiClusterPayload) Validate(req *http.Request) bool {
+  if req.Body == nil {
+    return false
+  }
+
   if err := json.NewDecoder(req.Body).Decode(p); err != nil {
     return false
   }
@@ -108,5 +116,5 @@ type DeleteApiClusterPayload struct {
 }
 
 func (p *DeleteApiClusterPayload) Validate(req *http.Request) bool {
-  return json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
+  return req.Body != nil && json.NewDecoder(req.Body).Decode(p) == nil && validator.Validate(p) == nil
 }
