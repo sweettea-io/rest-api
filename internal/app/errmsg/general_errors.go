@@ -24,5 +24,5 @@ func InvalidPayload() (*Error) {
 }
 
 func StreamingNotSupported() (*Error) {
-  return ApiError(http.StatusBadRequest, http.StatusBadRequest, "streaming_not_supported")
+  return ApiError(http.StatusBadRequest, 999, "streaming_not_supported")
 }

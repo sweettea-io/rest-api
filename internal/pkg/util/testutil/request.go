@@ -8,11 +8,12 @@ import (
 )
 
 type Request struct {
-  Method  string
-  Route   string
-  Body    io.Reader
-  Data    *enc.JSON
-  Headers map[string]string
+  Method     string
+  Route      string
+  Body       io.Reader
+  Data       *enc.JSON
+  Headers    map[string]string
+  BeforeSend func(req *Request) (*Request, error)
 }
 
 // Create HTTP request out of the Request object.
@@ -24,7 +25,6 @@ func (req *Request) CreateHTTPRequest(baseRoute string) *http.Request {
 
   // Create new HTTP request.
   httpReq, err := http.NewRequest(req.Method, baseRoute + req.Route, req.Body)
-
   if err != nil {
     panic(fmt.Errorf("error creating new http request object: %s", err.Error()))
   }
@@ -46,4 +46,12 @@ func (req *Request) CreateHTTPRequest(baseRoute string) *http.Request {
   }
 
   return httpReq
+}
+
+func (req *Request) SetHeader(name string, value string) {
+  if req.Headers == nil {
+    req.Headers = make(map[string]string)
+  }
+
+  req.Headers[name] = value
 }

@@ -12,7 +12,17 @@ type Router struct {
 }
 
 // Perform an HTTP request, responding with a Response object.
-func (router *Router) Request(req *Request) *Response {
+func (router *Router) Request(req *Request) (*Response, error) {
+  // Call before-send handler if exists.
+  if req.BeforeSend != nil {
+    var err error
+    req, err = req.BeforeSend(req)
+
+    if err != nil {
+      return nil, err
+    }
+  }
+
   // Create HTTP request object.
   httpReq := req.CreateHTTPRequest(router.BaseRoute)
 
@@ -23,5 +33,5 @@ func (router *Router) Request(req *Request) *Response {
   router.Raw.ServeHTTP(res, httpReq)
 
   // Return a Response wrapping the raw response.
-  return &Response{raw: res}
+  return &Response{raw: res}, nil
 }

@@ -42,6 +42,20 @@ func TestCreateTrainJobHandler(t *testing.T) {
         "error": "Unauthorized",
       },
     },
+    {
+      Name: "invalid payload when required fields missing",
+      Request: &testutil.Request{
+        Method: "POST",
+        Route: route,
+        BeforeSend: testutil.AuthReqWithNewUser,
+      },
+      ExpectedStatus: 400,
+      ExpectedRespJSON: &enc.JSON{
+        "ok": false,
+        "code": 400,
+        "error": "invalid_input_payload",
+      },
+    },
   }
 
   for _, tc := range testCases {
@@ -49,7 +63,11 @@ func TestCreateTrainJobHandler(t *testing.T) {
       defer Teardown()
 
       // Perform request.
-      res := TestRouter.Request(tc.Request)
+      res, err := TestRouter.Request(tc.Request)
+      if err != nil {
+        t.Error(err.Error())
+        return
+      }
 
       // Assert response status code and data.
       assert.Equal(t, tc.ExpectedStatus, res.StatusCode(), tc.Name)
