@@ -14,6 +14,8 @@ func TestMain(m *testing.M) {
   // Initialize the app, start with a teardown, and create the test router.
   app.Init(config.New())
   Teardown()
+
+  // TODO: Need someway of "reconfiguring" the router before every request so that you can stub shit appropriately.
   InitRouter()
 
   // Create test router wrapping the base router.

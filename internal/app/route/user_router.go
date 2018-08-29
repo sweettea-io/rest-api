@@ -15,9 +15,10 @@ import (
 
 // ----------- ROUTER SETUP ------------
 
-// Prefix for all routes in this file
+// Prefix for all routes in this file.
 const UserRoute = "/user"
 
+// TODO: pass custom route handlers in through here.
 func InitUserRouter() {
   // Create user router.
   userRouter := Router.PathPrefix(UserRoute).Subrouter()
