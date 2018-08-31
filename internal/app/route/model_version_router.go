@@ -12,7 +12,7 @@ const ModelVersionRoute = "/model_version"
 
 func InitModelVersionRouter() {
   // Create modelVersion router.
-  modelVersionRouter := Router.PathPrefix(ModelVersionRoute).Subrouter()
+  modelVersionRouter := Router.GetRouter().PathPrefix(ModelVersionRoute).Subrouter()
 
   // Attach Session-based auth middleware to all request handlers on this router.
   modelVersionRouter.Use(middleware.SessionAuth)

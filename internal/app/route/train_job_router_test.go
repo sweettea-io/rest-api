@@ -7,6 +7,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
   "github.com/stretchr/testify/assert"
   "reflect"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/testutil/mocks"
 )
 
 func TestCreateTrainJobHandler(t *testing.T) {
@@ -24,6 +25,7 @@ func TestCreateTrainJobHandler(t *testing.T) {
         "ok": false,
         "code": 401,
         "error": "Unauthorized",
+
       },
     },
     {
@@ -47,7 +49,9 @@ func TestCreateTrainJobHandler(t *testing.T) {
       Request: &testutil.Request{
         Method: "POST",
         Route: route,
-        BeforeSend: testutil.AuthReqWithNewUser,
+        BeforeSend: []testutil.RequestModifier{
+          testutil.AuthReqWithNewUser,
+        },
       },
       ExpectedStatus: 400,
       ExpectedRespJSON: &enc.JSON{
@@ -56,10 +60,33 @@ func TestCreateTrainJobHandler(t *testing.T) {
         "error": "invalid_input_payload",
       },
     },
+    {
+      Name: "fails when train cluster not configured",
+      CustomCfg: &mocks.MockConfig{
+        MockTrainClusterConfigured: func() bool { return false },
+      },
+      Request: &testutil.Request{
+        Method: "POST",
+        Route: route,
+        Data: &enc.JSON{
+          "projectNsp": "my-project-nsp",
+        },
+        BeforeSend: []testutil.RequestModifier{
+          testutil.AuthReqWithNewUser,
+        },
+      },
+      ExpectedStatus: 500,
+      ExpectedRespJSON: &enc.JSON{
+        "ok": false,
+        "code": 6002,
+        "error": "train_cluster_not_configured",
+      },
+    },
   }
 
   for _, tc := range testCases {
     func () {
+      Setup(tc.SetupArgs())
       defer Teardown()
 
       // Perform request.

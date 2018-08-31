@@ -20,7 +20,7 @@ const ProjectRoute = "/project"
 
 func InitProjectRouter() {
   // Create project router.
-  projectRouter := Router.PathPrefix(ProjectRoute).Subrouter()
+  projectRouter := Router.GetRouter().PathPrefix(ProjectRoute).Subrouter()
 
   // Attach route handlers.
   projectRouter.HandleFunc("", UpsertProjectHandler).Methods("POST")

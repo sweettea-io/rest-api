@@ -13,8 +13,10 @@ type Request struct {
   Body       io.Reader
   Data       *enc.JSON
   Headers    map[string]string
-  BeforeSend func(req *Request) (*Request, error)
+  BeforeSend []RequestModifier
 }
+
+type RequestModifier func(req *Request) (*Request, error)
 
 // Create HTTP request out of the Request object.
 func (req *Request) CreateHTTPRequest(baseRoute string) *http.Request {

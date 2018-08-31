@@ -26,7 +26,7 @@ const DeployRoute = "/deploy"
 
 func InitDeployRouter() {
   // Create deploy router.
-  deployRouter := Router.PathPrefix(DeployRoute).Subrouter()
+  deployRouter := Router.GetRouter().PathPrefix(DeployRoute).Subrouter()
 
   // Attach Session-based auth middleware to all request handlers on this router.
   deployRouter.Use(middleware.SessionAuth)

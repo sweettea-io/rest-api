@@ -26,7 +26,7 @@ const TrainJobRoute = "/train_job"
 
 func InitTrainJobRouter() {
   // Create trainJob router.
-  trainJobRouter := Router.PathPrefix(TrainJobRoute).Subrouter()
+  trainJobRouter := Router.GetRouter().PathPrefix(TrainJobRoute).Subrouter()
 
   // Attach Session-based auth middleware to all request handlers on this router.
   trainJobRouter.Use(middleware.SessionAuth)
@@ -65,7 +65,7 @@ func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Ensure Train cluster exists.
-  if !app.Config.TrainClusterConfigured() {
+  if !Router.Config.TrainClusterConfigured() {
     respond.Error(w, errmsg.TrainClusterNotConfigured())
     return
   }

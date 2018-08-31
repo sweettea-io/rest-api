@@ -26,7 +26,7 @@ func main() {
   })
 
   // Build API routes.
-  route.InitRouter()
+  route.InitRouter(app.Config)
 
   // Format address to listen on.
   addr := fmt.Sprintf(":%v", app.Config.ServerPort)
@@ -34,5 +34,5 @@ func main() {
   app.Log.Infof("Listening on port %v...\n", app.Config.ServerPort)
 
   // Start server.
-  panic(http.ListenAndServe(addr, route.Router))
+  panic(http.ListenAndServe(addr, route.Router.GetRouter()))
 }

@@ -11,25 +11,31 @@ import (
 var TestRouter *testutil.Router
 
 func TestMain(m *testing.M) {
-  // Initialize the app, start with a teardown, and create the test router.
+  // Initialize the app and start with a teardown.
   app.Init(config.New())
   Teardown()
-
-  // TODO: Need someway of "reconfiguring" the router before every request so that you can stub shit appropriately.
-  InitRouter()
-
-  // Create test router wrapping the base router.
-  TestRouter = &testutil.Router{
-    Raw: Router,
-    BaseRoute: app.Config.BaseRoute(),
-  }
 
   // Run the tests in this package and exit.
   code := m.Run()
   os.Exit(code)
 }
 
+// Setup test function for all tests in this package.
+func Setup(cfg config.ConfigItf) {
+  if cfg == nil {
+    cfg = app.Config
+  }
+
+  InitRouter(cfg)
+
+  // Create test router wrapping the base router.
+  TestRouter = &testutil.Router{
+    Raw: Router.GetRouter(),
+    BaseRoute: cfg.BaseRoute(),
+  }
+}
+
 // Teardown test function for all tests in this package.
 func Teardown() {
-  testutil.ClearTables(app.DB, app.Config.Debug)
+  testutil.ClearTables(app.DB, true)
 }

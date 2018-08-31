@@ -21,7 +21,7 @@ const ApiClusterRoute = "/api_cluster"
 
 func InitApiClusterRouter() {
   // Create apiCluster router.
-  apiClusterRouter := Router.PathPrefix(ApiClusterRoute).Subrouter()
+  apiClusterRouter := Router.GetRouter().PathPrefix(ApiClusterRoute).Subrouter()
 
   // Attach route handlers.
   apiClusterRouter.HandleFunc("", CreateApiClusterHandler).Methods("POST")
