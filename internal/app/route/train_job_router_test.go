@@ -82,6 +82,30 @@ func TestCreateTrainJobHandler(t *testing.T) {
         "error": "train_cluster_not_configured",
       },
     },
+    {
+      Name: "project not found for unknown project namespace",
+      CustomCfg: &mocks.MockConfig{
+        MockTrainClusterConfigured: func() bool { return true },
+      },
+      Request: &testutil.Request{
+        Method: "POST",
+        Route: route,
+        Data: &enc.JSON{
+          "projectNsp": "my-project-nsp",
+        },
+        BeforeSend: []testutil.RequestModifier{
+          testutil.AuthReqWithNewUser,
+        },
+      },
+      ExpectedStatus: 404,
+      ExpectedRespJSON: &enc.JSON{
+        "ok": false,
+        "code": 3003,
+        "error": "project_not_found",
+      },
+    },
+    // TODO: Before testing next case in this endpoint --> job being enqueued, get a separate...
+    // TODO: ...test Redis instance that you can also clear out inside Teardown() just like you do with Postgres.
   }
 
   for _, tc := range testCases {
