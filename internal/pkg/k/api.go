@@ -148,12 +148,12 @@ func (api *Api) makeEnvs() {
     "AWS_ACCESS_KEY_ID": app.Config.AWSAccessKeyId,
     "AWS_REGION_NAME": app.Config.AWSRegionName,
     "AWS_SECRET_ACCESS_KEY": app.Config.AWSSecretAccessKey,
+    "CLIENT_ID": api.Deploy.ClientID,
+    "CLIENT_SECRET": api.Deploy.ClientSecret,
     "LOG_STREAM_KEY": api.Deploy.Uid,
     "MODEL_STORAGE_URL": app.Config.ModelStorageUrl,
-    "MODEL_KEY": api.ModelVersion.StorageKey(),
+    "MODEL_STORAGE_FILE_PATH": api.ModelVersion.StorageKey(),
     "PROJECT_UID": api.Project.Uid,
-    "REDIS_ADDRESS": app.Config.RedisAddress,
-    "REDIS_PASSWORD": app.Config.RedisPassword,
   })
 
   // Format envs as k8s resources.

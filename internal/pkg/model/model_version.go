@@ -4,6 +4,7 @@ import (
   "time"
   "github.com/jinzhu/gorm"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
+  "fmt"
 )
 
 /*
@@ -31,5 +32,5 @@ func (mv *ModelVersion) BeforeCreate(scope *gorm.Scope) error {
 }
 
 func (mv *ModelVersion) StorageKey() string {
-  return "<s3_bucket_key>"
+  return fmt.Sprintf("%s-%s-%s", mv.Model.Project.Nsp, mv.Model.Slug, mv.Version)
 }

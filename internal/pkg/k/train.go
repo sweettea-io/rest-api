@@ -142,6 +142,7 @@ func (t *Train) makeEnvs() {
     "AWS_SECRET_ACCESS_KEY": app.Config.AWSSecretAccessKey,
     "LOG_STREAM_KEY": t.TrainJob.Uid,
     "MODEL_STORAGE_URL": app.Config.ModelStorageUrl,
+    "MODEL_STORAGE_FILE_PATH": t.ModelVersion.StorageKey(),
     "PROJECT_UID": t.Project.Uid,
     "REDIS_ADDRESS": app.Config.RedisAddress,
     "REDIS_PASSWORD": app.Config.RedisPassword,
