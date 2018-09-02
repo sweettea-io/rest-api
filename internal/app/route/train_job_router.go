@@ -46,7 +46,8 @@ func InitTrainJobRouter() {
   Route:   /train_job
   Payload:
     projectNsp  string (required)
-    modelName   string (required)
+    modelName   string (optional, default:"default")
+    sha         string (optional)
     envs        string (optional)
 */
 func CreateTrainJobHandler(w http.ResponseWriter, req *http.Request) {
