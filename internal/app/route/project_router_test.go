@@ -5,11 +5,10 @@ import (
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/util/testutil"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
-  "github.com/sweettea-io/rest-api/internal/pkg/util/testutil/mocks"
 )
 
-func TestCreateTrainJobHandler(t *testing.T) {
-  route := TrainJobRoute
+func TestUpsertProjectHandler(t *testing.T) {
+  route := ProjectRoute
 
   testCases := []testutil.RequestCase{
     {
@@ -59,51 +58,30 @@ func TestCreateTrainJobHandler(t *testing.T) {
       },
     },
     {
-      Name: "fails when train cluster not configured",
-      CustomCfg: &mocks.MockConfig{
-        MockTrainClusterConfigured: func() bool { return false },
-      },
+      Name: "does NOT create new project and fails when project already exists",
       Request: &testutil.Request{
         Method: "POST",
         Route: route,
-        Data: &enc.JSON{
-          "projectNsp": "my-project-nsp",
-        },
         BeforeSend: []testutil.RequestModifier{
           testutil.AuthReqWithNewUser,
+          testutil.CreateProject("my-nsp"),
+        },
+        Data: &enc.JSON{
+          "nsp": "my-nsp",
         },
       },
       ExpectedStatus: 500,
       ExpectedRespJSON: &enc.JSON{
         "ok": false,
-        "code": 6002,
-        "error": "train_cluster_not_configured",
+        "code": 3001,
+        "error": "project_namespace_unavailable",
       },
-    },
-    {
-      Name: "project not found for unknown project namespace",
-      CustomCfg: &mocks.MockConfig{
-        MockTrainClusterConfigured: func() bool { return true },
-      },
-      Request: &testutil.Request{
-        Method: "POST",
-        Route: route,
-        Data: &enc.JSON{
-          "projectNsp": "my-project-nsp",
-        },
-        BeforeSend: []testutil.RequestModifier{
-          testutil.AuthReqWithNewUser,
+      CustomAssertions: []testutil.CustomReqAssertion{
+        func(t *testing.T, tc *testutil.RequestCase, status int, data *enc.JSON) {
+          testutil.AssertTableCount(t, tc, "projects", 1)
         },
       },
-      ExpectedStatus: 404,
-      ExpectedRespJSON: &enc.JSON{
-        "ok": false,
-        "code": 3003,
-        "error": "project_not_found",
-      },
     },
-    // TODO: Before testing next case in this endpoint --> job being enqueued, get a separate...
-    // TODO: ...test Redis instance that you can also clear out inside Teardown() just like you do with Postgres.
   }
 
   EvalRequestCases(t, testCases)
