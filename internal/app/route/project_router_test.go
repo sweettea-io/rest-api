@@ -5,6 +5,7 @@ import (
   "github.com/sweettea-io/rest-api/internal/app"
   "github.com/sweettea-io/rest-api/internal/pkg/util/testutil"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
+  "github.com/stretchr/testify/assert"
 )
 
 func TestUpsertProjectHandler(t *testing.T) {
@@ -78,6 +79,34 @@ func TestUpsertProjectHandler(t *testing.T) {
       },
       CustomAssertions: []testutil.CustomReqAssertion{
         func(t *testing.T, tc *testutil.RequestCase, status int, data *enc.JSON) {
+          testutil.AssertTableCount(t, tc, "projects", 1)
+        },
+      },
+    },
+    {
+      Name: "successfully creates project with unique namespace",
+      Request: &testutil.Request{
+        Method: "POST",
+        Route: route,
+        BeforeSend: []testutil.RequestModifier{
+          testutil.AuthReqWithNewUser,
+        },
+        Data: &enc.JSON{
+          "nsp": "my-nsp",
+        },
+      },
+      ExpectedStatus: 201,
+      CustomAssertions: []testutil.CustomReqAssertion{
+        func(t *testing.T, tc *testutil.RequestCase, status int, data *enc.JSON) {
+          // Parse newly created Project.
+          d := *data
+          proj := d["project"].(map[string]interface{})
+          projNsp := proj["nsp"].(string)
+
+          // Assert new Project has proper namespace.
+          assert.Equal(t, "my-nsp", projNsp, tc.Name)
+
+          // Ensure only one Project was created/exists with this namespace.
           testutil.AssertTableCount(t, tc, "projects", 1)
         },
       },
