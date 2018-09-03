@@ -92,7 +92,7 @@ func TestUpsertProjectHandler(t *testing.T) {
           testutil.AuthReqWithNewUser,
         },
         Data: &enc.JSON{
-          "nsp": "my-nsp",
+          "nsp": "MY cool nameSPACE",
         },
       },
       ExpectedStatus: 201,
@@ -103,8 +103,8 @@ func TestUpsertProjectHandler(t *testing.T) {
           proj := d["project"].(map[string]interface{})
           projNsp := proj["nsp"].(string)
 
-          // Assert new Project has proper namespace.
-          assert.Equal(t, "my-nsp", projNsp, tc.Name)
+          // Assert new Project has proper slugified namespace.
+          assert.Equal(t, "my-cool-namespace", projNsp, tc.Name)
 
           // Ensure only one Project was created/exists with this namespace.
           testutil.AssertTableCount(t, tc, "projects", 1)

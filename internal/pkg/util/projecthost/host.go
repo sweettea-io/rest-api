@@ -7,3 +7,11 @@ type Host interface {
   EnsureCommitExists(owner string, repo string, sha string) error
   GetToken() string
 }
+
+var validHostDomains = map[string]bool{
+  GitHubDomain: true,
+}
+
+func IsValidHostDomain(domain string) bool {
+  return validHostDomains[domain] == true
+}

@@ -10,7 +10,6 @@ import (
   "github.com/sweettea-io/rest-api/internal/pkg/service/projectsvc"
   "github.com/sweettea-io/rest-api/internal/pkg/service/usersvc"
   "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
-  "strings"
 )
 
 // ----------- ROUTER SETUP ------------
@@ -56,7 +55,7 @@ func UpsertProjectHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Upsert project by namespace.
-  project, isNew, err := projectsvc.UpsertByNsp(strings.ToLower(pl.Nsp))
+  project, isNew, err := projectsvc.UpsertByNsp(pl.Nsp)
 
   if err != nil {
     app.Log.Errorln(err.Error())
@@ -129,7 +128,7 @@ func DeleteProjectHandler(w http.ResponseWriter, req *http.Request) {
   }
 
   // Find Project by nsp.
-  project, err := projectsvc.FromNsp(strings.ToLower(pl.Nsp))
+  project, err := projectsvc.FromNsp(pl.Nsp)
 
   if err != nil {
     app.Log.Errorln(err.Error())
