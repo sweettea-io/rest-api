@@ -10,22 +10,19 @@ import (
 )
 
 func Send(w http.ResponseWriter, status int, body string, headers map[string]string) {
-  // Write status header.
-  w.WriteHeader(status)
-
   // Write other provided headers.
   for k, v := range headers {
     w.Header().Set(k, v)
   }
+
+  // Write status header.
+  w.WriteHeader(status)
 
   // Write string
   io.WriteString(w, body)
 }
 
 func SendJSON(w http.ResponseWriter, status int, data *enc.JSON, headers map[string]string) {
-  // Write status header.
-  w.WriteHeader(status)
-
   // Write other provided headers.
   for k, v := range headers {
     w.Header().Set(k, v)
@@ -33,6 +30,9 @@ func SendJSON(w http.ResponseWriter, status int, data *enc.JSON, headers map[str
 
   // Content-Type always set to JSON here -- will override any provided arg headers.
   w.Header().Set("Content-Type", "application/json")
+
+  // Write status header.
+  w.WriteHeader(status)
 
   // Encode and send JSON string.
   if err := json.NewEncoder(w).Encode(data); err != nil {
