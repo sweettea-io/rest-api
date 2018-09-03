@@ -59,16 +59,73 @@ func TestUpsertProjectHandler(t *testing.T) {
       },
     },
     {
+      Name: "invalid payload when unsupported project host used in namespace",
+      Request: &testutil.Request{
+        Method: "POST",
+        Route: route,
+        BeforeSend: []testutil.RequestModifier{
+          testutil.AuthReqWithNewUser,
+        },
+        Data: &enc.JSON{
+          "nsp": "unsupported-host.com/team/project",
+        },
+      },
+      ExpectedStatus: 400,
+      ExpectedRespJSON: &enc.JSON{
+        "ok": false,
+        "code": 400,
+        "error": "invalid_input_payload",
+      },
+    },
+    {
+      Name: "invalid payload when team section of namespace is not slugified",
+      Request: &testutil.Request{
+        Method: "POST",
+        Route: route,
+        BeforeSend: []testutil.RequestModifier{
+          testutil.AuthReqWithNewUser,
+        },
+        Data: &enc.JSON{
+          "nsp": "github.com/Team/project",
+        },
+      },
+      ExpectedStatus: 400,
+      ExpectedRespJSON: &enc.JSON{
+        "ok": false,
+        "code": 400,
+        "error": "invalid_input_payload",
+      },
+    },
+    {
+      Name: "invalid payload when repo section of namespace is not slugified",
+      Request: &testutil.Request{
+        Method: "POST",
+        Route: route,
+        BeforeSend: []testutil.RequestModifier{
+          testutil.AuthReqWithNewUser,
+        },
+        Data: &enc.JSON{
+          "nsp": "github.com/team/Project",
+        },
+      },
+      ExpectedStatus: 400,
+      ExpectedRespJSON: &enc.JSON{
+        "ok": false,
+        "code": 400,
+        "error": "invalid_input_payload",
+      },
+    },
+    {
       Name: "does NOT create new project and fails when project already exists",
       Request: &testutil.Request{
         Method: "POST",
         Route: route,
         BeforeSend: []testutil.RequestModifier{
           testutil.AuthReqWithNewUser,
-          testutil.CreateProject("my-nsp"),
+          testutil.CreateProject("github.com/team/project"),
         },
         Data: &enc.JSON{
-          "nsp": "my-nsp",
+          "nsp": "github.com/team/project",
         },
       },
       ExpectedStatus: 500,
@@ -84,7 +141,7 @@ func TestUpsertProjectHandler(t *testing.T) {
       },
     },
     {
-      Name: "successfully creates project with unique namespace",
+      Name: "successfully creates project for proper, unique namespace",
       Request: &testutil.Request{
         Method: "POST",
         Route: route,
@@ -92,7 +149,7 @@ func TestUpsertProjectHandler(t *testing.T) {
           testutil.AuthReqWithNewUser,
         },
         Data: &enc.JSON{
-          "nsp": "MY cool nameSPACE",
+          "nsp": "github.com/team/project",
         },
       },
       ExpectedStatus: 201,
@@ -104,7 +161,7 @@ func TestUpsertProjectHandler(t *testing.T) {
           projNsp := proj["nsp"].(string)
 
           // Assert new Project has proper slugified namespace.
-          assert.Equal(t, "my-cool-namespace", projNsp, tc.Name)
+          assert.Equal(t, "github.com/team/project", projNsp, tc.Name)
 
           // Ensure only one Project was created/exists with this namespace.
           testutil.AssertTableCount(t, tc, "projects", 1)
