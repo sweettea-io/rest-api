@@ -16,7 +16,6 @@ type Config struct {
   AWSRegionName                          string `env:"AWS_REGION_NAME,required,ignore_on_envs=test|local"`
   AWSSecretAccessKey                     string `env:"AWS_SECRET_ACCESS_KEY,required,ignore_on_envs=test|local"`
   BuildClusterName                       string `env:"BUILD_CLUSTER_NAME,required,ignore_on_envs=test"`
-  BuildClusterState                      string `env:"BUILD_CLUSTER_STATE,required,ignore_on_envs=test|local"`
   CloudProvider                          string `env:"CLOUD_PROVIDER,required,ignore_on_envs=test|local"`
   DatabaseUrl                            string `env:"DATABASE_URL,required"`
   Debug                                  bool   `env:"DEBUG,required"`
@@ -49,7 +48,6 @@ type Config struct {
   RestApiToken                           string `env:"REST_API_TOKEN,required"`
   ServerPort                             int    `env:"SERVER_PORT,required"`
   TrainClusterName                       string `env:"TRAIN_CLUSTER_NAME"`
-  TrainClusterState                      string `env:"TRAIN_CLUSTER_STATE"`
   UserCreationHash                       string `env:"USER_CREATION_HASH"`
   WildcardSSLCertArn                     string `env:"WILDCARD_SSL_CERT_ARN,required,ignore_on_envs=test|local"`
   WorkerCount                            uint   `env:"WORKER_COUNT,required,ignore_on_envs=test"`
@@ -89,7 +87,7 @@ func (cfg *Config) OnProd() bool {
 // TrainClusterConfigured returns if the SweetTea Train cluster
 // is configured for the current environment.
 func (cfg *Config) TrainClusterConfigured() bool {
-  return cfg.TrainClusterName != "" && cfg.TrainClusterState != ""
+  return cfg.TrainClusterName != ""
 }
 
 func (cfg *Config) BuildpackEnvs() map[string]string {
