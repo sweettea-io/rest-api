@@ -33,6 +33,10 @@ FROM alpine:latest
 # Build arg used to specifiy which environment this image is for (i.e. dev, prod, etc.).
 ARG BUILD_ENV
 
+# Root user directory of exector user (equal to `echo ~`)
+# TODO: figure out best way of conditionally moving minikube certs over
+ARG EXECUTOR_ROOT
+
 RUN apk --no-cache add ca-certificates
 
 # Set working dir to /root inside alpine image.
