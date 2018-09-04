@@ -45,5 +45,4 @@ COPY ./tmp/kubeconfigs/$BUILD_ENV ./.kubeconfig
 COPY --from=builder /go/src/github.com/sweettea-io/rest-api/main ./main
 
 # Execute Go binary.
-#ENTRYPOINT ["./main"]
-CMD ["./main"]
+ENTRYPOINT ["./main"]
