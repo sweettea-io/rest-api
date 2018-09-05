@@ -4,6 +4,7 @@ import (
   "github.com/jinzhu/gorm"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
   "github.com/sweettea-io/rest-api/internal/pkg/util/str"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
 )
 
 /*
@@ -55,4 +56,23 @@ func (deploy *Deploy) GetCommit() *Commit {
 
 func (deploy *Deploy) GetUid() string {
   return deploy.Uid
+}
+
+func (deploy *Deploy) AsJSON() enc.JSON {
+  mv := deploy.ModelVersion
+
+  return enc.JSON{
+    "name": deploy.Slug,
+    "cluster": deploy.ApiCluster.Slug,
+    "model": mv.Model.Slug,
+    "modelVersion": mv.Version,
+    "sha": deploy.Commit.Sha,
+    "stage": deploy.Stage,
+    "failed": deploy.Failed,
+    "loadBalancer": deploy.LBHostname,
+    "hostname": deploy.Hostname,
+    "public": deploy.Public,
+    "clientID": deploy.ClientID,
+    "clientSecret": deploy.ClientSecret,
+  }
 }

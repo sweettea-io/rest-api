@@ -4,6 +4,7 @@ import (
   "github.com/jinzhu/gorm"
   "github.com/sweettea-io/rest-api/internal/pkg/util/unique"
   "strings"
+  "github.com/sweettea-io/rest-api/internal/pkg/util/enc"
 )
 
 /*
@@ -28,4 +29,11 @@ func (ev *EnvVar) BeforeSave(scope *gorm.Scope) error {
 func (ev *EnvVar) BeforeCreate(scope *gorm.Scope) error {
   scope.SetColumn("Uid", unique.NewUid())
   return nil
+}
+
+func (ev *EnvVar) AsJSON() enc.JSON {
+  return enc.JSON{
+    "key": ev.Key,
+    "value": ev.Val,
+  }
 }

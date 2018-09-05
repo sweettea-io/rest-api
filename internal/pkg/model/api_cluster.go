@@ -26,8 +26,7 @@ func (apiCluster *ApiCluster) BeforeSave(scope *gorm.Scope) error {
 
 func (apiCluster *ApiCluster) AsJSON() enc.JSON {
   return enc.JSON{
-    "name": apiCluster.Name,
-    "slug": apiCluster.Slug,
+    "name": apiCluster.Slug,
     "cloud": apiCluster.Cloud,
     "state": apiCluster.State,
   }

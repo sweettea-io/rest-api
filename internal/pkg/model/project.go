@@ -38,9 +38,8 @@ func (project *Project) BeforeCreate(scope *gorm.Scope) error {
 
 func (project *Project) AsJSON() enc.JSON {
   return enc.JSON{
-    "uid": project.Uid,
     "nsp": project.Nsp,
-    "config": project.ProjectConfig.AsJSON(),
+    "createdAt": project.CreatedAt,
   }
 }
 
