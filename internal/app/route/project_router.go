@@ -23,7 +23,7 @@ func InitProjectRouter() {
 
   // Attach route handlers.
   projectRouter.HandleFunc("", UpsertProjectHandler).Methods("POST")
-  projectRouter.HandleFunc("", GetProjectsHandler).Methods("GET")
+  projectRouter.HandleFunc("", GetProjectHandler).Methods("GET")
   projectRouter.HandleFunc("", DeleteProjectHandler).Methods("DELETE")
 }
 
@@ -74,12 +74,15 @@ func UpsertProjectHandler(w http.ResponseWriter, req *http.Request) {
 
 
 /*
-  Get Projects by query criteria
+  Get Projects by query criteria in payload
 
   Method:  GET
   Route:   /project
+  Payload:
+    nsp    (string) optional
+
 */
-func GetProjectsHandler(w http.ResponseWriter, req *http.Request) {
+func GetProjectHandler(w http.ResponseWriter, req *http.Request) {
   // Auth request from Session token.
   _, err := usersvc.FromRequest(req)
 
@@ -88,13 +91,18 @@ func GetProjectsHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  // Fetch all Project records.
-  projects := projectsvc.All()
+  // Parse & validate payload.
+  var pl payload.GetProjectPayload
 
-  // Format clusters for response payload.
+  if !pl.Validate(req) {
+    respond.Error(w, errmsg.InvalidPayload())
+    return
+  }
+
+  // Format projects for response payload.
   var fmtProjects []enc.JSON
 
-  for _, project := range projects {
+  for _, project := range projectsvc.Filter(pl.Nsp) {
     fmtProjects = append(fmtProjects, project.AsJSON())
   }
 

@@ -53,3 +53,18 @@ func FromID(id uint) (*model.Project, error) {
 
   return &project, nil
 }
+
+func Filter(nsp string) []model.Project {
+  if nsp == "" {
+    return All()
+  }
+
+  var projects []model.Project
+  project, _ := FromNsp(nsp)
+
+  if project != nil {
+    projects = append(projects, *project)
+  }
+
+  return projects
+}
