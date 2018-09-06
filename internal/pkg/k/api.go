@@ -175,7 +175,7 @@ func (api *Api) makeContainers() {
 
 func (api *Api) makePodTemplateSpec() {
   api.PodTemplateSpec = PodTemplateSpec(map[string]interface{}{
-    "label": api.DeploymentName,
+    "name": api.DeploymentName,
     "containers": api.Containers,
     "restart": corev1.RestartPolicyNever,
   })

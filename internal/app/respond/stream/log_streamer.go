@@ -61,10 +61,9 @@ func (ls *logStreamer) watchLogs() {
   for {
     entries, err := redis.XRead(&conn, ls.streamKey, readFromTs, redis.DefaultReadTimeout)
 
-    // Pipe any unexpected errors and return (if those occur).
+    // Pipe any unexpected errors and return (if one occurred).
     if err != nil {
-      app.Log.Errorf("unexpected error while reading log stream: %s\n", err.Error())
-      ls.streamLog(StreamErrorLog)
+      ls.handleUnexpectedErr("unexpected error while reading log stream: %s\n", err.Error())
       return
     }
 
@@ -79,9 +78,10 @@ func (ls *logStreamer) watchLogs() {
     for _, entry := range entries {
       // Unmarshal entry into Log structure.
       log, err := unmarshalLog(&entry)
+
+      // Pipe any unexpected errors and return (if one occurred).
       if err != nil {
-        app.Log.Errorf("error unmarshalling redis stream reply into Log: %s\n", err.Error())
-        ls.streamLog(StreamErrorLog)
+        ls.handleUnexpectedErr("error unmarshalling redis stream reply into Log: %s\n", err.Error())
         return
       }
 
@@ -92,9 +92,8 @@ func (ls *logStreamer) watchLogs() {
       ls.streamLog(log)
 
       // Call log fail handler if log failed.
-      if log.Failed && ls.failedLogHandler != nil {
-        failHandler := *ls.failedLogHandler
-        failHandler()
+      if log.Failed {
+        ls.handleFailure()
       }
 
       // Stop watching logs if failed or completed.
@@ -109,6 +108,22 @@ func (ls *logStreamer) watchLogs() {
 func (ls *logStreamer) streamLog(log *Log) {
   fmt.Fprintln(ls.writer, log.Msg)
   ls.flusher.Flush()
+}
+
+func (ls *logStreamer) handleFailure() {
+  if ls.failedLogHandler == nil {
+    return
+  }
+
+  failHandler := *ls.failedLogHandler
+  failHandler()
+}
+
+func (ls *logStreamer) handleUnexpectedErr(format string, args ...interface{}) {
+  app.Log.Errorf(format, args...)
+  ls.streamLog(StreamErrorLog)
+  ls.handleFailure()
+  ls.completeNotifyCh <- true
 }
 
 func unmarshalLog(entry *redis.XReadEntry) (*Log, error) {

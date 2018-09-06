@@ -188,7 +188,7 @@ func (b *Build) makeContainers() {
 
 func (b *Build) makePod() {
   b.Pod = Pod(map[string]interface{}{
-    "label": b.DeployName,
+    "name": b.DeployName,
     "containers": b.Containers,
     "volumes": b.Volumes,
     "restart": corev1.RestartPolicyNever,

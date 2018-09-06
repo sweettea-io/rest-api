@@ -27,17 +27,18 @@ fi
 
 # Only add the k8s version arg if that version supported.
 kubernetes_version_arg=""
-if minikube get-k8s-versions | grep "v${k8s_version}$" &>/dev/null; then
-	kubernetes_version_arg="--kubernetes-version v$k8s_version"
-fi
+# TODO: Figure out what the new command is for getting these versions
+#if minikube get-k8s-versions | grep "v${k8s_version}$" &>/dev/null; then
+#	kubernetes_version_arg="--kubernetes-version v$k8s_version"
+#fi
 
 # ======== CREATE LOCAL CLUSTER ======== #
 
-# We're gonna use localkube, so ignore this deprecation error.
-minikube config set ShowBootstrapperDeprecationNotification false
+# Embed cert data directly into kubeconfig rather than using paths.
+minikube config set embed-certs true
 
 # Start the cluster.
-minikube start --bootstrapper localkube --profile "$cluster_name" "$kubernetes_version_arg"
+minikube start --profile "$cluster_name" "$kubernetes_version_arg"
 
 # If creating the core cluster, also enable ingress.
 if [[ "$role" == "core" ]]; then

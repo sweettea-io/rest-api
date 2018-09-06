@@ -161,7 +161,7 @@ func (t *Train) makeContainers() {
 
 func (t *Train) makePod() {
   t.Pod = Pod(map[string]interface{}{
-    "label": t.DeployName,
+    "name": t.DeployName,
     "containers": t.Containers,
     "restart": corev1.RestartPolicyNever,
   })

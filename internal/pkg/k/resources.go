@@ -176,7 +176,7 @@ func Container(args map[string]interface{}) corev1.Container {
 
 func Pod(args map[string]interface{}) *corev1.Pod {
   // Parse args.
-  label := args["label"].(string)
+  name := args["name"].(string)
   containers := args["containers"].([]corev1.Container)
   restart := args["restart"].(corev1.RestartPolicy)
   vols, volsProvided := args["volumes"]
@@ -195,8 +195,9 @@ func Pod(args map[string]interface{}) *corev1.Pod {
   // Create and return Pod.
   return &corev1.Pod{
     ObjectMeta: metav1.ObjectMeta{
+      Name: name,
       Labels: map[string]string{
-        "app": label,
+        "app": name,
       },
     },
     Spec: podSpec,
@@ -205,7 +206,7 @@ func Pod(args map[string]interface{}) *corev1.Pod {
 
 func PodTemplateSpec(args map[string]interface{}) *corev1.PodTemplateSpec {
   // Parse args.
-  label := args["label"].(string)
+  name := args["name"].(string)
   containers := args["containers"].([]corev1.Container)
   restart := args["restart"].(corev1.RestartPolicy)
   vols, volsProvided := args["volumes"]
@@ -225,7 +226,7 @@ func PodTemplateSpec(args map[string]interface{}) *corev1.PodTemplateSpec {
   return &corev1.PodTemplateSpec{
     ObjectMeta: metav1.ObjectMeta{
       Labels: map[string]string{
-        "app": label,
+        "app": name,
       },
     },
     Spec: podSpec,
@@ -246,6 +247,7 @@ func Deployment(deploymentSpec *v1beta1.DeploymentSpec, name string) *v1beta1.De
       Kind: "Deployment",
     },
     ObjectMeta: metav1.ObjectMeta{
+      Name: name,
       Labels: map[string]string{
         "name": name,
       },
@@ -267,13 +269,16 @@ func ServiceSpec(deploymentName string, port int32, targetPort int32) *corev1.Se
   }
 }
 
-func Service(serviceSpec *corev1.ServiceSpec, labels map[string]string) *corev1.Service {
+func Service(serviceSpec *corev1.ServiceSpec, name string, labels map[string]string) *corev1.Service {
   return &corev1.Service{
     TypeMeta: metav1.TypeMeta{
       APIVersion: "core/v1",
       Kind: "Service",
     },
-    ObjectMeta: metav1.ObjectMeta{Labels: labels},
+    ObjectMeta: metav1.ObjectMeta{
+      Name: name,
+      Labels: labels,
+    },
     Spec: *serviceSpec,
   }
 }

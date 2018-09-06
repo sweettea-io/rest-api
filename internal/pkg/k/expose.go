@@ -116,7 +116,7 @@ func (expose *Expose) makeServiceSpec() {
 }
 
 func (expose *Expose) makeService() {
-  expose.Service = Service(expose.ServiceSpec, expose.Labels)
+  expose.Service = Service(expose.ServiceSpec, expose.ServiceName, expose.Labels)
 }
 
 func (expose *Expose) checkEventForResult(event watch.Event) *Result {
