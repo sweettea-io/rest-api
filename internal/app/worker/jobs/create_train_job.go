@@ -95,7 +95,7 @@ func (c *Context) CreateTrainJob(job *work.Job) error {
   // Enqueue new job to build this Project for the Train Cluster.
   jobArgs := work.Q{
     "resourceID": trainJob.ID,
-    "buildTargetSha": sha,
+    "buildTargetSha": commit.Sha,
     "projectID": projectID,
     "targetCluster": cluster.Train,
     "logKey": logKey,
