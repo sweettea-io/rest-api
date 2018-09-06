@@ -9,6 +9,7 @@
     "BUILD_CLUSTER_NAME": "",
     "BUILD_CLUSTER_STATE": "",
     "BUILD_CLUSTER_ZONES": "us-west-1a",
+    "BUILD_SERVER_IMAGE_VERSION": "latest",
     "CLOUD_PROVIDER": "aws",
     "CLUSTER_IMAGE": "099720109477/ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171026.1",
     "CORE_CLUSTER_NAME": "",

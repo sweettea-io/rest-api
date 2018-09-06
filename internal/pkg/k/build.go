@@ -76,7 +76,7 @@ func (b *Build) Init(args map[string]interface{}) error {
   b.DeployName = fmt.Sprintf("%s-%v", b.ContainerName, timeutil.MSSinceEpoch())
 
   // Set image to the SweetTea Build Server image.
-  b.Image = fmt.Sprintf("%s/%s", app.Config.DockerRegistryOrg, image.BuildServer)
+  b.Image = fmt.Sprintf("%s/%s:%s", app.Config.DockerRegistryOrg, image.BuildServer, app.Config.BuildServerImageVersion)
 
   return nil
 }

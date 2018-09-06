@@ -16,6 +16,7 @@ type Config struct {
   AWSRegionName                          string `env:"AWS_REGION_NAME,required,ignore_on_envs=test|local"`
   AWSSecretAccessKey                     string `env:"AWS_SECRET_ACCESS_KEY,required,ignore_on_envs=test|local"`
   BuildClusterName                       string `env:"BUILD_CLUSTER_NAME,required,ignore_on_envs=test"`
+  BuildServerImageVersion                string `env:"BUILD_SERVER_IMAGE_VERSION,default=latest"`
   CloudProvider                          string `env:"CLOUD_PROVIDER,required,ignore_on_envs=test|local"`
   DatabaseUrl                            string `env:"DATABASE_URL,required"`
   Debug                                  bool   `env:"DEBUG,required"`
