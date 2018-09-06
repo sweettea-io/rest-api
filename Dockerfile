@@ -42,9 +42,9 @@ WORKDIR /root
 COPY ./tmp/kubeconfigs/$BUILD_ENV ./.kubeconfig
 
 # HACK -- ridiculous hack for local testing
-COPY /Users/benwhittle/.minikube/ca.crt /root/.minikube/ca.crt
-COPY /Users/benwhittle/.minikube/client.crt /root/.minikube/client.crt
-COPY /Users/benwhittle/.minikube/client.key /root/.minikube/client.key
+COPY ./tmp/kubeconfigs/minikube/ca.crt /root/.minikube/ca.crt
+COPY ./tmp/kubeconfigs/minikube/client.crt /root/.minikube/client.crt
+COPY ./tmp/kubeconfigs/minikube/client.key /root/.minikube/client.key
 
 # Copy Go binary built in first image over to this image.
 COPY --from=builder /go/src/github.com/sweettea-io/rest-api/main ./main
