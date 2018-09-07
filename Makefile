@@ -64,9 +64,3 @@ ensure: ## Update dependencies.
 
 test: ## Run all tests.
 	./scripts/run_tests
-
-rebuild-local-clusters: ## Delete and re-create the core, train, and build clusters for the local environment.
-	rm -rf ~/.minikube
-	./scripts/rebuild_local_cluster core
-	./scripts/rebuild_local_cluster train
-	./scripts/rebuild_local_cluster build

@@ -128,16 +128,18 @@ func (ls *logStreamer) handleUnexpectedErr(format string, args ...interface{}) {
 
 func unmarshalLog(entry *redis.XReadEntry) (*Log, error) {
   // Parse log message from args.
-  msg, err := typeconvert.InterfaceToStr(entry.Args["msg"])
+  msgBytes, err := typeconvert.InterfaceToBytes(entry.Args["msg"])
   if err != nil {
     return nil, err
   }
+  msg := typeconvert.BytesToStr(msgBytes)
 
   // Parse log level from args.
-  level, err := typeconvert.InterfaceToStr(entry.Args["level"])
+  levelBytes, err := typeconvert.InterfaceToBytes(entry.Args["level"])
   if err != nil {
     return nil, err
   }
+  level := typeconvert.BytesToStr(levelBytes)
 
   // Parse complete status from args.
   complete, err := typeconvert.InterfaceToBool(entry.Args["complete"])

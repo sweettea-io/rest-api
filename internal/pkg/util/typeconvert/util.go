@@ -14,18 +14,18 @@ func BoolToStr(b bool) string {
   return "false"
 }
 
-func InterfaceToStr(val interface{}) (string, error) {
+func InterfaceToBytes(val interface{}) ([]byte, error) {
   if val == nil {
-    return "", nil
+    return nil, nil
   }
 
-  strVal, ok := val.(string)
+  bytes, ok := val.([]byte)
 
   if !ok {
-    return "", fmt.Errorf("error converting interface{} to string")
+    return nil, fmt.Errorf("error converting interface{} to []byte")
   }
 
-  return strVal, nil
+  return bytes, nil
 }
 
 func InterfaceToBool(val interface{}) (bool, error) {
