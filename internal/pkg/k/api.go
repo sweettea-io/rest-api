@@ -146,7 +146,7 @@ func (api *Api) makeClient() error {
 }
 
 func (api *Api) makeEnvs() {
-  envs := maputil.MergeMaps(api.CustomEnvs, map[string]string{
+  envs := maputil.MergeMaps(api.CustomEnvs, app.Config.FormatInternalEnvs(map[string]string{
     "AWS_ACCESS_KEY_ID": app.Config.AWSAccessKeyId,
     "AWS_REGION_NAME": app.Config.AWSRegionName,
     "AWS_SECRET_ACCESS_KEY": app.Config.AWSSecretAccessKey,
@@ -156,7 +156,7 @@ func (api *Api) makeEnvs() {
     "MODEL_STORAGE_URL": app.Config.ModelStorageUrl,
     "MODEL_STORAGE_FILE_PATH": api.ModelVersion.StorageKey(api.Project, api.Model),
     "PROJECT_UID": api.Project.Uid,
-  })
+  }))
 
   // Format envs as k8s resources.
   api.Envs = EnvVars(envs)

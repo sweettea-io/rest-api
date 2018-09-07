@@ -161,7 +161,7 @@ func (b *Build) makeEnvs() {
     "BUILD_TARGET_SHA": b.BuildTargetSha,
     "BUILD_TARGET_UID": b.Project.Uid,
     "BUILD_TARGET_URL": b.Project.Url(),
-    "LOG_STREAM_KEY": b.LogStreamKey,
+    "LOG_STREAM_KEY": b.LogStreamKey,s
     "DOCKER_REGISTRY_ORG": app.Config.DockerRegistryOrg,
     "DOCKER_REGISTRY_USERNAME": app.Config.DockerRegistryUsername,
     "DOCKER_REGISTRY_PASSWORD": app.Config.DockerRegistryPassword,

@@ -29,6 +29,7 @@ type Config struct {
   Env                                    string `env:"ENV,required"`
   GitHubAccessToken                      string `env:"GITHUB_ACCESS_TOKEN"`
   HostedZoneId                           string `env:"HOSTED_ZONE_ID,ignore_on_envs=test|local"`
+  InternalEnvPrefix                      string `env:"INTERNAL_ENV_PREFIX"`
   JobQueueNsp                            string `env:"JOB_QUEUE_NSP,required"`
   KubeConfig                             string `env:"KUBECONFIG,required"`
   ModelStorageUrl                        string `env:"MODEL_STORAGE_URL,required,ignore_on_envs=test"`
@@ -103,6 +104,16 @@ func (cfg *Config) BuildpackEnvs() map[string]string {
     "PYTHON_WEBSOCKET_API_BUILDPACK_SHA": cfg.PythonWebsocketApiBuildpackSha,
     "PYTHON_WEBSOCKET_API_BUILDPACK_URL": cfg.PythonWebsocketApiBuildpackUrl,
   }
+}
+
+func (cfg *Config) FormatInternalEnvs(envs map[string]string) map[string]string {
+  formattedEnvs := map[string]string{}
+
+  for k, v := range envs {
+    formattedEnvs[fmt.Sprintf("%s%s", cfg.InternalEnvPrefix, k)] = v
+  }
+
+  return formattedEnvs
 }
 
 // New creates and returns a new Config struct instance populated from environment variables.

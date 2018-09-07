@@ -143,7 +143,7 @@ func (t *Train) makeClient() error {
 
 func (t *Train) makeEnvs() {
   // Create envs map by merging deploy-agnostic envs on top of custom envs.
-  envs := maputil.MergeMaps(t.CustomEnvs, map[string]string{
+  envs := maputil.MergeMaps(t.CustomEnvs, app.Config.FormatInternalEnvs(map[string]string{
     "AWS_ACCESS_KEY_ID": app.Config.AWSAccessKeyId,
     "AWS_REGION_NAME": app.Config.AWSRegionName,
     "AWS_SECRET_ACCESS_KEY": app.Config.AWSSecretAccessKey,
@@ -153,7 +153,7 @@ func (t *Train) makeEnvs() {
     "PROJECT_UID": t.Project.Uid,
     "REDIS_ADDRESS": app.Config.RedisAddress,
     "REDIS_PASSWORD": app.Config.RedisPassword,
-  })
+  }))
 
   t.Envs = EnvVars(envs)
 }
