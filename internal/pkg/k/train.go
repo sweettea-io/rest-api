@@ -16,6 +16,7 @@ import (
 type Train struct {
   // Establish on Init
   CustomEnvs      map[string]string
+  LogStreamKey    string
   TrainJob        *model.TrainJob
   Commit          *model.Commit
   Project         *model.Project
@@ -37,6 +38,8 @@ type Train struct {
 }
 
 func (t *Train) Init(args map[string]interface{}) error {
+  t.LogStreamKey = args["logKey"].(string)
+
   // Set custom train deploy envs.
   customEnvs, ok := args["envs"].(map[string]string)
   if !ok {
@@ -144,7 +147,7 @@ func (t *Train) makeEnvs() {
     "AWS_ACCESS_KEY_ID": app.Config.AWSAccessKeyId,
     "AWS_REGION_NAME": app.Config.AWSRegionName,
     "AWS_SECRET_ACCESS_KEY": app.Config.AWSSecretAccessKey,
-    "LOG_STREAM_KEY": t.TrainJob.Uid,
+    "LOG_STREAM_KEY": t.LogStreamKey,
     "MODEL_STORAGE_URL": app.Config.ModelStorageUrl,
     "MODEL_STORAGE_FILE_PATH": t.ModelVersion.StorageKey(t.Project, t.Model),
     "PROJECT_UID": t.Project.Uid,

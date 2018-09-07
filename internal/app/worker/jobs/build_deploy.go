@@ -58,6 +58,7 @@ func (c *Context) BuildDeploy(job *work.Job) error {
     "buildTargetSha": buildTargetSha,
     "projectID": projectID,
     "targetCluster": targetCluster,
+    "logKey": logKey,
   }
 
   // Initialize build deploy.

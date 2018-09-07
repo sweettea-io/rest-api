@@ -43,6 +43,7 @@ func (c *Context) ApiDeploy(job *work.Job) error {
     "commit": &deploy.Commit,
     "model": &deploy.Model,
     "customEnvs": envvarsvc.GetMap(deploy.ID),
+    "logKey": logKey,
   }
 
   // Initialize API deploy.

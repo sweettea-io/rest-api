@@ -50,6 +50,7 @@ func (c *Context) TrainDeploy(job *work.Job) error {
   trainDeployArgs := map[string]interface{}{
     "trainJobID": trainJobID,
     "envs": envsMap,
+    "logKey": logKey,
   }
 
   // Initialize train deploy.

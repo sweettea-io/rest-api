@@ -20,6 +20,7 @@ type Api struct {
   Commit          *model.Commit
   ModelVersion    *model.ModelVersion
   CustomEnvs      map[string]string
+  LogStreamKey    string
   Project         *model.Project
   Model           *model.Model
   ApiCluster      *model.ApiCluster
@@ -45,6 +46,7 @@ func (api *Api) Init(args map[string]interface{}) error {
   api.Commit = args["commit"].(*model.Commit)
   api.ModelVersion = args["modelVersion"].(*model.ModelVersion)
   api.CustomEnvs = args["customEnvs"].(map[string]string)
+  api.LogStreamKey = args["logKey"].(string)
 
   // Update Deploy to Deploying.
   if err := deploysvc.UpdateStage(api.Deploy, model.BuildStages.Deploying); err != nil {
@@ -150,7 +152,7 @@ func (api *Api) makeEnvs() {
     "AWS_SECRET_ACCESS_KEY": app.Config.AWSSecretAccessKey,
     "CLIENT_ID": api.Deploy.ClientID,
     "CLIENT_SECRET": api.Deploy.ClientSecret,
-    "LOG_STREAM_KEY": api.Deploy.Uid,
+    "LOG_STREAM_KEY": api.LogStreamKey,
     "MODEL_STORAGE_URL": app.Config.ModelStorageUrl,
     "MODEL_STORAGE_FILE_PATH": api.ModelVersion.StorageKey(api.Project, api.Model),
     "PROJECT_UID": api.Project.Uid,

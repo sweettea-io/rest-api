@@ -88,6 +88,7 @@ func (c *Context) ApiUpdate(job *work.Job) error {
     "commit": commit,
     "modelVersion": modelVersion,
     "customEnvs": allCustomEnvs,
+    "logKey": logKey,
   }
 
   // Initialize API deploy.

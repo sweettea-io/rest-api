@@ -21,6 +21,7 @@ type Build struct {
   ResourceID       uint
   BuildTargetSha   string
   TargetCluster    string
+  LogStreamKey     string
 
   // Establish on Init
   Project          *model.Project
@@ -46,6 +47,7 @@ func (b *Build) Init(args map[string]interface{}) error {
   b.ResourceID = args["resourceID"].(uint)
   b.BuildTargetSha = args["buildTargetSha"].(string)
   b.TargetCluster = args["targetCluster"].(string)
+  b.LogStreamKey = args["logKey"].(string)
 
   // Find Project by ID.
   project, err := projectsvc.FromID(args["projectID"].(uint))
@@ -159,7 +161,7 @@ func (b *Build) makeEnvs() {
     "BUILD_TARGET_SHA": b.BuildTargetSha,
     "BUILD_TARGET_UID": b.Project.Uid,
     "BUILD_TARGET_URL": b.Project.Url(),
-    "LOG_STREAM_KEY": b.Buildable.GetUid(),
+    "LOG_STREAM_KEY": b.LogStreamKey,
     "DOCKER_REGISTRY_ORG": app.Config.DockerRegistryOrg,
     "DOCKER_REGISTRY_USERNAME": app.Config.DockerRegistryUsername,
     "DOCKER_REGISTRY_PASSWORD": app.Config.DockerRegistryPassword,
