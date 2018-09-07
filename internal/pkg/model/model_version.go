@@ -31,6 +31,6 @@ func (mv *ModelVersion) BeforeCreate(scope *gorm.Scope) error {
   return nil
 }
 
-func (mv *ModelVersion) StorageKey() string {
-  return fmt.Sprintf("%s-%s-%s", mv.Model.Project.Nsp, mv.Model.Slug, mv.Version)
+func (mv *ModelVersion) StorageKey(project *Project, m *Model) string {
+  return fmt.Sprintf("%s-%s-%s", project.Nsp, m.Slug, mv.Version)
 }

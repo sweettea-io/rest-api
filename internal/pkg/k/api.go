@@ -152,7 +152,7 @@ func (api *Api) makeEnvs() {
     "CLIENT_SECRET": api.Deploy.ClientSecret,
     "LOG_STREAM_KEY": api.Deploy.Uid,
     "MODEL_STORAGE_URL": app.Config.ModelStorageUrl,
-    "MODEL_STORAGE_FILE_PATH": api.ModelVersion.StorageKey(),
+    "MODEL_STORAGE_FILE_PATH": api.ModelVersion.StorageKey(api.Project, api.Model),
     "PROJECT_UID": api.Project.Uid,
   })
 
