@@ -15,24 +15,25 @@ import (
 
 type Train struct {
   // Establish on Init
-  CustomEnvs    map[string]string
-  TrainJob      *model.TrainJob
-  Commit        *model.Commit
-  Project       *model.Project
-  ModelVersion  *model.ModelVersion
-  Model         *model.Model
-  ClusterName   string
-  DeployName    string
-  Image         string
-  ContainerName string
-  ResultChannel chan Result
+  CustomEnvs      map[string]string
+  TrainJob        *model.TrainJob
+  Commit          *model.Commit
+  Project         *model.Project
+  ModelVersion    *model.ModelVersion
+  Model           *model.Model
+  ClusterName     string
+  DeployName      string
+  Image           string
+  ContainerName   string
+  ImagePullPolicy corev1.PullPolicy
+  ResultChannel   chan Result
 
   // K8S resources
-  Namespace     string
-  Client        *typedcorev1.CoreV1Client
-  Envs          []corev1.EnvVar
-  Containers    []corev1.Container
-  Pod           *corev1.Pod
+  Namespace       string
+  Client          *typedcorev1.CoreV1Client
+  Envs            []corev1.EnvVar
+  Containers      []corev1.Container
+  Pod             *corev1.Pod
 }
 
 func (t *Train) Init(args map[string]interface{}) error {
@@ -73,6 +74,9 @@ func (t *Train) Init(args map[string]interface{}) error {
 
   // Ex: sweetteaprod/train-<project_uid>:<commit_sha>
   t.Image = fmt.Sprintf("%s/%s:%s", app.Config.DockerRegistryOrg, t.ContainerName, t.Commit.Sha)
+
+  // Always pull train job images.
+  t.ImagePullPolicy = corev1.PullAlways
 
   return nil
 }
@@ -155,6 +159,7 @@ func (t *Train) makeContainers() {
   t.Containers = Containers([]map[string]interface{}{{
     "name": t.ContainerName,
     "image": t.Image,
+    "imagePullPolicy": t.ImagePullPolicy,
     "envs": t.Envs,
   }})
 }

@@ -144,6 +144,7 @@ func Container(args map[string]interface{}) corev1.Container {
   // Parse container args.
   name := args["name"].(string)
   image := args["image"].(string)
+  imagePullPolicy, imagePullPolicyProvided := args["imagePullPolicy"]
   envs, envsProvided := args["envs"]
   ports, portsProvided := args["ports"]
   volMounts, volMountsProvided := args["volumeMounts"]
@@ -169,6 +170,11 @@ func Container(args map[string]interface{}) corev1.Container {
   // VolumeMounts (optional)
   if volMountsProvided {
     container.VolumeMounts = volMounts.([]corev1.VolumeMount)
+  }
+
+  // ImagePullPolicy (optional)
+  if imagePullPolicyProvided {
+    container.ImagePullPolicy = imagePullPolicy.(corev1.PullPolicy)
   }
 
   return container
