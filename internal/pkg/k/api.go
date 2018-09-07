@@ -158,6 +158,9 @@ func (api *Api) makeEnvs() {
     "PROJECT_UID": api.Project.Uid,
   }))
 
+  // Let buildpack know what the internal env prefix is.
+  envs["SWEET_TEA_INTERNAL_ENV_PREFIX"] = app.Config.InternalEnvPrefix
+
   // Format envs as k8s resources.
   api.Envs = EnvVars(envs)
 }

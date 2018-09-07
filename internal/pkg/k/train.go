@@ -155,6 +155,10 @@ func (t *Train) makeEnvs() {
     "REDIS_PASSWORD": app.Config.RedisPassword,
   }))
 
+  // Let buildpack know what the internal env prefix is.
+  envs["SWEET_TEA_INTERNAL_ENV_PREFIX"] = app.Config.InternalEnvPrefix
+
+  // Format envs as k8s resources.
   t.Envs = EnvVars(envs)
 }
 
